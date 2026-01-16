@@ -20,26 +20,26 @@ export const About: React.FC = () => {
             </div>
             
             <h2 className="text-4xl md:text-5xl font-semibold mb-6 leading-tight">
-              We design with purpose.<br />
-              We build with intelligence.
+              Design with Intent.<br />
+              Build for Scale.
             </h2>
             <p className="text-brand-text text-lg mb-10 max-w-md">
-              We create future-ready brands, smart SaaS interfaces, and high-converting websites that leave a lasting impact.
+              We bridge the gap between aesthetic excellence and technical performance. Whether we are architecting a seamless iOS experience or engineering a high-retention email system, our focus is always on your bottom line.
             </p>
 
             <div className="flex gap-12 mb-10">
               <div>
-                <div className="text-3xl font-bold text-white mb-1">$10.7B</div>
-                <div className="text-sm text-brand-text">In product launches</div>
+                <div className="text-3xl font-bold text-white mb-1">$50M+</div>
+                <div className="text-sm text-brand-text">In Revenue Generated for Clients</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white mb-1">13K+</div>
-                <div className="text-sm text-brand-text">In product launches</div>
+                <div className="text-3xl font-bold text-white mb-1">150+</div>
+                <div className="text-sm text-brand-text">Digital Products Launched</div>
               </div>
             </div>
 
             <Button variant="outline" icon={<ArrowUpRight className="w-4 h-4"/>}>
-              Learn about us
+              Our Methodology
             </Button>
           </div>
 

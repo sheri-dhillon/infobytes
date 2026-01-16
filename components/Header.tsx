@@ -51,7 +51,7 @@ export const Header: React.FC = () => {
         <div className="max-w-[1400px] mx-auto flex items-center justify-between relative z-50">
           
           {/* Left: Contact Pill (Hidden on Mobile) */}
-          <Link to="/contact" className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${isScrolled ? 'p-1.5 pr-5' : 'p-2 pr-8'}`}>
+          <a href="https://calendly.com/shehryar-infobytes/30min" target="_blank" rel="noopener noreferrer" className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${isScrolled ? 'p-1.5 pr-5' : 'p-2 pr-8'}`}>
              <div className={`rounded-full bg-black flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all duration-500 border border-white/10 shrink-0 ${isScrolled ? 'w-10 h-10' : 'w-14 h-14'}`}>
                 <Phone className={`fill-current transition-all duration-500 ${isScrolled ? 'w-4 h-4' : 'w-6 h-6'}`} />
              </div>
@@ -62,7 +62,7 @@ export const Header: React.FC = () => {
                    <span className={`text-gray-400 font-medium transition-all duration-500 ${isScrolled ? 'text-xs' : 'text-sm'}`}>Available now</span>
                 </div>
              </div>
-          </Link>
+          </a>
 
           {/* Mobile Logo (Visible on Mobile, aligned left in flex container) */}
           <div className="md:hidden pointer-events-auto">

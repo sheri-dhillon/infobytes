@@ -15,7 +15,7 @@ export const Hero: React.FC = () => {
         
         {/* Floating Tags */}
         <div className="flex flex-wrap gap-3 mb-8 md:mb-12 animate-slide-up-fade">
-           {['Branding', 'UI/UX Design', 'Strategy', 'Development'].map((tag, i) => (
+           {['Marketing', 'UI/UX Design', 'Strategy', 'Development'].map((tag, i) => (
              <span key={i} className="px-5 py-2 rounded-full bg-white/5 border border-white/5 text-sm font-medium text-gray-300 backdrop-blur-sm hover:bg-white/10 transition-colors cursor-default">
                {tag}
              </span>
@@ -25,10 +25,10 @@ export const Hero: React.FC = () => {
         {/* Main Typography */}
         <div className="flex flex-col">
           <h1 className="text-6xl md:text-8xl lg:text-[7rem] leading-[0.9] font-serif italic text-white mb-2 md:ml-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
-             Creative design
+             Design. Develop.
           </h1>
           <h2 className="text-[18vw] md:text-[14rem] leading-[0.75] font-black tracking-tighter text-white uppercase mix-blend-overlay opacity-90 animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
-             STRATEGY
+             & SCALE.
           </h2>
         </div>
 

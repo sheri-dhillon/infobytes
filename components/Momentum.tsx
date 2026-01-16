@@ -64,19 +64,19 @@ export const Momentum: React.FC = () => {
 
                 <div className="relative z-10 flex flex-col gap-10">
                    
-                   {/* Competitor Bar */}
+                   {/* Competitor Bar - Made more visible */}
                    <div className="group">
                       <div className="flex justify-between items-end mb-3">
-                         <span className="text-sm font-medium text-gray-500">Other Agencies</span>
-                         <span className="text-2xl font-bold text-gray-600">56%</span>
+                         <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Other Agencies</span>
+                         <span className="text-2xl font-bold text-gray-400 group-hover:text-white transition-colors">56%</span>
                       </div>
-                      <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden">
                          <div 
-                           className="h-full bg-gray-700 rounded-full transition-all duration-[1500ms] ease-out"
+                           className="h-full bg-gray-500 rounded-full transition-all duration-[1500ms] ease-out group-hover:bg-gray-400"
                            style={{ width: isVisible ? '30%' : '0%' }}
                          ></div>
                       </div>
-                      <p className="text-xs text-gray-600 mt-2">Average increase in conversion within 90 days.</p>
+                      <p className="text-xs text-gray-400 mt-2 group-hover:text-gray-300 transition-colors">Average increase in conversion within 90 days.</p>
                    </div>
 
                    {/* Hero Bar */}
