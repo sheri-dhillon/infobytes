@@ -6,11 +6,13 @@ import { Support } from './components/Support';
 import { Outcomes } from './components/Outcomes';
 import { Portfolio } from './components/Portfolio';
 import { Services } from './components/Services';
+import { Momentum } from './components/Momentum';
 import { Testimonials } from './components/Testimonials';
 import { Pricing } from './components/Pricing';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
+import { TrustedBy } from './components/TrustedBy';
 
 function App() {
   return (
@@ -21,32 +23,12 @@ function App() {
         <About />
         <Support />
         <Outcomes />
+        <Momentum />
         <Portfolio />
         <Services />
         
-        {/* Features Grid (Small interlude) */}
-        <section className="py-24 bg-black text-center border-t border-white/5">
-           <div className="max-w-7xl mx-auto px-6">
-              <div className="text-xs font-bold tracking-widest text-brand-text uppercase mb-4">● Features</div>
-              <h2 className="text-3xl md:text-5xl font-semibold mb-16">Built for founders, Fine-<br/>tuned for teams.</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                 {[
-                   { title: "Multilingual by Design", icon: "🌐" },
-                   { title: "Intelligent Tool Hooks", icon: "🔗" },
-                   { title: "A/B Prompt + UX Testing", icon: "⚡" },
-                   { title: "99.9% Uptime", icon: "🛡️" },
-                   { title: "Launch Support", icon: "🚀" },
-                   { title: "Compliance", icon: "🔒" }
-                 ].map((f, i) => (
-                    <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/20 transition-colors">
-                       <div className="text-2xl mb-4">{f.icon}</div>
-                       <h3 className="font-semibold mb-2">{f.title}</h3>
-                       <p className="text-xs text-gray-500">Robust systems scaled for performance.</p>
-                    </div>
-                 ))}
-              </div>
-           </div>
-        </section>
+        {/* Trusted By / Marquee Section */}
+        <TrustedBy />
 
         <Testimonials />
         <Pricing />
