@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
   return (
@@ -13,8 +14,8 @@ export const Footer: React.FC = () => {
            <p className="text-gray-400 max-w-lg mx-auto mb-10">From idea to investment, MVP to market — we adapt to your goals and build around what your product truly needs.</p>
            
            <div className="flex justify-center items-center gap-4">
-             <button className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors">Get Started</button>
-             <button className="bg-white/10 border border-white/10 text-white px-8 py-3 rounded-full font-medium hover:bg-white/20 transition-colors">Explore Pricing Plan</button>
+             <Link to="/contact" className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors">Get Started</Link>
+             <Link to="/pricing" className="bg-white/10 border border-white/10 text-white px-8 py-3 rounded-full font-medium hover:bg-white/20 transition-colors">Explore Pricing Plan</Link>
            </div>
            
            <div className="mt-6 text-xs text-purple-400 flex justify-center items-center gap-2">
@@ -36,11 +37,11 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">About Us</a>
-            <a href="#" className="hover:text-white transition-colors">Work</a>
-            <a href="#" className="hover:text-white transition-colors">Services</a>
-            <a href="#" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#" className="hover:text-white transition-colors">Blog</a>
+            <Link to="/about" className="hover:text-white transition-colors">About Us</Link>
+            <Link to="/work" className="hover:text-white transition-colors">Work</Link>
+            <Link to="/services" className="hover:text-white transition-colors">Services</Link>
+            <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
           </div>
 
           <div>
