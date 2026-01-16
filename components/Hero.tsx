@@ -14,7 +14,7 @@ export const Hero: React.FC = () => {
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-8 flex flex-col h-full justify-center">
         
         {/* Floating Tags */}
-        <div className="flex flex-wrap gap-3 mb-8 md:mb-12 animate-in slide-in-from-bottom-5 fade-in duration-700">
+        <div className="flex flex-wrap gap-3 mb-8 md:mb-12 animate-slide-up-fade">
            {['Branding', 'UI/UX Design', 'Strategy', 'Development'].map((tag, i) => (
              <span key={i} className="px-5 py-2 rounded-full bg-white/5 border border-white/5 text-sm font-medium text-gray-300 backdrop-blur-sm hover:bg-white/10 transition-colors cursor-default">
                {tag}
@@ -24,16 +24,16 @@ export const Hero: React.FC = () => {
 
         {/* Main Typography */}
         <div className="flex flex-col">
-          <h1 className="text-6xl md:text-8xl lg:text-[7rem] leading-[0.9] font-serif italic text-white mb-2 md:ml-4 animate-in slide-in-from-left-5 fade-in duration-1000 delay-100">
+          <h1 className="text-6xl md:text-8xl lg:text-[7rem] leading-[0.9] font-serif italic text-white mb-2 md:ml-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
              Creative design
           </h1>
-          <h2 className="text-[18vw] md:text-[14rem] leading-[0.75] font-black tracking-tighter text-white uppercase mix-blend-overlay opacity-90 animate-in slide-in-from-right-5 fade-in duration-1000 delay-200">
+          <h2 className="text-[18vw] md:text-[14rem] leading-[0.75] font-black tracking-tighter text-white uppercase mix-blend-overlay opacity-90 animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
              STRATEGY
           </h2>
         </div>
 
         {/* Floating CTA Button - Positioned relative to typography */}
-        <div className="flex justify-end md:mr-24 mt-12 md:-mt-16 relative z-20 animate-in fade-in duration-1000 delay-500">
+        <div className="flex justify-end md:mr-24 mt-12 md:-mt-16 relative z-20 animate-fade-in" style={{ animationDelay: '600ms' }}>
            <button className="group relative px-8 py-4 bg-[#1a1a1a] hover:bg-[#252525] text-white rounded-full flex items-center gap-4 transition-all hover:scale-105 border border-white/10 shadow-2xl shadow-purple-900/20">
               <span className="font-bold text-lg">Let's Talk</span>
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-45">

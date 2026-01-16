@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 export const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
 
   // Prevent scrolling when menu is open
   useEffect(() => {
@@ -13,6 +15,11 @@ export const Header: React.FC = () => {
       document.body.style.overflow = 'unset';
     }
   }, [isOpen]);
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location]);
 
   // Handle scroll for background
   useEffect(() => {
@@ -25,11 +32,11 @@ export const Header: React.FC = () => {
   }, []);
 
   const navItems = [
-    { name: 'Home', href: '#' },
-    { name: 'Service', href: '#services' },
-    { name: 'Portfolio', href: '#work' },
-    { name: 'Contact', href: '#contact' },
-    { name: 'Blog', href: '#' },
+    { name: 'Home', href: '/' },
+    { name: 'Service', href: '/services' },
+    { name: 'Portfolio', href: '/work' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Blog', href: '/blog' },
   ];
 
   return (
@@ -44,7 +51,7 @@ export const Header: React.FC = () => {
         <div className="max-w-[1400px] mx-auto flex items-center justify-between relative z-50">
           
           {/* Left: Contact Pill (Hidden on Mobile) */}
-          <div className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${isScrolled ? 'p-1.5 pr-5' : 'p-2 pr-8'}`}>
+          <Link to="/contact" className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${isScrolled ? 'p-1.5 pr-5' : 'p-2 pr-8'}`}>
              <div className={`rounded-full bg-black flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all duration-500 border border-white/10 shrink-0 ${isScrolled ? 'w-10 h-10' : 'w-14 h-14'}`}>
                 <Phone className={`fill-current transition-all duration-500 ${isScrolled ? 'w-4 h-4' : 'w-6 h-6'}`} />
              </div>
@@ -55,16 +62,16 @@ export const Header: React.FC = () => {
                    <span className={`text-gray-400 font-medium transition-all duration-500 ${isScrolled ? 'text-xs' : 'text-sm'}`}>Available now</span>
                 </div>
              </div>
-          </div>
+          </Link>
 
           {/* Mobile Logo (Visible on Mobile, aligned left in flex container) */}
           <div className="md:hidden pointer-events-auto">
-             <h1 className="text-lg font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg">INFOBYTES</h1>
+             <Link to="/"><h1 className="text-lg font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg">INFOBYTES</h1></Link>
           </div>
 
           {/* Center: Desktop Logo (Absolute Center) */}
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-8'}`}>
-             <h1 className={`font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg transition-all duration-500 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>INFOBYTES</h1>
+             <Link to="/"><h1 className={`font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg transition-all duration-500 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>INFOBYTES</h1></Link>
           </div>
 
           {/* Right: Menu Toggle */}
@@ -90,15 +97,15 @@ export const Header: React.FC = () => {
         <div className="fixed inset-0 bg-[#050505] z-40 flex flex-col items-center justify-center animate-fade-in">
            <nav className="flex flex-col items-center gap-6 md:gap-8 text-center p-4">
              {navItems.map((item, index) => (
-               <a 
+               <Link 
                  key={item.name} 
-                 href={item.href} 
+                 to={item.href} 
                  onClick={() => setIsOpen(false)} 
                  className="text-3xl md:text-6xl font-bold text-white hover:text-gray-400 transition-colors opacity-0 animate-slide-up-fade font-sans tracking-tight"
                  style={{ animationDelay: `${100 + index * 100}ms` }}
                >
                  {item.name}
-               </a>
+               </Link>
              ))}
            </nav>
         </div>

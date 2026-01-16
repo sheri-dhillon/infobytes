@@ -1,41 +1,50 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
-import { Hero } from './components/Hero';
-import { About } from './components/About';
-import { Services } from './components/Services';
-import { Momentum } from './components/Momentum';
-import { Testimonials } from './components/Testimonials';
-import { Pricing } from './components/Pricing';
-import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
-import { TrustedBy } from './components/TrustedBy';
-import { Process } from './components/Process';
+
+// Pages
+import { HomePage } from './pages/HomePage';
+import { AboutPage } from './pages/AboutPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { WorkPage } from './pages/WorkPage';
+import { ContactPage } from './pages/ContactPage';
+import { BlogPage } from './pages/BlogPage';
+import { PricingPage } from './pages/PricingPage';
+
+// Scroll to top component that listens to route changes
+const ScrollToTopOnNavigate = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 function App() {
   return (
-    <div className="bg-brand-dark text-white min-h-screen font-sans selection:bg-purple-500/30 selection:text-white">
-      <Header />
-      <main>
-        <Hero />
-        <About />
-        <Services />
-        <Momentum />
-        
-        {/* Replaced Portfolio with Process based on user request */}
-        <Process />
-        
-        {/* Trusted By / Marquee Section */}
-        <TrustedBy />
-
-        <Testimonials />
-        <Pricing />
-        
-        <FAQ />
-      </main>
-      <Footer />
-      <ScrollToTop />
-    </div>
+    <Router>
+      <div className="bg-brand-dark text-white min-h-screen font-sans selection:bg-purple-500/30 selection:text-white">
+        <ScrollToTopOnNavigate />
+        <Header />
+        <main>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/work" element={<WorkPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+          </Routes>
+        </main>
+        <Footer />
+        <ScrollToTop />
+      </div>
+    </Router>
   );
 }
 
