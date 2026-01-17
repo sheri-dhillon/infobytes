@@ -1,12 +1,11 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { Button } from './ui/Button';
 
 export const About: React.FC = () => {
   return (
-    <section className="py-24 bg-black relative" id="about">
+    <section className="py-20 md:py-24 bg-black relative" id="about">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <div className="flex -space-x-2 mb-6">
               {[1, 2, 3].map((i) => (
@@ -19,28 +18,29 @@ export const About: React.FC = () => {
               </div>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-semibold mb-6 leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-semibold mb-6 leading-tight">
               Design with Intent.<br />
               Build for Scale.
             </h2>
-            <p className="text-brand-text text-lg mb-10 max-w-md">
+            <p className="text-brand-text text-base md:text-lg mb-10 max-w-md">
               We bridge the gap between aesthetic excellence and technical performance. Whether we are architecting a seamless iOS experience or engineering a high-retention email system, our focus is always on your bottom line.
             </p>
 
             <div className="flex gap-12 mb-10">
               <div>
-                <div className="text-3xl font-bold text-white mb-1">$50M+</div>
-                <div className="text-sm text-brand-text">In Revenue Generated for Clients</div>
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">$50M+</div>
+                <div className="text-xs md:text-sm text-brand-text">In Revenue Generated for Clients</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white mb-1">150+</div>
-                <div className="text-sm text-brand-text">Digital Products Launched</div>
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">150+</div>
+                <div className="text-xs md:text-sm text-brand-text">Digital Products Launched</div>
               </div>
             </div>
 
-            <Button variant="outline" icon={<ArrowUpRight className="w-4 h-4"/>}>
+            <button className="group relative px-6 py-3 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-full flex items-center gap-3 transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,107,74,0.3)] hover:shadow-[0_0_30px_rgba(185,109,243,0.4)] font-bold text-sm tracking-wide">
               Our Methodology
-            </Button>
+              <ArrowUpRight className="w-4 h-4 transition-transform group-hover:rotate-45" />
+            </button>
           </div>
 
           <div className="relative">
@@ -49,7 +49,7 @@ export const About: React.FC = () => {
                 <img 
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" 
                   alt="Designer working" 
-                  className="rounded-xl w-full h-[500px] object-cover opacity-90 hover:scale-105 transition-transform duration-700"
+                  className="rounded-xl w-full h-[400px] md:h-[500px] object-cover opacity-90 hover:scale-105 transition-transform duration-700"
                 />
                 
                 {/* Floating UI Element */}
@@ -64,14 +64,6 @@ export const About: React.FC = () => {
                 </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-20 pt-10 border-t border-white/5 flex flex-wrap justify-center md:justify-between gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-             {['Circle', 'Goldline', 'Stari', 'Velocity', 'Codecraft'].map((logo) => (
-               <div key={logo} className="flex items-center gap-2 text-lg font-semibold">
-                 <div className="w-6 h-6 bg-white/20 rounded-full"></div> {logo}
-               </div>
-             ))}
         </div>
       </div>
     </section>

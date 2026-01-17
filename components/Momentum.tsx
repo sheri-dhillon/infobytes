@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Momentum: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -23,13 +24,13 @@ export const Momentum: React.FC = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-32 bg-black relative overflow-hidden">
+    <section ref={sectionRef} className="py-20 md:py-32 bg-black relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[600px] h-[600px] bg-brand-orange opacity-[0.05] blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-brand-purple opacity-[0.05] blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-20 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           
           {/* Left Column */}
           <div className="relative">
@@ -38,18 +39,22 @@ export const Momentum: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange"></span>
                 </span>
-                <span className="text-xs font-bold tracking-widest text-gray-400 uppercase">Global Result</span>
+                <span className="text-[10px] md:text-xs font-bold tracking-widest text-gray-400 uppercase">Global Result</span>
              </div>
              
-             <h2 className="text-5xl md:text-7xl font-semibold text-white leading-[1.05] mb-8 tracking-tight">
-               We don't offer <span className="text-gray-600">services.</span><br />
-               We offer <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-brand-text">momentum.</span>
+             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-[1.05] mb-8 tracking-tight">
+               We don't offer services.<br />
+               We <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-purple">move metrics.</span>
              </h2>
 
+             <p className="text-gray-400 text-lg leading-relaxed mb-8 max-w-lg">
+                In a crowded digital landscape, "beautiful" is the baseline. We focus on the bottom line. By unifying seamless <strong className="text-white font-semibold">iOS experiences</strong> with high-retention <strong className="text-white font-semibold">email automation</strong>, we create a compounding growth loop that turns your digital footprint into your most profitable asset.
+             </p>
+
              <div className="flex flex-wrap gap-4">
-               <button className="px-8 py-4 rounded-full bg-brand-orange text-white font-bold text-lg hover:bg-[#e05e40] transition-all hover:scale-105 flex items-center gap-2 shadow-[0_0_30px_rgba(255,107,74,0.3)]">
-                 Let's Talk <ArrowUpRight className="w-5 h-5" />
-               </button>
+               <Link to="/contact" className="px-6 py-3 md:px-8 md:py-4 rounded-full bg-gradient-to-r from-brand-orange to-brand-purple text-white font-bold text-base md:text-lg hover:scale-105 transition-all flex items-center gap-2 shadow-[0_0_30px_rgba(255,107,74,0.3)]">
+                 Let's Talk <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5" />
+               </Link>
              </div>
           </div>
 
@@ -58,47 +63,65 @@ export const Momentum: React.FC = () => {
              {/* Card Backdrop */}
              <div className="absolute inset-0 bg-white/5 blur-xl rounded-[40px] transform rotate-3 scale-95 opacity-50"></div>
              
-             <div className="bg-[#1a1a1a] border border-white/10 rounded-[40px] p-8 md:p-12 relative overflow-hidden shadow-2xl">
-                {/* Noise Texture - Enhanced opacity for visibility */}
+             <div className="bg-[#1a1a1a] border border-white/10 rounded-[30px] md:rounded-[40px] p-8 md:p-12 relative overflow-hidden shadow-2xl min-h-[500px] flex flex-col justify-between">
+                {/* Noise Texture */}
                 <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")` }}></div>
 
-                <div className="relative z-10 flex flex-col gap-10">
+                <div className="relative z-10 flex flex-col h-full justify-end">
                    
-                   {/* Competitor Bar - Made more visible */}
-                   <div className="group">
-                      <div className="flex justify-between items-end mb-3">
-                         <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Other Agencies</span>
-                         <span className="text-2xl font-bold text-gray-400 group-hover:text-white transition-colors">56%</span>
-                      </div>
-                      <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden">
-                         <div 
-                           className="h-full bg-gray-500 rounded-full transition-all duration-[1500ms] ease-out group-hover:bg-gray-400"
-                           style={{ width: isVisible ? '30%' : '0%' }}
-                         ></div>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2 group-hover:text-gray-300 transition-colors">Average increase in conversion within 90 days.</p>
+                   {/* Chart Container */}
+                   <div className="relative mb-8 mt-12 px-2 md:px-4">
+                       {/* Grid Area */}
+                       <div className="h-[320px] relative w-full">
+                           {/* Grid Lines */}
+                           <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+                                <div className="w-full h-px bg-white border-t border-dashed border-white/50"></div>
+                                <div className="w-full h-px bg-white border-t border-dashed border-white/50"></div>
+                                <div className="w-full h-px bg-white border-t border-dashed border-white/50"></div>
+                                <div className="w-full h-px bg-white border-t border-dashed border-white/50"></div>
+                           </div>
+
+                           {/* Bars Wrapper */}
+                           <div className="absolute inset-0 flex items-end justify-center gap-16 md:gap-32">
+                                
+                                {/* Bar 1: Other Agencies */}
+                                <div className="flex flex-col items-center justify-end w-32 group">
+                                     <div className={`text-2xl font-bold text-gray-500 mb-4 transition-all duration-700 delay-[1000ms] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>56%</div>
+                                     <div 
+                                        className="w-24 md:w-28 bg-white/10 rounded-t-sm relative transition-all duration-[2000ms] ease-out origin-bottom group-hover:bg-white/20" 
+                                        style={{ height: isVisible ? '80px' : '0px' }}
+                                     ></div>
+                                </div>
+
+                                {/* Bar 2: Infobytes */}
+                                <div className="flex flex-col items-center justify-end w-40">
+                                     <div className={`text-6xl font-bold text-brand-orange mb-4 drop-shadow-[0_0_15px_rgba(255,107,74,0.6)] transition-all duration-700 delay-[1500ms] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>172%</div>
+                                     <div 
+                                        className="w-32 md:w-36 bg-gradient-to-t from-brand-orange to-brand-purple rounded-t-xl relative shadow-[0_0_40px_rgba(255,107,74,0.4)] transition-all duration-[2000ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-200 origin-bottom" 
+                                        style={{ height: isVisible ? '240px' : '0px' }}
+                                     >
+                                        <div className="absolute inset-0 bg-white/20 animate-pulse mix-blend-overlay"></div>
+                                     </div>
+                                </div>
+
+                           </div>
+                       </div>
+                       
+                       {/* Labels */}
+                       <div className="flex justify-center gap-16 md:gap-32 mt-6">
+                           <div className="w-32 text-center">
+                               <div className="text-sm text-gray-400 font-medium leading-tight">Other<br/>Agencies</div>
+                           </div>
+                           <div className="w-40 text-center">
+                               <div className="text-3xl md:text-4xl text-white font-bold tracking-tight">Infobytes</div>
+                           </div>
+                       </div>
                    </div>
 
-                   {/* Hero Bar */}
-                   <div className="group">
-                      <div className="flex justify-between items-end mb-3">
-                         <span className="text-xl font-bold text-white">Infobytes</span>
-                         <span className="text-6xl font-bold text-brand-orange tracking-tighter drop-shadow-[0_0_15px_rgba(255,107,74,0.2)]">
-                            172%
-                         </span>
-                      </div>
-                      <div className="h-6 w-full bg-white/5 rounded-full overflow-hidden p-1">
-                         <div 
-                           className="h-full bg-gradient-to-r from-brand-orange to-brand-purple rounded-full relative transition-all duration-[1500ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_0_20px_rgba(255,107,74,0.4)]"
-                           style={{ width: isVisible ? '100%' : '0%' }}
-                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent w-full -translate-x-full animate-[shimmer_3s_infinite]"></div>
-                         </div>
-                      </div>
-                      <p className="text-base text-gray-400 mt-5 leading-relaxed">
-                         Clients who worked with us for full-cycle brand and campaign strategy saw an average 172% increase in conversion within 90 days.
-                      </p>
-                   </div>
+                   {/* Footer Text */}
+                   <p className="text-sm md:text-base text-gray-400 leading-relaxed text-center border-t border-white/10 pt-6">
+                      Brands that integrate our full-cycle design and email automation systems see an average <span className="text-white font-bold">172% increase</span> in Customer Lifetime Value (CLV) within the first 90 days.
+                   </p>
 
                 </div>
              </div>

@@ -77,7 +77,7 @@ export const Header: React.FC = () => {
           {/* Right: Menu Toggle */}
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            className={`pointer-events-auto bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center gap-3 text-white font-medium text-sm hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] transition-all duration-500 z-50 shadow-lg justify-center ${isScrolled ? 'px-5 py-2 min-w-[90px]' : 'px-6 py-3 min-w-[100px]'}`}
+            className={`pointer-events-auto bg-gradient-to-r from-brand-orange to-brand-purple rounded-full flex items-center gap-3 text-white font-medium text-sm hover:shadow-[0_0_20px_rgba(255,107,74,0.4)] transition-all duration-500 z-50 shadow-lg justify-center ${isScrolled ? 'px-5 py-2 min-w-[90px]' : 'px-6 py-3 min-w-[100px]'}`}
           >
              <span>Menu</span>
              {isOpen ? (
@@ -101,7 +101,7 @@ export const Header: React.FC = () => {
                  key={item.name} 
                  to={item.href} 
                  onClick={() => setIsOpen(false)} 
-                 className="text-3xl md:text-6xl font-bold text-white hover:text-gray-400 transition-colors opacity-0 animate-slide-up-fade font-sans tracking-tight"
+                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white hover:text-gray-400 transition-colors opacity-0 animate-slide-up-fade font-sans tracking-tight"
                  style={{ animationDelay: `${100 + index * 100}ms` }}
                >
                  {item.name}

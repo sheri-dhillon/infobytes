@@ -40,17 +40,17 @@ export const Services: React.FC = () => {
   return (
     <section 
       id="services"
-      className="py-32 bg-brand-dark relative overflow-hidden border-t border-white/5" 
+      className="py-20 md:py-32 bg-brand-dark relative overflow-hidden border-t border-white/5" 
       onMouseMove={handleMouseMove}
     >
       <div className="max-w-[1400px] mx-auto px-6 relative z-10">
         
         {/* Header */}
-        <div className="text-center mb-24">
-          <div className="inline-block px-6 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs font-bold tracking-widest uppercase mb-8 text-white">
+        <div className="text-center mb-16 md:mb-24">
+          <div className="inline-block px-4 py-1.5 md:px-6 md:py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs font-bold tracking-widest uppercase mb-6 md:mb-8 text-white">
             Our Services
           </div>
-          <h2 className="text-5xl md:text-7xl font-medium text-white leading-[1.1] tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] tracking-tight">
             From idea to <span className="font-serif italic text-gray-400">execution</span><br />
             we've got you covered
           </h2>
@@ -61,33 +61,33 @@ export const Services: React.FC = () => {
            {services.map((service, idx) => (
              <div 
                key={idx}
-               className="group relative flex flex-col md:flex-row items-start md:items-center justify-between py-10 md:py-14 border-t border-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
+               className="group relative flex flex-col md:flex-row items-start md:items-center justify-between py-8 md:py-12 border-t border-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
                onMouseEnter={() => setHoveredIndex(idx)}
                onMouseLeave={() => setHoveredIndex(null)}
              >
                 {/* Background Hover Effect for Row (Subtle) */}
                 <div className={`absolute inset-0 bg-white/5 transition-opacity duration-300 -z-10 ${hoveredIndex === idx ? 'opacity-100' : 'opacity-0'}`} />
 
-                <div className="flex items-baseline gap-8 md:gap-16 mb-6 md:mb-0">
-                  <span className="text-sm font-mono text-gray-500 font-medium">
+                <div className="flex items-baseline gap-6 md:gap-12 lg:gap-16 mb-6 md:mb-0 max-w-full md:max-w-[60%]">
+                  <span className="text-xs md:text-sm font-mono text-gray-500 font-medium shrink-0">
                     {service.id}
                   </span>
-                  <h3 className="text-3xl md:text-5xl lg:text-6xl font-medium text-white group-hover:translate-x-4 transition-transform duration-300">
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-white group-hover:translate-x-4 transition-transform duration-300 leading-tight">
                     {service.title}
                   </h3>
                 </div>
 
-                <div className="flex items-center gap-6 md:gap-12 md:max-w-xl w-full justify-between md:justify-end">
+                <div className="flex items-center gap-6 md:gap-12 md:max-w-xl w-full justify-between md:justify-end pl-10 md:pl-0">
                    {/* Description: Hidden on desktop until hover, visible on mobile */}
-                   <p className="text-sm text-gray-400 max-w-xs leading-relaxed hidden md:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+                   <p className="text-sm text-gray-400 max-w-[250px] md:max-w-xs leading-relaxed hidden md:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
                      {service.description}
                    </p>
                    <p className="text-sm text-gray-400 max-w-xs leading-relaxed md:hidden">
                      {service.description}
                    </p>
 
-                   <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-300 transform group-hover:-rotate-45 shrink-0 bg-black z-20">
-                      <ArrowRight className="w-5 h-5" />
+                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-300 transform group-hover:-rotate-45 shrink-0 bg-black z-20">
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                    </div>
                 </div>
              </div>
@@ -108,7 +108,7 @@ export const Services: React.FC = () => {
           transition: 'opacity 0.2s ease, transform 0.1s ease-out' 
         }}
       >
-         <div className="w-[350px] h-[250px] rounded-lg overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] relative bg-black border border-white/10">
+         <div className="w-[300px] h-[200px] lg:w-[350px] lg:h-[250px] rounded-lg overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] relative bg-black border border-white/10">
             {services.map((service, idx) => (
               <img 
                 key={idx}
