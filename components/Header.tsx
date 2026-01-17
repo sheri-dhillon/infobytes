@@ -44,14 +44,21 @@ export const Header: React.FC = () => {
       <header 
         className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-8 transition-all duration-500 ease-in-out ${
           isScrolled 
-            ? 'py-2 bg-black/80 backdrop-blur-md border-b border-white/5 shadow-lg' 
+            ? (isOpen ? 'py-2 bg-transparent border-none' : 'py-2 bg-black/80 backdrop-blur-md border-b border-white/5 shadow-lg') 
             : 'pt-8 pb-4 bg-transparent pointer-events-none'
         }`}
       >
         <div className="max-w-[1400px] mx-auto flex items-center justify-between relative z-50">
           
           {/* Left: Contact Pill (Hidden on Mobile) */}
-          <a href="https://calendly.com/shehryar-infobytes/30min" target="_blank" rel="noopener noreferrer" className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${isScrolled ? 'p-1.5 pr-5' : 'p-2 pr-8'}`}>
+          <a 
+            href="https://calendly.com/shehryar-infobytes/30min" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${
+              isScrolled ? 'p-1.5 pr-5' : 'p-2 pr-8'
+            } ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          >
              <div className={`rounded-full bg-black flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all duration-500 border border-white/10 shrink-0 ${isScrolled ? 'w-10 h-10' : 'w-14 h-14'}`}>
                 <Phone className={`fill-current transition-all duration-500 ${isScrolled ? 'w-4 h-4' : 'w-6 h-6'}`} />
              </div>
@@ -65,12 +72,12 @@ export const Header: React.FC = () => {
           </a>
 
           {/* Mobile Logo (Visible on Mobile, aligned left in flex container) */}
-          <div className="md:hidden pointer-events-auto">
+          <div className={`md:hidden pointer-events-auto transition-opacity duration-300 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/"><h1 className="text-lg font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg">INFOBYTES</h1></Link>
           </div>
 
           {/* Center: Desktop Logo (Absolute Center) */}
-          <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'}`}>
+          <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/"><h1 className={`font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg transition-all duration-500 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>INFOBYTES</h1></Link>
           </div>
 
@@ -79,7 +86,7 @@ export const Header: React.FC = () => {
             onClick={() => setIsOpen(!isOpen)}
             className={`pointer-events-auto bg-gradient-to-r from-brand-orange to-brand-purple rounded-full flex items-center gap-3 text-white font-medium text-sm hover:shadow-[0_0_20px_rgba(255,107,74,0.4)] transition-all duration-500 z-50 shadow-lg justify-center ${isScrolled ? 'px-5 py-2 min-w-[90px]' : 'px-6 py-3 min-w-[100px]'}`}
           >
-             <span>Menu</span>
+             <span>{isOpen ? 'Close' : 'Menu'}</span>
              {isOpen ? (
                 <X className="w-5 h-5" />
              ) : (
@@ -95,13 +102,16 @@ export const Header: React.FC = () => {
       {/* Menu Overlay */}
       {isOpen && (
         <div className="fixed inset-0 bg-[#050505] z-40 flex flex-col items-center justify-center animate-fade-in">
-           <nav className="flex flex-col items-center gap-6 md:gap-8 text-center p-4">
+           {/* Background Glow */}
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-purple/5 blur-[120px] rounded-full pointer-events-none"></div>
+
+           <nav className="flex flex-col items-center gap-6 md:gap-8 text-center p-4 relative z-10">
              {navItems.map((item, index) => (
                <Link 
                  key={item.name} 
                  to={item.href} 
                  onClick={() => setIsOpen(false)} 
-                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white hover:text-gray-400 transition-colors opacity-0 animate-slide-up-fade font-sans tracking-tight"
+                 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-brand-orange hover:to-brand-purple transition-all opacity-0 animate-slide-up-fade font-sans tracking-tight"
                  style={{ animationDelay: `${100 + index * 100}ms` }}
                >
                  {item.name}
