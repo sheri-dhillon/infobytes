@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 export const Hero: React.FC = () => {
   return (
-    <section className="relative min-h-[100dvh] w-full flex flex-col justify-center bg-brand-dark overflow-hidden pt-24 pb-12 md:pt-0 md:pb-0">
+    <section className="relative min-h-[100dvh] w-full flex flex-col bg-brand-dark overflow-hidden pt-32 pb-12 md:pt-48 md:pb-20">
       
       {/* Background Fluid Gradient (Right Side) */}
       <div className="absolute top-[-10%] right-[-10%] w-[90vw] md:w-[60vw] h-[60vh] md:h-[100vh] bg-gradient-to-bl from-blue-500 via-purple-600 to-transparent opacity-40 blur-[80px] md:blur-[120px] rounded-full pointer-events-none mix-blend-screen animate-pulse duration-[5000ms]" />
@@ -11,7 +11,7 @@ export const Hero: React.FC = () => {
       {/* Secondary Glow for depth */}
       <div className="absolute bottom-0 left-0 w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] bg-purple-900/20 blur-[100px] md:blur-[150px] rounded-full pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-8 flex flex-col h-full justify-center">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-8 flex flex-col h-full justify-start">
         
         {/* Floating Tags */}
         <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-10 animate-slide-up-fade justify-start">

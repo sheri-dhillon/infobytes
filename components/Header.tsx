@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
         className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-8 transition-all duration-500 ease-in-out ${
           isScrolled 
             ? 'py-2 bg-black/80 backdrop-blur-md border-b border-white/5 shadow-lg' 
-            : 'pt-6 pb-2 bg-transparent pointer-events-none'
+            : 'pt-8 pb-4 bg-transparent pointer-events-none'
         }`}
       >
         <div className="max-w-[1400px] mx-auto flex items-center justify-between relative z-50">
@@ -70,7 +70,7 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Center: Desktop Logo (Absolute Center) */}
-          <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-8'}`}>
+          <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'}`}>
              <Link to="/"><h1 className={`font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg transition-all duration-500 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>INFOBYTES</h1></Link>
           </div>
 
