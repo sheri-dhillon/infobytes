@@ -10,7 +10,7 @@ import { AboutPage } from './pages/AboutPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { WorkPage } from './pages/WorkPage';
 import { ContactPage } from './pages/ContactPage';
-import { BlogPage } from './pages/BlogPage';
+import { TestimonialsPage } from './pages/TestimonialsPage';
 import { PricingPage } from './pages/PricingPage';
 
 // Scroll to top component that listens to route changes
@@ -37,7 +37,7 @@ function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/work" element={<WorkPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/testimonials" element={<TestimonialsPage />} />
             <Route path="/pricing" element={<PricingPage />} />
           </Routes>
         </main>

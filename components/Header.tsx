@@ -36,7 +36,7 @@ export const Header: React.FC = () => {
     { name: 'Service', href: '/services' },
     { name: 'Portfolio', href: '/work' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Blog', href: '/blog' },
+    { name: 'Reviews', href: '/testimonials' },
   ];
 
   return (
