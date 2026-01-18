@@ -33,10 +33,11 @@ export const Header: React.FC = () => {
 
   const navItems = [
     { name: 'Home', href: '/' },
+    { name: 'About', href: '/about' },
     { name: 'Service', href: '/services' },
     { name: 'Portfolio', href: '/work' },
-    { name: 'Contact', href: '/contact' },
     { name: 'Reviews', href: '/testimonials' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -73,12 +74,24 @@ export const Header: React.FC = () => {
 
           {/* Mobile Logo (Visible on Mobile, aligned left in flex container) */}
           <div className={`md:hidden pointer-events-auto transition-opacity duration-300 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-             <Link to="/"><h1 className="text-lg font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg">INFOBYTES</h1></Link>
+             <Link to="/" className="block">
+               <img 
+                 src="/logo.png" 
+                 alt="INFOBYTES AGENCY" 
+                 className="h-8 w-auto object-contain"
+               />
+             </Link>
           </div>
 
           {/* Center: Desktop Logo (Absolute Center) */}
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-             <Link to="/"><h1 className={`font-bold tracking-widest text-white uppercase font-sans drop-shadow-lg transition-all duration-500 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>INFOBYTES</h1></Link>
+             <Link to="/" className="block">
+               <img 
+                 src="/logo.png" 
+                 alt="INFOBYTES AGENCY" 
+                 className={`w-auto object-contain transition-all duration-500 ${isScrolled ? 'h-10' : 'h-14'}`}
+               />
+             </Link>
           </div>
 
           {/* Right: Menu Toggle */}

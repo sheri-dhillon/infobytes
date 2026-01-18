@@ -51,8 +51,12 @@ export const Footer: React.FC = () => {
           
           {/* Brand Column */}
           <div className="md:col-span-12 lg:col-span-5 flex flex-col items-start">
-             <Link to="/" className="text-3xl md:text-4xl font-black tracking-wider text-white uppercase font-sans mb-8 block">
-               INFOBYTES
+             <Link to="/" className="inline-block mb-8">
+               <img 
+                 src="/logo.png" 
+                 alt="INFOBYTES AGENCY" 
+                 className="h-16 w-auto object-contain"
+               />
              </Link>
              <p className="text-gray-500 max-w-sm leading-relaxed mb-10 text-base">
                We bridge the gap between aesthetic excellence and technical performance. A strategic partner for brands ready to transition from "business as usual" to market leaders.
@@ -81,6 +85,7 @@ export const Footer: React.FC = () => {
              <div className="flex flex-col gap-6">
                 <h4 className="text-white font-bold text-sm tracking-widest uppercase opacity-80">02. Agency</h4>
                 <ul className="flex flex-col gap-4 text-gray-400">
+                   <li><Link to="/about" className="hover:text-white transition-colors duration-300">About Us</Link></li>
                    <li><Link to="/#process" className="hover:text-white transition-colors duration-300">Our Process</Link></li>
                    <li><Link to="/work" className="hover:text-white transition-colors duration-300">Client Success Stories</Link></li>
                    <li><Link to="/pricing" className="hover:text-white transition-colors duration-300">Pricing Strategies</Link></li>
