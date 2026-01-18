@@ -54,6 +54,14 @@
               scrollRight: {
                 '0%': { transform: 'translateX(-50%)' },
                 '100%': { transform: 'translateX(0)' },
+              },
+              scrollUp: {
+                '0%': { transform: 'translateY(0)' },
+                '100%': { transform: 'translateY(-50%)' },
+              },
+              scrollDown: {
+                '0%': { transform: 'translateY(-50%)' },
+                '100%': { transform: 'translateY(0)' },
               }
             },
             animation: {
@@ -61,6 +69,8 @@
               'fade-in': 'fadeIn 0.4s ease-out forwards',
               'scroll-left': 'scrollLeft 40s linear infinite',
               'scroll-right': 'scrollRight 40s linear infinite',
+              'scroll-up': 'scrollUp 60s linear infinite',
+              'scroll-down': 'scrollDown 60s linear infinite',
             }
           }
         }
