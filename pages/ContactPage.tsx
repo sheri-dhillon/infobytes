@@ -20,10 +20,10 @@ export const ContactPage: React.FC = () => {
       
       <section className="pb-24 bg-[#050505] relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-16">
             
-            {/* Left Column: Contact Info & CTA (Smaller width - col-span-5) */}
-            <div className="lg:col-span-5 space-y-16">
+            {/* Left Column: Contact Info & CTA (Narrower width - col-span-4) */}
+            <div className="lg:col-span-4 space-y-12">
               
               {/* "Let's Chat" Header & Book Call Card */}
               <div>
@@ -36,7 +36,7 @@ export const ContactPage: React.FC = () => {
                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&q=80" alt="Avatar" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
                     
-                    <h3 className="text-4xl font-bold text-white leading-none mb-12 uppercase tracking-tight">
+                    <h3 className="text-3xl md:text-4xl font-bold text-white leading-none mb-10 uppercase tracking-tight">
                        BOOK A <br/>
                        QUICK CALL
                     </h3>
@@ -45,11 +45,11 @@ export const ContactPage: React.FC = () => {
                       href="https://calendly.com/shehryar-infobytes/30min" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-3 text-white font-medium hover:gap-5 transition-all group/link"
+                      className="inline-flex items-center gap-3 text-white font-medium hover:gap-5 transition-all group/link bg-white/5 px-5 py-3 rounded-full border border-white/10 hover:bg-white/10"
                     >
                        Book a call 
-                       <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center transition-transform group-hover/link:rotate-[-45deg]">
-                          <ArrowRight className="w-4 h-4" />
+                       <div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center transition-transform group-hover/link:rotate-[-45deg]">
+                          <ArrowRight className="w-3 h-3" />
                        </div>
                     </a>
                  </div>
@@ -61,22 +61,22 @@ export const ContactPage: React.FC = () => {
                    <h3 className="text-xl font-bold text-white mb-6">Contact Details</h3>
                    <div className="space-y-6">
                       <a href="mailto:hello@infobytes.io" className="flex items-center gap-4 group">
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
-                          <Mail className="w-4 h-4" />
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
+                          <Mail className="w-5 h-5" />
                         </div>
                         <span className="text-gray-300 group-hover:text-white transition-colors">hello@infobytes.io</span>
                       </a>
                       
                       <a href="tel:+15550000000" className="flex items-center gap-4 group">
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
-                          <Phone className="w-4 h-4" />
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
+                          <Phone className="w-5 h-5" />
                         </div>
                         <span className="text-gray-300 group-hover:text-white transition-colors">+1 (555) 000-0000</span>
                       </a>
 
                       <div className="flex items-center gap-4 group">
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
-                          <MapPin className="w-4 h-4" />
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
+                          <MapPin className="w-5 h-5" />
                         </div>
                         <span className="text-gray-300 group-hover:text-white transition-colors">123 Design Street, Creative City, NY 10012</span>
                       </div>
@@ -97,8 +97,8 @@ export const ContactPage: React.FC = () => {
 
             </div>
 
-            {/* Right Column: Contact Form (Wider - col-span-7) */}
-            <div className="lg:col-span-7">
+            {/* Right Column: Contact Form (Wider - col-span-8) */}
+            <div className="lg:col-span-8">
                <div className="bg-[#111] p-8 md:p-12 rounded-[2.5rem] border border-white/10 sticky top-32">
                   <h3 className="text-2xl font-bold text-white mb-8">Send us a message</h3>
                   <form className="space-y-6">
@@ -187,6 +187,29 @@ export const ContactPage: React.FC = () => {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* Marquee CTA Section */}
+      <section className="py-24 md:py-32 bg-black relative overflow-hidden flex items-center justify-center border-t border-white/5">
+        <div className="absolute inset-0 flex items-center select-none pointer-events-none">
+            <div className="flex whitespace-nowrap animate-scroll-left">
+                {[1, 2, 3, 4].map((i) => (
+                    <span key={i} className="text-[12vw] md:text-[10vw] font-black uppercase text-[#1a1a1a] leading-none px-8">
+                        Let's Connect And Let's Contact
+                    </span>
+                ))}
+            </div>
+        </div>
+
+        <div className="relative z-10">
+             <a 
+               href="mailto:hello@infobytes.io" 
+               className="flex items-center gap-3 bg-white text-black px-8 py-4 md:px-12 md:py-6 rounded-full text-lg md:text-xl font-bold hover:scale-110 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)] group"
+             >
+                Let's Contact 
+                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+             </a>
         </div>
       </section>
     </>
