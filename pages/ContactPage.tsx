@@ -1,13 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '../components/ui/Button';
-import { Mail, Phone, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowRight, ChevronDown, Plus, Minus } from 'lucide-react';
+
+const faqs = [
+  {
+    q: "How do you bridge the gap between UI/UX and actual revenue?",
+    a: "We believe beauty must perform. Our UI/UX process uses behavioral data to map user journeys that lead directly to conversions. When paired with our email automation, we create a closed-loop system that captures, converts, and retains customers."
+  },
+  {
+    q: "Do you build native iOS apps or cross-platform solutions?",
+    a: "We specialize in high-performance Native iOS development using Swift and SwiftUI. This ensures your app has the fastest possible response times, seamless integration with Apple’s ecosystem, and a premium \"Apple-level\" feel for your users."
+  },
+  {
+    q: "Can you integrate email marketing into my existing eCommerce store?",
+    a: "Absolutely. We specialize in turning \"stale\" stores into profit engines. We audit your current tech stack (Shopify, Magento, etc.) and deploy sophisticated lifecycle automations—like abandoned cart recovery and post-purchase flows—that drive immediate ROI."
+  },
+  {
+    q: "What is the typical timeline for a full Design-to-Launch project?",
+    a: "A custom high-end project typically spans 8 to 12 weeks. This includes deep-dive strategy, UI/UX prototyping, full-stack development, and rigorous QA. We work in agile \"sprints\" so you see tangible progress every two weeks."
+  },
+  {
+    q: "Are your designs \"dev-ready\" if I have my own internal team?",
+    a: "Yes. We provide a complete Design System, including component libraries, documentation, and high-fidelity prototypes. Our designs are architected with engineering in mind, ensuring a seamless handover to your developers."
+  },
+  {
+    q: "Do you provide long-term support after the \"Scale\" phase?",
+    a: "We aren't just a vendor; we’re a partner. After launch, we offer optimization packages that include A/B testing for your email flows, monthly UI/UX refinements, and technical scaling to ensure your product grows with your user base."
+  }
+];
 
 export const ContactPage: React.FC = () => {
   const [source, setSource] = useState('');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  
+  // Magnetic button logic
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const footerSectionRef = useRef<HTMLElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!footerSectionRef.current) return;
+    const rect = footerSectionRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    // Limit movement range and smooth it
+    setMousePos({ x: x * 0.2, y: y * 0.2 }); 
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
 
   return (
     <>
-      {/* Custom Hero Section */}
+      {/* Custom Hero Section matching screenshot */}
       <section className="pt-40 pb-20 md:pt-52 md:pb-32 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
           <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.1] tracking-tight mb-6 animate-slide-up-fade">
             We'd love to <br />
@@ -20,10 +65,10 @@ export const ContactPage: React.FC = () => {
       
       <section className="pb-24 bg-[#050505] relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-16">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
             
-            {/* Left Column: Contact Info & CTA (Narrower width - col-span-4) */}
-            <div className="lg:col-span-4 space-y-12">
+            {/* Left Column: Contact Info & CTA (Smaller width - col-span-5) */}
+            <div className="lg:col-span-5 space-y-16">
               
               {/* "Let's Chat" Header & Book Call Card */}
               <div>
@@ -36,7 +81,7 @@ export const ContactPage: React.FC = () => {
                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&q=80" alt="Avatar" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
                     
-                    <h3 className="text-3xl md:text-4xl font-bold text-white leading-none mb-10 uppercase tracking-tight">
+                    <h3 className="text-4xl font-bold text-white leading-none mb-12 uppercase tracking-tight">
                        BOOK A <br/>
                        QUICK CALL
                     </h3>
@@ -45,11 +90,11 @@ export const ContactPage: React.FC = () => {
                       href="https://calendly.com/shehryar-infobytes/30min" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-3 text-white font-medium hover:gap-5 transition-all group/link bg-white/5 px-5 py-3 rounded-full border border-white/10 hover:bg-white/10"
+                      className="inline-flex items-center gap-3 text-white font-medium hover:gap-5 transition-all group/link"
                     >
                        Book a call 
-                       <div className="w-6 h-6 rounded-full bg-white text-black flex items-center justify-center transition-transform group-hover/link:rotate-[-45deg]">
-                          <ArrowRight className="w-3 h-3" />
+                       <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center transition-transform group-hover/link:rotate-[-45deg]">
+                          <ArrowRight className="w-4 h-4" />
                        </div>
                     </a>
                  </div>
@@ -61,22 +106,22 @@ export const ContactPage: React.FC = () => {
                    <h3 className="text-xl font-bold text-white mb-6">Contact Details</h3>
                    <div className="space-y-6">
                       <a href="mailto:hello@infobytes.io" className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
-                          <Mail className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
+                          <Mail className="w-4 h-4" />
                         </div>
                         <span className="text-gray-300 group-hover:text-white transition-colors">hello@infobytes.io</span>
                       </a>
                       
                       <a href="tel:+15550000000" className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
-                          <Phone className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
+                          <Phone className="w-4 h-4" />
                         </div>
                         <span className="text-gray-300 group-hover:text-white transition-colors">+1 (555) 000-0000</span>
                       </a>
 
                       <div className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
-                          <MapPin className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
+                          <MapPin className="w-4 h-4" />
                         </div>
                         <span className="text-gray-300 group-hover:text-white transition-colors">123 Design Street, Creative City, NY 10012</span>
                       </div>
@@ -97,8 +142,8 @@ export const ContactPage: React.FC = () => {
 
             </div>
 
-            {/* Right Column: Contact Form (Wider - col-span-8) */}
-            <div className="lg:col-span-8">
+            {/* Right Column: Contact Form (Wider - col-span-7) */}
+            <div className="lg:col-span-7">
                <div className="bg-[#111] p-8 md:p-12 rounded-[2.5rem] border border-white/10 sticky top-32">
                   <h3 className="text-2xl font-bold text-white mb-8">Send us a message</h3>
                   <form className="space-y-6">
@@ -190,26 +235,110 @@ export const ContactPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Marquee CTA Section */}
-      <section className="py-24 md:py-32 bg-black relative overflow-hidden flex items-center justify-center border-t border-white/5">
-        <div className="absolute inset-0 flex items-center select-none pointer-events-none">
+      {/* Magnetic Marquee CTA Section */}
+      <section 
+        ref={footerSectionRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="py-32 md:py-48 bg-black relative overflow-hidden flex items-center justify-center border-t border-white/5 cursor-default"
+      >
+        {/* Marquee Background */}
+        <div className="absolute inset-0 flex flex-col justify-center gap-4 md:gap-8 select-none pointer-events-none opacity-20">
+            {/* Line 1 */}
             <div className="flex whitespace-nowrap animate-scroll-left">
                 {[1, 2, 3, 4].map((i) => (
-                    <span key={i} className="text-[12vw] md:text-[10vw] font-black uppercase text-[#1a1a1a] leading-none px-8">
-                        Let's Connect And Let's Contact
-                    </span>
+                    <React.Fragment key={i}>
+                        <span className="text-[10vw] md:text-[8vw] font-black uppercase text-white leading-none px-4">
+                            Let's Work Together
+                        </span>
+                        <span className="text-[10vw] md:text-[8vw] font-serif italic text-white leading-none px-4">
+                            Let's Work Together
+                        </span>
+                    </React.Fragment>
+                ))}
+            </div>
+            {/* Line 2 */}
+            <div className="flex whitespace-nowrap animate-scroll-right">
+                 {[1, 2, 3, 4].map((i) => (
+                    <React.Fragment key={i}>
+                        <span className="text-[10vw] md:text-[8vw] font-serif italic text-white leading-none px-4">
+                            Let's Work Together
+                        </span>
+                        <span className="text-[10vw] md:text-[8vw] font-black uppercase text-white leading-none px-4">
+                            Let's Work Together
+                        </span>
+                    </React.Fragment>
                 ))}
             </div>
         </div>
 
-        <div className="relative z-10">
+        {/* Magnetic Button */}
+        <div 
+             className="relative z-10 transition-transform duration-100 ease-out"
+             style={{ transform: `translate3d(${mousePos.x}px, ${mousePos.y}px, 0)` }}
+        >
              <a 
                href="mailto:hello@infobytes.io" 
-               className="flex items-center gap-3 bg-white text-black px-8 py-4 md:px-12 md:py-6 rounded-full text-lg md:text-xl font-bold hover:scale-110 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.2)] group"
+               className="flex flex-col items-center justify-center w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-r from-brand-orange to-brand-purple text-white shadow-[0_0_60px_rgba(255,107,74,0.4)] hover:shadow-[0_0_100px_rgba(185,109,243,0.6)] hover:scale-105 transition-all duration-300 group text-center p-8"
              >
-                Let's Contact 
-                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+                <span className="text-xl md:text-2xl font-bold uppercase tracking-wider mb-2">Get In Touch</span>
+                <span className="text-sm md:text-base opacity-80 group-hover:opacity-100 transition-opacity">hello@infobytes.io</span>
              </a>
+        </div>
+      </section>
+
+      {/* New FAQ Section with Accordion Design */}
+      <section className="py-24 bg-[#0a0a0a] border-t border-white/5 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-24">
+            
+            {/* Header / Left Side */}
+            <div className="lg:col-span-4">
+              <div className="sticky top-32">
+                 <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase mb-6 text-brand-orange">
+                   Support
+                 </div>
+                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Got questions? <br/><span className="text-gray-500">We've got answers.</span></h2>
+                 <p className="text-gray-400 text-lg mb-8 leading-relaxed">
+                   Everything you need to know about our process, pricing, and services. Can't find what you're looking for?
+                 </p>
+                 <a href="mailto:hello@infobytes.io" className="inline-flex items-center gap-2 text-white font-semibold hover:text-brand-orange transition-colors group">
+                    Email our team <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                 </a>
+              </div>
+            </div>
+
+            {/* Accordion / Right Side */}
+            <div className="lg:col-span-8">
+               <div className="divide-y divide-white/10">
+                 {faqs.map((faq, idx) => (
+                   <div key={idx} className="py-6 first:pt-0 last:pb-0">
+                     <button 
+                       onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                       className="w-full flex items-start justify-between text-left group py-2"
+                     >
+                       <span className={`text-xl font-medium transition-colors duration-300 pr-8 leading-tight ${openFaq === idx ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                         {faq.q}
+                       </span>
+                       <span className={`flex-shrink-0 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center transition-all duration-300 ${openFaq === idx ? 'bg-white text-black rotate-180' : 'bg-transparent text-white group-hover:bg-white/10'}`}>
+                          {openFaq === idx ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                       </span>
+                     </button>
+                     <div 
+                       className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${openFaq === idx ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'}`}
+                     >
+                        <div className="overflow-hidden">
+                           <p className="text-gray-400 leading-relaxed pr-12 pb-2">
+                             {faq.a}
+                           </p>
+                        </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+
+          </div>
         </div>
       </section>
     </>
