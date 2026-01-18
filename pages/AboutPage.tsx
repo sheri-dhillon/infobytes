@@ -2,6 +2,7 @@ import React from 'react';
 import { MousePointer2, Plus, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CultureScroll } from '../components/CultureScroll';
+import { WorkProcess } from '../components/WorkProcess';
 
 export const AboutPage: React.FC = () => {
   // Team grid configuration to match the masonry layout exactly
@@ -151,6 +152,9 @@ export const AboutPage: React.FC = () => {
     
     {/* Infinite Horizontal Scroll Section */}
     <CultureScroll />
+    
+    {/* Work Process Section */}
+    <WorkProcess />
     </>
   );
 };

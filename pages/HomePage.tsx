@@ -7,7 +7,6 @@ import { Testimonials } from '../components/Testimonials';
 import { Pricing } from '../components/Pricing';
 import { FAQ } from '../components/FAQ';
 import { TrustedBy } from '../components/TrustedBy';
-import { WorkProcess } from '../components/WorkProcess';
 
 export const HomePage: React.FC = () => {
   return (
@@ -16,7 +15,6 @@ export const HomePage: React.FC = () => {
       <About />
       <Services />
       <Momentum />
-      <WorkProcess />
       <TrustedBy />
       <Testimonials />
       <Pricing />
