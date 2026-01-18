@@ -1,6 +1,5 @@
 import React from 'react';
-import { PageHero } from '../components/PageHero';
-import { Star, Quote } from 'lucide-react';
+import { Star, Quote, ArrowDown } from 'lucide-react';
 
 const testimonials = [
   // Category: Email Marketing & Automation
@@ -166,12 +165,62 @@ export const TestimonialsPage: React.FC = () => {
 
   return (
     <>
-      <PageHero 
-        title="Client Reviews" 
-        subtitle="Don't just take our word for it. See how we've helped founders and brands scale their digital presence." 
-      />
+      {/* Custom Hero Section */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 bg-[#050505] overflow-hidden min-h-[70vh] flex flex-col justify-center">
+        {/* Background Ambience */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-brand-purple/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
+        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-brand-orange/5 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
+        
+        <div className="max-w-7xl mx-auto w-full relative z-10 text-center">
+            {/* Top Pill */}
+            <div className="inline-flex items-center gap-3 border border-white/10 rounded-full px-5 py-2 mb-10 bg-white/5 backdrop-blur-md animate-fade-in mx-auto hover:bg-white/10 transition-colors cursor-default shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                <div className="flex -space-x-3">
+                   {[1,2,3,4].map(i => (
+                     <div key={i} className="w-6 h-6 rounded-full border border-[#050505] overflow-hidden">
+                        <img src={`https://randomuser.me/api/portraits/thumb/men/${i+20}.jpg`} alt="User" className="w-full h-full object-cover" />
+                     </div>
+                   ))}
+                </div>
+                <span className="text-sm font-bold text-white tracking-wide">Trusted by 150+ Founders</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl lg:text-[6.5rem] font-bold text-white mb-8 tracking-tight leading-[1] animate-slide-up-fade">
+               Don't just take <br/>
+               our word for it.
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-16 leading-relaxed font-light animate-slide-up-fade" style={{ animationDelay: '150ms' }}>
+               We build digital products that scale. Here is what the founders, CTOs, and Product Leaders we work with have to say about the impact we've made.
+            </p>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto border-t border-white/10 pt-12 animate-slide-up-fade" style={{ animationDelay: '300ms' }}>
+                 <div className="flex flex-col items-center gap-2 group cursor-default">
+                    <div className="text-4xl md:text-5xl font-bold text-white tracking-tighter group-hover:scale-110 transition-transform duration-300">4.9<span className="text-gray-600 text-2xl">/5</span></div>
+                    <div className="text-xs font-bold text-brand-orange uppercase tracking-widest group-hover:text-white transition-colors">Average Rating</div>
+                 </div>
+                 <div className="flex flex-col items-center gap-2 group cursor-default">
+                    <div className="text-4xl md:text-5xl font-bold text-white tracking-tighter group-hover:scale-110 transition-transform duration-300">96<span className="text-gray-600 text-2xl">%</span></div>
+                    <div className="text-xs font-bold text-brand-purple uppercase tracking-widest group-hover:text-white transition-colors">Retention Rate</div>
+                 </div>
+                 <div className="flex flex-col items-center gap-2 group cursor-default">
+                    <div className="text-4xl md:text-5xl font-bold text-white tracking-tighter group-hover:scale-110 transition-transform duration-300">200<span className="text-gray-600 text-2xl">+</span></div>
+                    <div className="text-xs font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Projects Shipped</div>
+                 </div>
+                 <div className="flex flex-col items-center gap-2 group cursor-default">
+                    <div className="text-4xl md:text-5xl font-bold text-white tracking-tighter group-hover:scale-110 transition-transform duration-300">$50<span className="text-gray-600 text-2xl">M+</span></div>
+                    <div className="text-xs font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Client Revenue</div>
+                 </div>
+            </div>
+
+            {/* Scroll Indicator */}
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-8 md:bottom-12 animate-bounce opacity-50">
+                <ArrowDown className="w-6 h-6 text-gray-400" />
+            </div>
+        </div>
+      </section>
       
-      <div className="bg-black pb-32 overflow-hidden">
+      <div className="bg-black pb-32 overflow-hidden border-t border-white/5 pt-20 relative z-10">
         {services.map((service, index) => (
           <div key={service} className="mb-20">
             {/* Service Header */}
