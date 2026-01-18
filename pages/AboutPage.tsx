@@ -3,6 +3,7 @@ import { MousePointer2, Plus, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CultureScroll } from '../components/CultureScroll';
 import { WorkProcess } from '../components/WorkProcess';
+import { StatsScroll } from '../components/StatsScroll';
 
 export const AboutPage: React.FC = () => {
   // Team grid configuration to match the masonry layout exactly
@@ -155,6 +156,9 @@ export const AboutPage: React.FC = () => {
     
     {/* Work Process Section */}
     <WorkProcess />
+
+    {/* Stats Scroll Section */}
+    <StatsScroll />
     </>
   );
 };
