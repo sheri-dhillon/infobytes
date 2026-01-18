@@ -1,8 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Linkedin, Twitter, Instagram } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { Logo } from './Logo';
 
 export const Footer: React.FC = () => {
+  
+  const socialLinks = [
+    { name: 'Facebook', icon: 'fa-brands fa-facebook-f', href: '#' },
+    { name: 'Instagram', icon: 'fa-brands fa-instagram', href: '#' },
+    { name: 'LinkedIn', icon: 'fa-brands fa-linkedin-in', href: '#' },
+    { name: 'Twitter', icon: 'fa-brands fa-x-twitter', href: '#' },
+    { name: 'Behance', icon: 'fa-brands fa-behance', href: '#' },
+    { name: 'Dribbble', icon: 'fa-brands fa-dribbble', href: '#' },
+  ];
+
   return (
     <footer className="bg-[#050505] relative overflow-hidden font-sans pt-0 border-t border-white/5">
       {/* Background Ambience */}
@@ -91,25 +102,26 @@ export const Footer: React.FC = () => {
                  
                  <div className="col-span-2 mt-4">
                      <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-6 opacity-70">Follow Us</h4>
-                     <div className="flex gap-4">
-                        <a href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all hover:scale-110">
-                             <Linkedin className="w-5 h-5"/>
-                        </a>
-                        <a href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all hover:scale-110">
-                             <Twitter className="w-5 h-5"/>
-                        </a>
-                        <a href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all hover:scale-110">
-                             <Instagram className="w-5 h-5"/>
-                        </a>
+                     <div className="flex gap-4 flex-wrap">
+                        {socialLinks.map((social) => (
+                          <a 
+                            key={social.name}
+                            href={social.href} 
+                            className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all hover:scale-110 group"
+                            aria-label={`Follow us on ${social.name}`}
+                          >
+                               <i className={`${social.icon} text-lg`}></i>
+                          </a>
+                        ))}
                      </div>
                  </div>
             </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-24 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="mt-24 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-white">
             <Link to="/" className="block">
-               <img src="https://lh3.googleusercontent.com/pw/AP1GczMy7wJgP62gL5nbdl9EWG4LJVgV571bKzwNkFJKmtAEzqNcx8DdoDls6SupQYADTc_EiMvxq6Tog1tgxVPnG7QSTUypv22FlcWlvrUQJPZG0ZBZmPcR-U75oBt8FE9mUy92xiEA1a34sISllhRCOj0k=w1080-h324-s-no-gm" alt="INFOBYTES" className="h-10 w-auto object-contain" />
+               <Logo className="h-8 w-auto" />
             </Link>
             <div className="text-gray-600 text-sm font-mono">
                © 2026 InfoBytes Agency. All rights reserved.

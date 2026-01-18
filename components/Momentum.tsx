@@ -63,16 +63,16 @@ export const Momentum: React.FC = () => {
              {/* Card Backdrop */}
              <div className="absolute inset-0 bg-white/5 blur-xl rounded-[40px] transform rotate-3 scale-95 opacity-50"></div>
              
-             <div className="bg-[#1a1a1a] border border-white/10 rounded-[30px] md:rounded-[40px] p-8 md:p-12 relative overflow-hidden shadow-2xl min-h-[500px] flex flex-col justify-between">
+             <div className="bg-[#1a1a1a] border border-white/10 rounded-[30px] md:rounded-[40px] p-8 md:p-10 relative overflow-hidden shadow-2xl flex flex-col justify-between">
                 {/* Noise Texture */}
                 <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")` }}></div>
 
                 <div className="relative z-10 flex flex-col h-full justify-end">
                    
                    {/* Chart Container */}
-                   <div className="relative mb-8 mt-12 px-2 md:px-4">
+                   <div className="relative mb-6 mt-6 px-2 md:px-4">
                        {/* Grid Area */}
-                       <div className="h-[320px] relative w-full">
+                       <div className="h-[260px] relative w-full">
                            {/* Grid Lines */}
                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
                                 <div className="w-full h-px bg-white border-t border-dashed border-white/50"></div>
@@ -89,7 +89,7 @@ export const Momentum: React.FC = () => {
                                      <div className={`text-2xl font-bold text-gray-500 mb-4 transition-all duration-700 delay-[1000ms] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>56%</div>
                                      <div 
                                         className="w-24 md:w-28 bg-white/10 rounded-t-sm relative transition-all duration-[2000ms] ease-out origin-bottom group-hover:bg-white/20" 
-                                        style={{ height: isVisible ? '80px' : '0px' }}
+                                        style={{ height: isVisible ? '65px' : '0px' }}
                                      ></div>
                                 </div>
 
@@ -98,7 +98,7 @@ export const Momentum: React.FC = () => {
                                      <div className={`text-6xl font-bold text-brand-orange mb-4 drop-shadow-[0_0_15px_rgba(255,107,74,0.6)] transition-all duration-700 delay-[1500ms] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>172%</div>
                                      <div 
                                         className="w-32 md:w-36 bg-gradient-to-t from-brand-orange to-brand-purple rounded-t-xl relative shadow-[0_0_40px_rgba(255,107,74,0.4)] transition-all duration-[2000ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-200 origin-bottom" 
-                                        style={{ height: isVisible ? '240px' : '0px' }}
+                                        style={{ height: isVisible ? '190px' : '0px' }}
                                      >
                                         <div className="absolute inset-0 bg-white/20 animate-pulse mix-blend-overlay"></div>
                                      </div>
@@ -119,7 +119,7 @@ export const Momentum: React.FC = () => {
                    </div>
 
                    {/* Footer Text */}
-                   <p className="text-sm md:text-base text-gray-400 leading-relaxed text-center border-t border-white/10 pt-6">
+                   <p className="text-sm text-gray-400 leading-relaxed text-center border-t border-white/10 pt-6">
                       Brands that integrate our full-cycle design and email automation systems see an average <span className="text-white font-bold">172% increase</span> in Customer Lifetime Value (CLV) within the first 90 days.
                    </p>
 
