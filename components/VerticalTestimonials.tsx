@@ -74,9 +74,6 @@ const TestimonialCard: React.FC<{ data: typeof column1[0] }> = ({ data }) => (
      <Quote className="absolute top-4 right-4 w-12 h-12 text-white/[0.03] group-hover:text-brand-purple/10 transition-colors rotate-180" />
      
      <div className="flex items-center gap-4 mb-4 relative z-10">
-        <div className="w-12 h-12 rounded-full p-0.5 bg-gradient-to-br from-white/10 to-transparent">
-           <img src={data.image} alt={data.name} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" />
-        </div>
         <div>
            <div className="text-white font-bold text-sm">{data.name}</div>
            <div className="text-xs text-gray-500">{data.role}</div>
