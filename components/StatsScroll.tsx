@@ -58,7 +58,7 @@ export const StatsScroll: React.FC = () => {
       id: 3, 
       value: "$1.35B", 
       label: "Startup funding raised", 
-      theme: "orange", 
+      theme: "purple", 
       x: 5, y: -5,
       mx: 5, my: -8
     },
@@ -82,11 +82,22 @@ export const StatsScroll: React.FC = () => {
       id: 6, 
       value: "25K+", 
       label: "Funds and syndicates", 
-      theme: "white", 
+      theme: "purple", 
       x: 20, y: 25,
       mx: 0, my: 32
     }
   ];
+
+  const getThemeClasses = (theme: string) => {
+    switch(theme) {
+      case 'orange':
+        return 'bg-brand-orange text-white';
+      case 'purple':
+        return 'bg-brand-purple text-white';
+      default:
+        return 'bg-white text-black';
+    }
+  };
 
   return (
     <section ref={containerRef} className="relative h-[250vh] bg-black">
@@ -124,9 +135,7 @@ export const StatsScroll: React.FC = () => {
                  return (
                    <div 
                      key={stat.id}
-                     className={`absolute transition-transform duration-75 ease-out shadow-2xl rounded-2xl p-6 md:p-8 w-[220px] md:w-[280px] flex flex-col justify-center pointer-events-auto
-                       ${stat.theme === 'orange' ? 'bg-[#ff5533] text-white' : 'bg-white text-black'}
-                     `}
+                     className={`absolute transition-transform duration-75 ease-out shadow-2xl rounded-2xl p-6 md:p-8 w-[220px] md:w-[280px] flex flex-col justify-center pointer-events-auto ${getThemeClasses(stat.theme)}`}
                      style={{
                        // Using translate3d centered on -50% -50% plus the offset
                        transform: `translate3d(calc(-50% + ${xPos}vw), calc(-50% + ${yPos}vh), 0) rotate(${rotation}deg) scale(${scale})`,
@@ -142,10 +151,9 @@ export const StatsScroll: React.FC = () => {
                         {stat.label}
                       </div>
                       
-                      {stat.theme === 'white' && (
+                      {stat.theme === 'white' ? (
                          <div className="w-8 h-1 bg-gray-200 mt-4 rounded-full"></div>
-                      )}
-                      {stat.theme === 'orange' && (
+                      ) : (
                          <div className="w-8 h-1 bg-white/30 mt-4 rounded-full"></div>
                       )}
                    </div>
