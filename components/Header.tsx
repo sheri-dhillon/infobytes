@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
           <div className={`md:hidden pointer-events-auto transition-opacity duration-300 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
                <img 
-                 src="/logo.png" 
+                 src="https://photos.app.goo.gl/uLyzYXTL2LSjEsSaA" 
                  alt="INFOBYTES AGENCY" 
                  className="h-8 w-auto object-contain"
                />
@@ -87,7 +87,7 @@ export const Header: React.FC = () => {
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
                <img 
-                 src="/logo.png" 
+                 src="https://lh3.googleusercontent.com/pw/AP1GczMy7wJgP62gL5nbdl9EWG4LJVgV571bKzwNkFJKmtAEzqNcx8DdoDls6SupQYADTc_EiMvxq6Tog1tgxVPnG7QSTUypv22FlcWlvrUQJPZG0ZBZmPcR-U75oBt8FE9mUy92xiEA1a34sISllhRCOj0k=w1080-h324-s-no-gm" 
                  alt="INFOBYTES AGENCY" 
                  className={`w-auto object-contain transition-all duration-500 ${isScrolled ? 'h-10' : 'h-14'}`}
                />

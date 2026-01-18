@@ -108,8 +108,8 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="mt-24 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <Link to="/" className="text-3xl font-black tracking-wider uppercase font-sans bg-gradient-to-r from-brand-orange to-brand-purple bg-clip-text text-transparent">
-               INFOBYTES
+            <Link to="/" className="block">
+               <img src="https://lh3.googleusercontent.com/pw/AP1GczMy7wJgP62gL5nbdl9EWG4LJVgV571bKzwNkFJKmtAEzqNcx8DdoDls6SupQYADTc_EiMvxq6Tog1tgxVPnG7QSTUypv22FlcWlvrUQJPZG0ZBZmPcR-U75oBt8FE9mUy92xiEA1a34sISllhRCOj0k=w1080-h324-s-no-gm" alt="INFOBYTES" className="h-10 w-auto object-contain" />
             </Link>
             <div className="text-gray-600 text-sm font-mono">
                © 2026 InfoBytes Agency. All rights reserved.
