@@ -76,32 +76,6 @@
         }
       }
     </script>
-    <style>
-      body {
-        background-color: #050505;
-        color: white;
-      }
-      .glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      .glow-text {
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      }
-      .gradient-border-bottom {
-        position: relative;
-      }
-      .gradient-border-bottom::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      }
-    </style>
   <script type="importmap">
 {
   "imports": {
@@ -111,7 +85,7 @@
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?deps=react@18.2.0",
     "lucide-react": "https://esm.sh/lucide-react@0.344.0?deps=react@18.2.0",
     "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@18.2.0,react-dom@18.2.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/"
   }
 }
 </script>
