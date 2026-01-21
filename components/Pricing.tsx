@@ -37,7 +37,7 @@ export const Pricing: React.FC = () => {
       price: "Custom Quote",
       customPrice: true,
       features: [
-        "Full-Funnel Digital Marketing & Retention",
+        "Full-Funnel Email Marketing & Retention",
         "Cross-Platform Development (iOS + Web + Backend)",
         "Dedicated Project Manager & Senior Architect",
         "Quarterly Brand Workshops & Competitor Audits",

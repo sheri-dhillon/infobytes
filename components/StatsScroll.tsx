@@ -20,6 +20,8 @@ export const StatsScroll: React.FC = () => {
       const viewportHeight = window.innerHeight;
       const elementHeight = rect.height;
       
+      // We want the animation to start when the container hits the top (sticky start)
+      // and end when it's scrolled fully (bottom of container hits bottom of viewport ideally, or stickiness ends)
       const scrollDist = elementHeight - viewportHeight;
       const scrolled = -rect.top;
       
@@ -32,7 +34,7 @@ export const StatsScroll: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll();
+    handleScroll(); // Initial check
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -105,15 +107,19 @@ export const StatsScroll: React.FC = () => {
         
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
+           <div className="absolute inset-0 bg-black z-0"></div>
            <img 
              src="https://lh3.googleusercontent.com/pw/AP1GczPwo75XMVyFtbTRnYjnMvUPaUbesHG38-EfOR8zHdR60uoLAYKsA7rKf8aHIfhJ1KX3KOSejhcuIKh-XB1_3Ik_mMcAZYLP0qaim_cvoLVHLR4cDYBQ0OBFVJQw0yhHTlP3Ni586XfErmh7aRxjei1H=w1584-h672-s-no-gm" 
              alt="Team background" 
-             className="w-full h-full object-cover opacity-60 scale-105"
-             style={{ transform: `scale(${1 + progress * 0.1})` }} 
+             className="w-full h-full object-cover opacity-60"
+             style={{ 
+               transform: `scale(${1 + progress * 0.1})`,
+               transition: 'transform 0.1s linear'
+             }} 
            />
            {/* Overlays for readability */}
-           <div className="absolute inset-0 bg-black/50 z-10"></div>
-           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black z-10 opacity-80"></div>
+           <div className="absolute inset-0 bg-black/60 z-10"></div>
+           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black z-10 opacity-90"></div>
         </div>
 
         {/* Stats Container */}
@@ -129,19 +135,22 @@ export const StatsScroll: React.FC = () => {
                  const yPos = targetY * progress;
                  
                  const rotation = (progress * (idx % 2 === 0 ? 5 : -5));
+                 // Start with a small scale (0.5) and grow to 1
                  const scale = 0.5 + (0.5 * progress);
-                 const opacity = Math.min(progress * 4, 1); // Fades in quickly
+                 // Fade in faster than the move
+                 const opacity = Math.min(progress * 3, 1); 
 
                  return (
                    <div 
                      key={stat.id}
                      className={`absolute transition-transform duration-75 ease-out shadow-2xl rounded-2xl p-6 md:p-8 w-[220px] md:w-[280px] flex flex-col justify-center pointer-events-auto ${getThemeClasses(stat.theme)}`}
                      style={{
-                       // Using translate3d centered on -50% -50% plus the offset
+                       // Center the element first (-50% -50%), then apply calculated offset in vw/vh
                        transform: `translate3d(calc(-50% + ${xPos}vw), calc(-50% + ${yPos}vh), 0) rotate(${rotation}deg) scale(${scale})`,
                        opacity: opacity,
                        zIndex: 10 + idx,
-                       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                       willChange: 'transform, opacity'
                      }}
                    >
                       <div className={`text-3xl md:text-5xl font-bold mb-2 tracking-tight ${stat.theme === 'white' ? 'text-black' : 'text-white'}`}>
@@ -165,7 +174,7 @@ export const StatsScroll: React.FC = () => {
         {/* Scroll Indicator */}
         <div 
           className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-opacity duration-500 pointer-events-none z-30"
-          style={{ opacity: 1 - progress * 3 }}
+          style={{ opacity: Math.max(0, 1 - progress * 4) }}
         >
            <div className="text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">Scroll to Reveal</div>
            <div className="w-[1px] h-12 md:h-16 bg-gradient-to-b from-white to-transparent animate-pulse"></div>

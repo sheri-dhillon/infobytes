@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 const services = [
   {
     id: "01",
-    title: "Digital Marketing",
+    title: "Email Marketing",
     description: "Data-driven strategies to boost visibility, engagement, and ROI across all channels.",
     pills: [
       { text: "SEO Ranking", top: "5%", left: "25%", rotate: "-6deg" },

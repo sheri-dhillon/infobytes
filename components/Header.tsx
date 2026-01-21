@@ -12,14 +12,24 @@ export const Header: React.FC = () => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden'; // Ensure lock on html as well for some browsers
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
   }, [isOpen]);
 
-  // Close menu on route change
+  // Close menu on route change and FORCE unlock scroll
   useEffect(() => {
     setIsOpen(false);
+    // Force unlock immediately on navigation to prevent race conditions
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
   }, [location]);
 
   // Handle scroll for background

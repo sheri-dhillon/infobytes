@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -18,6 +18,9 @@ const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // Ensure scroll is unlocked and at top
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
     window.scrollTo(0, 0);
   }, [pathname]);
 
@@ -27,10 +30,10 @@ const ScrollToTopOnNavigate = () => {
 function App() {
   return (
     <Router>
-      <div className="bg-brand-dark text-white min-h-screen font-sans selection:bg-purple-500/30 selection:text-white">
+      <div className="bg-brand-dark text-white min-h-screen font-sans selection:bg-purple-500/30 selection:text-white flex flex-col w-full">
         <ScrollToTopOnNavigate />
         <Header />
-        <main>
+        <main className="flex-grow w-full relative z-0 flex flex-col">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
