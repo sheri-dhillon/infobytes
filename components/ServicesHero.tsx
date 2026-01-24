@@ -21,7 +21,7 @@ const techStack = [
 
 export const ServicesHero: React.FC = () => {
   return (
-    <section className="relative min-h-[90vh] bg-black pt-32 pb-0 overflow-hidden flex flex-col justify-center">
+    <section className="relative min-h-[90vh] bg-black pt-52 md:pt-64 pb-0 overflow-hidden flex flex-col justify-center">
       {/* Dynamic Background */}
       <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-brand-purple/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen animate-pulse duration-[4000ms]"></div>
       <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-brand-orange/5 blur-[120px] rounded-full pointer-events-none mix-blend-screen"></div>

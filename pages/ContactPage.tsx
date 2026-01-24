@@ -53,7 +53,7 @@ export const ContactPage: React.FC = () => {
   return (
     <>
       {/* Custom Hero Section matching screenshot */}
-      <section className="pt-40 pb-20 md:pt-52 md:pb-32 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
+      <section className="pt-52 pb-20 md:pt-72 md:pb-32 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
           <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.1] tracking-tight mb-6 animate-slide-up-fade">
             We'd love to <br />
             hear from you.
