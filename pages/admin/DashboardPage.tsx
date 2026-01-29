@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 
 // Mock Data for Views
@@ -10,7 +10,7 @@ const MOCK_LEADS = [
   { id: 3, name: "Sarah Williams", email: "sarah@design.studio", interest: "UI/UX", status: "Closed", date: "Oct 22, 2024" },
 ];
 
-const MOCK_SERVICES = [
+const INITIAL_SERVICES = [
   { id: 1, title: "Web Development", price: "$5,000+", status: "Active" },
   { id: 2, title: "iOS App Development", price: "$12,000+", status: "Active" },
   { id: 3, title: "UI/UX Design", price: "$4,000+", status: "Active" },
@@ -32,13 +32,29 @@ const MOCK_PROJECTS = [
 export const DashboardPage: React.FC = () => {
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  
+  // State for Services Editing
+  const [services, setServices] = useState(INITIAL_SERVICES);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+
+  const handleEditService = (item: any) => {
+    setEditingItem(item);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveService = (updatedItem: any) => {
+    setServices(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
+    setIsEditModalOpen(false);
+    setEditingItem(null);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return <DashboardHome />;
       case 'services':
-        return <TableView title="Services" data={MOCK_SERVICES} columns={['Title', 'Price', 'Status']} />;
+        return <TableView title="Services" data={services} columns={['Title', 'Price', 'Status']} onEdit={handleEditService} />;
       case 'posts':
         return <TableView title="Blog Posts" data={MOCK_POSTS} columns={['Title', 'Category', 'Views', 'Status']} />;
       case 'casestudies':
@@ -134,6 +150,15 @@ export const DashboardPage: React.FC = () => {
             {renderContent()}
          </div>
       </main>
+
+      {/* Edit Service Modal */}
+      {isEditModalOpen && editingItem && (
+        <EditServiceModal 
+            item={editingItem} 
+            onClose={() => setIsEditModalOpen(false)} 
+            onSave={handleSaveService} 
+        />
+      )}
     </div>
   );
 };
@@ -210,7 +235,7 @@ const DashboardHome: React.FC = () => {
     );
 };
 
-const TableView: React.FC<{ title: string, data: any[], columns: string[] }> = ({ title, data, columns }) => {
+const TableView: React.FC<{ title: string, data: any[], columns: string[], onEdit?: (item: any) => void }> = ({ title, data, columns, onEdit }) => {
     return (
         <div className="animate-fade-in">
             <div className="flex justify-between items-center mb-6">
@@ -251,7 +276,10 @@ const TableView: React.FC<{ title: string, data: any[], columns: string[] }> = (
                                     ))}
                                     <td className="p-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors">
+                                            <button 
+                                                onClick={() => onEdit && onEdit(row)}
+                                                className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"
+                                            >
                                                 <Edit2 className="w-4 h-4" />
                                             </button>
                                             <button className="p-1.5 hover:bg-red-500/10 rounded-md text-gray-400 hover:text-red-400 transition-colors">
@@ -267,6 +295,74 @@ const TableView: React.FC<{ title: string, data: any[], columns: string[] }> = (
                 {data.length === 0 && (
                     <div className="p-8 text-center text-gray-500 text-sm">No records found.</div>
                 )}
+            </div>
+        </div>
+    );
+};
+
+// Edit Modal Component
+const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
+    const [formData, setFormData] = useState(item);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                </button>
+                <h3 className="text-xl font-bold text-white mb-6">Edit Service</h3>
+                
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Service Title</label>
+                        <input 
+                            name="title"
+                            value={formData.title} 
+                            onChange={handleChange}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Price</label>
+                        <input 
+                            name="price"
+                            value={formData.price} 
+                            onChange={handleChange}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Status</label>
+                        <div className="relative">
+                            <select 
+                                name="status"
+                                value={formData.status} 
+                                onChange={handleChange}
+                                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none appearance-none cursor-pointer transition-colors"
+                            >
+                                <option value="Active">Active</option>
+                                <option value="Draft">Draft</option>
+                                <option value="Archived">Archived</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        onClick={() => onSave(formData)}
+                        className="w-full bg-white text-black font-bold py-3.5 rounded-lg mt-4 hover:bg-gray-200 transition-colors"
+                    >
+                        Save Changes
+                    </button>
+                </div>
             </div>
         </div>
     );
