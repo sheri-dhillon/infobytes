@@ -1,7 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { User, Lock, Mail, Shield, Save, CheckCircle, AlertCircle, Loader2, Trash2, Edit2, Plus, UserPlus } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js'; // Import to create temp client
+import { User, Lock, Mail, Shield, Save, CheckCircle, AlertCircle, Loader2, Trash2, Edit2, Plus, UserPlus, Upload, X } from 'lucide-react';
+
+// Reuse upload helper
+const uploadImage = async (file: File) => {
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`; // Put in avatars folder
+
+        const { error: uploadError } = await supabase.storage
+            .from('media')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+            .from('media')
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+    }
+};
 
 export const SettingsPage: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -11,6 +36,7 @@ export const SettingsPage: React.FC = () => {
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false); // New state
   const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
 
   // --- Password State ---
@@ -22,6 +48,7 @@ export const SettingsPage: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [isLoadingTeam, setIsLoadingTeam] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null); // For role updates
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false); // Modal state
 
   useEffect(() => {
     if (profile) {
@@ -44,6 +71,20 @@ export const SettingsPage: React.FC = () => {
   };
 
   // --- Profile Actions ---
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.files || e.target.files.length === 0) return;
+      setIsUploadingAvatar(true);
+      setProfileMsg({ type: '', text: '' });
+      try {
+          const url = await uploadImage(e.target.files[0]);
+          setAvatarUrl(url);
+      } catch (error: any) {
+          setProfileMsg({ type: 'error', text: 'Failed to upload image: ' + error.message });
+      } finally {
+          setIsUploadingAvatar(false);
+      }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +119,7 @@ export const SettingsPage: React.FC = () => {
     setPassMsg({ type: '', text: '' });
 
     try {
-      // 1. Verify old password by signing in (Re-auth)
+      // 1. Verify old password by attempting to sign in (Verify credential)
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user?.email || '',
         password: passwords.old
@@ -93,12 +134,12 @@ export const SettingsPage: React.FC = () => {
 
       if (updateError) throw updateError;
 
-      setPassMsg({ type: 'success', text: 'Password changed. You will receive an email confirmation.' });
+      setPassMsg({ type: 'success', text: 'Password updated successfully.' });
       setPasswords({ old: '', new: '', confirm: '' });
     } catch (err: any) {
       setPassMsg({ type: 'error', text: err.message });
     } finally {
-      setIsChangingPass(false);
+      setIsChangingPass(false); // Ensure this runs to stop loader
     }
   };
 
@@ -156,24 +197,43 @@ export const SettingsPage: React.FC = () => {
 
              <form onSubmit={handleUpdateProfile} className="space-y-6">
                 <div className="flex items-center gap-6 mb-6">
-                   <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 overflow-hidden shrink-0">
-                      {avatarUrl ? (
+                   <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 overflow-hidden shrink-0 relative group">
+                      {isUploadingAvatar ? (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                              <Loader2 className="w-6 h-6 animate-spin text-white" />
+                          </div>
+                      ) : avatarUrl ? (
                         <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-500">
                            <User className="w-8 h-8" />
                         </div>
                       )}
+                      
+                      {/* Upload Overlay */}
+                      <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                          <Upload className="w-6 h-6 text-white" />
+                          <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                      </label>
                    </div>
+                   
                    <div className="flex-1">
-                      <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Avatar URL</label>
-                      <input 
-                        type="text" 
-                        value={avatarUrl}
-                        onChange={(e) => setAvatarUrl(e.target.value)}
-                        placeholder="https://..."
-                        className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:border-blue-500/50 focus:outline-none"
-                      />
+                      <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Profile Picture</label>
+                      <div className="flex items-center gap-3">
+                          <label className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white cursor-pointer hover:bg-white/10 transition-colors">
+                              Upload New
+                              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                          </label>
+                          {avatarUrl && (
+                              <button 
+                                type="button" 
+                                onClick={() => setAvatarUrl('')} 
+                                className="text-xs text-red-400 hover:text-red-300 underline"
+                              >
+                                  Remove
+                              </button>
+                          )}
+                      </div>
                    </div>
                 </div>
 
@@ -184,6 +244,7 @@ export const SettingsPage: React.FC = () => {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-blue-500/50 focus:outline-none"
+                      placeholder="Your Name"
                    />
                 </div>
 
@@ -205,7 +266,7 @@ export const SettingsPage: React.FC = () => {
                 )}
 
                 <button 
-                  disabled={isSavingProfile}
+                  disabled={isSavingProfile || isUploadingAvatar}
                   className="px-6 py-3 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors flex items-center gap-2 disabled:opacity-50"
                 >
                    {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -277,19 +338,28 @@ export const SettingsPage: React.FC = () => {
 
       {activeTab === 'team' && (
         <div>
-           <div className="bg-[#111] border border-brand-orange/20 rounded-xl p-6 mb-8 flex items-start gap-4">
-              <div className="bg-brand-orange/10 p-3 rounded-full text-brand-orange shrink-0">
-                 <AlertCircle className="w-6 h-6" />
-              </div>
-              <div>
-                 <h4 className="text-white font-bold mb-1">Manage Access</h4>
-                 <p className="text-gray-400 text-sm mb-2">To add a new member, ask them to Sign Up on the login page. Then, find them here and assign a role.</p>
-                 <ul className="text-xs text-gray-500 space-y-1 list-disc pl-4">
-                    <li><strong className="text-gray-300">Admin:</strong> Full access to everything. Can manage teams.</li>
-                    <li><strong className="text-gray-300">Manager:</strong> Read-only access to all data. Cannot delete or edit.</li>
-                    <li><strong className="text-gray-300">Blogger:</strong> Full access to Posts only. Cannot see Leads or Services.</li>
-                 </ul>
-              </div>
+           <div className="flex justify-between items-end mb-6">
+                <div className="bg-[#111] border border-brand-orange/20 rounded-xl p-6 flex items-start gap-4 max-w-2xl">
+                    <div className="bg-brand-orange/10 p-3 rounded-full text-brand-orange shrink-0">
+                        <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h4 className="text-white font-bold mb-1">Manage Access</h4>
+                        <p className="text-gray-400 text-sm mb-2">Only Admins can add new members. Default role is Manager.</p>
+                        <ul className="text-xs text-gray-500 space-y-1 list-disc pl-4">
+                            <li><strong className="text-gray-300">Admin:</strong> Full access + Team management.</li>
+                            <li><strong className="text-gray-300">Manager:</strong> Read-only access.</li>
+                            <li><strong className="text-gray-300">Blogger:</strong> Full access to Posts only.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <button 
+                    onClick={() => setIsAddMemberOpen(true)}
+                    className="bg-white text-black px-4 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-lg"
+                >
+                    <UserPlus className="w-4 h-4" /> Add Member
+                </button>
            </div>
 
            <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden">
@@ -358,6 +428,134 @@ export const SettingsPage: React.FC = () => {
            </div>
         </div>
       )}
+
+      {/* Add Member Modal */}
+      {isAddMemberOpen && (
+          <AddMemberModal 
+            onClose={() => setIsAddMemberOpen(false)}
+            onSuccess={() => {
+                fetchTeam();
+                setIsAddMemberOpen(false);
+            }}
+          />
+      )}
     </div>
   );
+};
+
+// --- Helper Component: Add Member Modal ---
+const AddMemberModal: React.FC<{ onClose: () => void, onSuccess: () => void }> = ({ onClose, onSuccess }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        try {
+            // Trick: Create a temporary Supabase client instance that DOES NOT persist the session.
+            // This allows us to sign up a new user without logging out the current admin.
+            const tempClient = createClient(
+                'https://yzhiautmlscflysrqxtm.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6aGlhdXRtbHNjZmx5c3JxeHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDU2NzcsImV4cCI6MjA4NTI4MTY3N30.1ZL3Db_rUstFttlJ7PKYJYLz9w9CFn2Fk-2bYFpSZcU',
+                {
+                    auth: {
+                        persistSession: false, // CRITICAL: Don't overwrite local storage
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
+                    }
+                }
+            );
+
+            const { data, error: signUpError } = await tempClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        role: 'manager' // Default role
+                    }
+                }
+            });
+
+            if (signUpError) throw signUpError;
+
+            if (data.user) {
+                // User created. The trigger in DB will handle profile creation.
+                alert("Member added successfully! They can now log in.");
+                onSuccess();
+            }
+        } catch (err: any) {
+            console.error("Error adding member:", err);
+            setError(err.message || 'Failed to add member.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                </button>
+                <h3 className="text-xl font-bold text-white mb-6">Add New Member</h3>
+                
+                {error && (
+                    <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-sm mb-4">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
+                        <input 
+                            type="text" 
+                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Password</label>
+                        <input 
+                            type="password" 
+                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            minLength={6}
+                        />
+                    </div>
+                    
+                    <div className="pt-4">
+                        <button 
+                            type="submit" 
+                            disabled={isLoading}
+                            className="w-full bg-white text-black font-bold py-3.5 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                        >
+                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 };
