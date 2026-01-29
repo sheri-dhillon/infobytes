@@ -76,7 +76,7 @@ export const LoginPage: React.FC = () => {
       if (errorMessage.includes('Failed to fetch')) {
         errorMessage = 'Network error: Could not connect to Supabase. Your project might be paused or your internet is down.';
       } else if (errorMessage.includes('Invalid login credentials')) {
-        errorMessage = 'Invalid email or password. Please check your credentials or create a new account if you haven\'t already.';
+        errorMessage = 'Incorrect email or password. If you just signed up, please check your email for a confirmation link.';
       }
       
       setError(errorMessage);
