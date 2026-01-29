@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check, Loader2, Wifi, WifiOff, Activity, MessageSquare, Star, ArrowLeft, Globe, Type, AlignLeft, List, Link as LinkIcon, Image as ImageIcon, Bold, Italic, Tag } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check, Loader2, Wifi, WifiOff, Activity, MessageSquare, Star, ArrowLeft, Globe, Type, AlignLeft, List, Link as LinkIcon, Image as ImageIcon, Bold, Italic, Tag, FolderOpen, Upload, Copy } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 
 export const DashboardPage: React.FC = () => {
@@ -24,7 +24,7 @@ export const DashboardPage: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
   // Modal & Editor States
-  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [isServiceEditorOpen, setIsServiceEditorOpen] = useState(false);
   const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
   const [isPostEditorOpen, setIsPostEditorOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -85,7 +85,7 @@ export const DashboardPage: React.FC = () => {
 
   // Fetch on mount and tab change
   useEffect(() => {
-    if (activeTab !== 'home') {
+    if (activeTab !== 'home' && activeTab !== 'files') {
         fetchData();
     }
   }, [activeTab]);
@@ -94,22 +94,30 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     setViewMode('active');
     setIsPostEditorOpen(false); 
+    setIsServiceEditorOpen(false);
     setIsCategoryModalOpen(false);
   }, [activeTab]);
 
   // --- Actions ---
 
   const handleSaveService = async (serviceData: any) => {
-    const { id, created_at, ...payload } = serviceData;
-    
-    // Ensure pills is a valid JSON array
-    if (!payload.pills) {
-        payload.pills = [];
-    }
+    // 1. Sanitize Data (Only valid columns)
+    const payload = {
+        title: serviceData.title,
+        slug: serviceData.slug,
+        description: serviceData.description,
+        content: serviceData.content,
+        image: serviceData.image,
+        status: serviceData.status,
+        pills: serviceData.pills || [], // Ensure array
+        seo_title: serviceData.seo_title,
+        meta_description: serviceData.meta_description
+    };
     
     let error;
+    const id = serviceData.id;
     
-    if (editingItem && id) {
+    if (id) {
         const { error: updateError } = await supabase.from('services').update(payload).eq('id', id);
         error = updateError;
     } else {
@@ -119,15 +127,27 @@ export const DashboardPage: React.FC = () => {
 
     if (!error) {
         await fetchData();
-        setIsServiceModalOpen(false);
+        setIsServiceEditorOpen(false);
         setEditingItem(null);
     } else {
+        console.error(error);
         alert("Error saving service: " + error.message);
     }
   };
 
   const handleSaveTestimonial = async (itemData: any) => {
-    const { id, created_at, ...payload } = itemData;
+    const { id, created_at, ...rawPayload } = itemData;
+    // Sanitizing for testimonials isn't strictly necessary if itemData comes from modal state, but safe
+    const payload = {
+        name: rawPayload.name,
+        designation: rawPayload.designation,
+        business_name: rawPayload.business_name,
+        service_name: rawPayload.service_name,
+        review: rawPayload.review,
+        stars: rawPayload.stars,
+        status: rawPayload.status
+    };
+
     let error;
 
     if (editingItem && id) {
@@ -148,7 +168,19 @@ export const DashboardPage: React.FC = () => {
   };
 
   const handleSavePost = async (postData: any) => {
-      const { id, created_at, ...payload } = postData;
+      // 1. Sanitize Data
+      const payload = {
+          title: postData.title,
+          slug: postData.slug,
+          content: postData.content,
+          image: postData.image,
+          category: postData.category,
+          status: postData.status,
+          seo_title: postData.seo_title,
+          meta_description: postData.meta_description
+      };
+
+      const id = postData.id;
       let error;
 
       if (id) {
@@ -164,20 +196,21 @@ export const DashboardPage: React.FC = () => {
           setIsPostEditorOpen(false);
           setEditingItem(null);
       } else {
+          console.error(error);
           alert("Error saving post: " + error.message);
       }
   };
 
   const handleOpenAdd = () => {
     setEditingItem(null);
-    if (activeTab === 'services') setIsServiceModalOpen(true);
+    if (activeTab === 'services') setIsServiceEditorOpen(true);
     if (activeTab === 'testimonials') setIsTestimonialModalOpen(true);
     if (activeTab === 'posts') setIsPostEditorOpen(true);
   };
 
   const handleOpenEdit = (item: any) => {
     setEditingItem(item);
-    if (activeTab === 'services') setIsServiceModalOpen(true);
+    if (activeTab === 'services') setIsServiceEditorOpen(true);
     if (activeTab === 'testimonials') setIsTestimonialModalOpen(true);
     if (activeTab === 'posts') setIsPostEditorOpen(true);
   };
@@ -252,7 +285,7 @@ export const DashboardPage: React.FC = () => {
   };
 
   const renderContent = () => {
-    if (loading) {
+    if (loading && activeTab !== 'files') {
         return (
             <div className="flex h-64 w-full items-center justify-center">
                 <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
@@ -263,14 +296,27 @@ export const DashboardPage: React.FC = () => {
     switch (activeTab) {
       case 'home':
         return <DashboardHome />;
+      case 'files':
+        return <FileManager />;
       case 'services':
+        if (isServiceEditorOpen) {
+            return (
+                <ServiceEditor
+                    service={editingItem}
+                    onSave={handleSaveService}
+                    onCancel={() => { setIsServiceEditorOpen(false); setEditingItem(null); }}
+                />
+            );
+        }
         const servicesView = getFilteredData(services).map(s => ({
             id: s.id,
             title: s.title,
             pills: s.pills,
             status: s.status,
             description: s.description,
-            created_at: s.created_at
+            created_at: s.created_at,
+            // Pass full object for editing to retain other fields like content/seo
+            _original: s 
         }));
         return (
             <TableView 
@@ -278,7 +324,7 @@ export const DashboardPage: React.FC = () => {
                 activeTab={activeTab}
                 data={servicesView} 
                 columns={['Title', 'Pills', 'Status']} 
-                onEdit={handleOpenEdit}
+                onEdit={(viewItem) => handleOpenEdit(viewItem._original)}
                 onDelete={(item) => requestDelete(item, 'services')}
                 onAdd={handleOpenAdd}
                 onRestore={(item) => handleRestore(item, 'services')}
@@ -377,6 +423,12 @@ export const DashboardPage: React.FC = () => {
                 onClick={() => setActiveTab('home')}
             />
             <NavItem 
+                icon={<FolderOpen className="w-4 h-4" />} 
+                label="Files" 
+                active={activeTab === 'files'} 
+                onClick={() => setActiveTab('files')}
+            />
+            <NavItem 
                 icon={<Layers className="w-4 h-4" />} 
                 label="Services" 
                 active={activeTab === 'services'} 
@@ -472,13 +524,6 @@ export const DashboardPage: React.FC = () => {
       </main>
 
       {/* Modals */}
-      {isServiceModalOpen && (
-        <ServiceModal 
-            item={editingItem} 
-            onClose={() => setIsServiceModalOpen(false)} 
-            onSave={handleSaveService} 
-        />
-      )}
       
       {isTestimonialModalOpen && (
         <TestimonialModal
@@ -508,8 +553,10 @@ export const DashboardPage: React.FC = () => {
   );
 };
 
-// ... (NavItem, DashboardHome, TableView, ServiceModal, TestimonialModal, DeleteConfirmationModal - KEEP AS IS)
-// [Code intentionally omitted for brevity as these components are unchanged from previous versions]
+// ... (NavItem, DashboardHome, TableView, TestimonialModal, DeleteConfirmationModal, CategoryManagerModal components remain unchanged) ...
+// For brevity, I am not repeating them, but they MUST be included in the final file.
+// I will include them below to ensure the file is complete.
+
 const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
     <button 
         onClick={onClick}
@@ -780,116 +827,8 @@ const TableView: React.FC<TableViewProps> = ({
     );
 };
 
-const ServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
-    // ... same as before
-    const [formData, setFormData] = useState({ 
-        title: '', 
-        description: '',
-        status: 'Draft',
-        pills: ['', '', '', ''] 
-    });
-
-    useEffect(() => {
-        if (item) {
-            const existingPills = Array.isArray(item.pills) ? item.pills : [];
-            const paddedPills = [...existingPills, '', '', '', ''].slice(0, 4);
-            setFormData({ ...item, pills: paddedPills, description: item.description || '' });
-        } else {
-            setFormData({ title: '', description: '', status: 'Draft', pills: ['', '', '', ''] });
-        }
-    }, [item]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handlePillChange = (index: number, value: string) => {
-        const newPills = [...formData.pills];
-        newPills[index] = value;
-        setFormData({ ...formData, pills: newPills });
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                    <X className="w-5 h-5" />
-                </button>
-                <h3 className="text-xl font-bold text-white mb-6">{item ? 'Edit Service' : 'Add New Service'}</h3>
-                
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Service Title</label>
-                        <input 
-                            name="title"
-                            value={formData.title} 
-                            onChange={handleChange}
-                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
-                            placeholder="e.g. Web Development"
-                        />
-                    </div>
-                     <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Description</label>
-                        <textarea 
-                            name="description"
-                            value={formData.description} 
-                            onChange={handleChange}
-                            rows={4}
-                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors resize-none"
-                            placeholder="Brief description of the service..."
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Hover Pills (4 Items)</label>
-                        <div className="grid grid-cols-2 gap-3">
-                            {formData.pills.map((pill, idx) => (
-                                <div key={idx}>
-                                    <input 
-                                        value={pill}
-                                        onChange={(e) => handlePillChange(idx, e.target.value)}
-                                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-brand-orange/50 focus:outline-none transition-colors"
-                                        placeholder={`Pill #${idx + 1}`}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Status</label>
-                        <div className="relative">
-                            <select 
-                                name="status"
-                                value={formData.status} 
-                                onChange={handleChange}
-                                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none appearance-none cursor-pointer transition-colors"
-                            >
-                                <option value="Active">Active</option>
-                                <option value="Draft">Draft</option>
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button 
-                        onClick={() => {
-                            const cleanPills = formData.pills.filter(p => p.trim() !== '');
-                            onSave({ ...formData, pills: cleanPills });
-                        }}
-                        className="w-full bg-white text-black font-bold py-3.5 rounded-lg mt-4 hover:bg-gray-200 transition-colors"
-                    >
-                        {item ? 'Save Changes' : 'Create Service'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const TestimonialModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
+    // ... same as before
     const [formData, setFormData] = useState({ 
         name: '', 
         designation: '',
@@ -1102,6 +1041,7 @@ const DeleteConfirmationModal: React.FC<{ isOpen: boolean, onClose: () => void, 
 };
 
 const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => void, categories: any[], onUpdate: () => void }> = ({ isOpen, onClose, categories, onUpdate }) => {
+    // ... same as before
     const [newCategory, setNewCategory] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -1111,9 +1051,10 @@ const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => void, cat
         if (!newCategory.trim()) return;
         setIsSubmitting(true);
         
-        const slug = newCategory.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const trimmedName = newCategory.trim();
+        const slug = trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         
-        const { error } = await supabase.from('categories').insert([{ name: newCategory, slug }]);
+        const { error } = await supabase.from('categories').insert([{ name: trimmedName, slug }]);
         
         if (!error) {
             setNewCategory('');
@@ -1125,24 +1066,38 @@ const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => void, cat
     };
 
     const handleDelete = async (category: any) => {
-        // 1. Check if used in posts
-        const { count } = await supabase
-            .from('posts')
-            .select('id', { count: 'exact', head: true })
-            .eq('category', category.name);
+        try {
+            // 1. Check if used in posts
+            const { count, error: countError } = await supabase
+                .from('posts')
+                .select('id', { count: 'exact', head: true })
+                .eq('category', category.name);
 
-        if (count && count > 0) {
-            alert(`Cannot delete category "${category.name}" because it is used in ${count} blog post(s). Please reassign or delete those posts first.`);
-            return;
-        }
+            if (countError) {
+                console.error("Error checking post usage:", countError);
+                alert("Could not verify if category is in use. Please check console for errors.");
+                return;
+            }
 
-        if (!window.confirm(`Are you sure you want to delete "${category.name}"?`)) return;
-        
-        const { error } = await supabase.from('categories').delete().eq('id', category.id);
-        if (!error) {
+            if (count !== null && count > 0) {
+                alert(`Cannot delete category "${category.name}" because it is used in ${count} blog post(s).\n\nPlease reassign or delete those posts first.`);
+                return;
+            }
+
+            if (!window.confirm(`Are you sure you want to delete the category "${category.name}"? This action cannot be undone.`)) return;
+            
+            const { error: deleteError } = await supabase.from('categories').delete().eq('id', category.id);
+            
+            if (deleteError) {
+                throw deleteError;
+            }
+            
+            // Success
             onUpdate();
-        } else {
-            alert('Error deleting category: ' + error.message);
+            
+        } catch (error: any) {
+            console.error("Delete failed:", error);
+            alert('Error deleting category: ' + (error.message || 'Unknown error'));
         }
     };
 
@@ -1180,6 +1135,7 @@ const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => void, cat
                             <div key={cat.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5 group">
                                 <span className="text-gray-300 font-medium">{cat.name}</span>
                                 <button 
+                                    type="button"
                                     onClick={() => handleDelete(cat)}
                                     className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                                 >
@@ -1194,7 +1150,448 @@ const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => void, cat
     );
 };
 
-// --- NEW POST EDITOR COMPONENTS ---
+// --- FILE MANAGER & UPLOADER COMPONENTS ---
+
+const uploadImage = async (file: File) => {
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('media')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+            .from('media')
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+    }
+};
+
+const FileManager: React.FC = () => {
+    const [files, setFiles] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
+    const fetchFiles = async () => {
+        setLoading(true);
+        const { data, error } = await supabase.storage.from('media').list('', {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'created_at', order: 'desc' },
+        });
+
+        if (data) {
+            setFiles(data);
+        } else {
+            console.error(error);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchFiles();
+    }, []);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        setUploading(true);
+        try {
+            await uploadImage(e.target.files[0]);
+            await fetchFiles();
+        } catch (error: any) {
+            alert(`Upload failed: ${error.message || 'Unknown error'}`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const copyToClipboard = (name: string) => {
+        const { data } = supabase.storage.from('media').getPublicUrl(name);
+        navigator.clipboard.writeText(data.publicUrl);
+        alert("URL Copied to clipboard!");
+    };
+
+    return (
+        <div className="animate-fade-in">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white">Media Library</h2>
+                <div className="relative">
+                    <input 
+                        type="file" 
+                        id="file-upload" 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                    />
+                    <label 
+                        htmlFor="file-upload"
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-black font-bold cursor-pointer hover:bg-gray-200 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                        {uploading ? 'Uploading...' : 'Upload Image'}
+                    </label>
+                </div>
+            </div>
+
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 min-h-[400px]">
+                {loading ? (
+                    <div className="flex justify-center items-center h-40">
+                        <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
+                    </div>
+                ) : files.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                        <ImageIcon className="w-12 h-12 mb-4 opacity-50" />
+                        <p>No files uploaded yet.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {files.map((file) => {
+                            const { data } = supabase.storage.from('media').getPublicUrl(file.name);
+                            return (
+                                <div key={file.id} className="group relative aspect-square bg-black border border-white/10 rounded-xl overflow-hidden">
+                                    <img 
+                                        src={data.publicUrl} 
+                                        alt={file.name} 
+                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                    />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button 
+                                            onClick={() => copyToClipboard(file.name)}
+                                            className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                                            title="Copy URL"
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                        </button>
+                                        <button 
+                                            onClick={async () => {
+                                                if(confirm('Delete file?')) {
+                                                    await supabase.storage.from('media').remove([file.name]);
+                                                    fetchFiles();
+                                                }
+                                            }}
+                                            className="p-2 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div className="absolute bottom-0 inset-x-0 bg-black/80 p-2 text-xs text-gray-300 truncate">
+                                        {file.name}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const ImageUploader: React.FC<{ value: string, onChange: (url: string) => void }> = ({ value, onChange }) => {
+    const [uploading, setUploading] = useState(false);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        setUploading(true);
+        try {
+            const url = await uploadImage(e.target.files[0]);
+            onChange(url);
+        } catch (error: any) {
+            alert(`Upload failed: ${error.message || 'Unknown error'}`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-white/5 transition-colors cursor-pointer group relative">
+                <input 
+                    type="file" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handleUpload}
+                    accept="image/*"
+                    disabled={uploading}
+                />
+                {uploading ? (
+                    <Loader2 className="w-8 h-8 text-brand-purple animate-spin mb-2" />
+                ) : (
+                    <ImageIcon className="w-8 h-8 text-gray-600 group-hover:text-white mb-2 transition-colors" />
+                )}
+                <span className="text-xs text-gray-500">{uploading ? 'Uploading...' : 'Click or Drag to Upload'}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600 uppercase font-bold">OR</span>
+                <input 
+                    className="flex-1 bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:border-brand-purple/50 focus:outline-none"
+                    placeholder="Paste image URL..."
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                />
+            </div>
+
+            {value && (
+                <div className="rounded-lg overflow-hidden border border-white/10 relative group">
+                    <img src={value} alt="Preview" className="w-full h-48 object-cover" />
+                    <button 
+                        onClick={() => onChange('')}
+                        className="absolute top-2 right-2 bg-black/80 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void; onCancel: () => void }> = ({ service, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+        title: '',
+        slug: '',
+        description: '', // Short description
+        content: '', // Full page content
+        seo_title: '',
+        meta_description: '',
+        status: 'Draft',
+        image: '', // Featured image/icon
+        pills: ['', '', '', ''] 
+    });
+
+    useEffect(() => {
+        if (service) {
+            const existingPills = Array.isArray(service.pills) ? service.pills : [];
+            const paddedPills = [...existingPills, '', '', '', ''].slice(0, 4);
+            
+            setFormData({
+                title: service.title || '',
+                slug: service.slug || '',
+                description: service.description || '',
+                content: service.content || '',
+                seo_title: service.seo_title || service.title || '',
+                meta_description: service.meta_description || '',
+                status: service.status || 'Draft',
+                image: service.image || '',
+                pills: paddedPills
+            });
+        } else {
+            setFormData({
+                title: '',
+                slug: '',
+                description: '',
+                content: '',
+                seo_title: '',
+                meta_description: '',
+                status: 'Draft',
+                image: '',
+                pills: ['', '', '', '']
+            });
+        }
+    }, [service]);
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const title = e.target.value;
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        setFormData(prev => ({
+            ...prev,
+            title,
+            slug: prev.slug && service ? prev.slug : slug, 
+            seo_title: prev.seo_title && service ? prev.seo_title : title 
+        }));
+    };
+
+    const handlePillChange = (index: number, value: string) => {
+        const newPills = [...formData.pills];
+        newPills[index] = value;
+        setFormData({ ...formData, pills: newPills });
+    };
+
+    return (
+        <div className="animate-fade-in w-full max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+                <button onClick={onCancel} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                    <ArrowLeft className="w-5 h-5" /> Back to Services
+                </button>
+                <div className="flex gap-4">
+                    <button onClick={onCancel} className="px-6 py-2.5 rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 transition-colors font-medium">
+                        Discard
+                    </button>
+                    <button 
+                        onClick={() => onSave({ ...service, ...formData, pills: formData.pills.filter(p => p.trim() !== '') })}
+                        className="px-6 py-2.5 rounded-lg bg-white text-black font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
+                    >
+                        <Check className="w-4 h-4" /> Save Service
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-8">
+                {/* Main Editor Column */}
+                <div className="lg:col-span-2 space-y-8">
+                    
+                    {/* Title & Slug */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 md:p-8">
+                        <div className="mb-6">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Service Title</label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter service title..." 
+                                className="w-full bg-transparent text-3xl md:text-4xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                                value={formData.title}
+                                onChange={handleTitleChange}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-lg border border-white/5">
+                            <Globe className="w-4 h-4 shrink-0" />
+                            <span>https://infobytes.io/services/</span>
+                            <input 
+                                type="text" 
+                                value={formData.slug}
+                                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                className="bg-transparent text-white focus:outline-none flex-1 font-mono text-xs md:text-sm"
+                                placeholder="service-url-slug"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Short Description */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 md:p-8">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Short Description (For Cards)</label>
+                        <textarea 
+                            rows={3}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors resize-none"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Brief summary of the service..."
+                        />
+                    </div>
+
+                    {/* Rich Text Content (Detailed Page) */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 min-h-[500px] flex flex-col">
+                        <div className="px-6 py-4 border-b border-white/10">
+                            <label className="text-xs font-bold text-gray-500 uppercase">Full Page Content</label>
+                        </div>
+                        <RichTextEditor 
+                            content={formData.content} 
+                            onChange={(html) => setFormData({ ...formData, content: html })} 
+                        />
+                    </div>
+
+                    {/* SEO Settings */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 md:p-8">
+                        <div className="flex items-center gap-2 mb-6 text-white font-bold text-lg">
+                            <Search className="w-5 h-5 text-brand-purple" />
+                            <h3>On-Page SEO</h3>
+                        </div>
+
+                        <div className="mb-8 p-4 bg-black rounded-xl border border-white/5">
+                            <div className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                                <Globe className="w-3 h-3" /> Preview
+                            </div>
+                            <div className="font-sans">
+                                <div className="text-[#9aa0a6] text-xs mb-1">infobytes.io › services › {formData.slug || 'service'}</div>
+                                <div className="text-[#8ab4f8] text-xl font-medium mb-1 truncate cursor-pointer hover:underline">
+                                    {formData.seo_title || formData.title || 'Service Title'}
+                                </div>
+                                <div className="text-[#bdc1c6] text-sm line-clamp-2">
+                                    {formData.meta_description || "Please provide a meta description to see how your page will look in search engine results."}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-xs font-bold uppercase text-gray-500">Meta Title</label>
+                                    <span className={`text-xs ${(formData.seo_title?.length || 0) > 60 ? 'text-red-400' : 'text-green-400'}`}>
+                                        {formData.seo_title?.length || 0} / 60
+                                    </span>
+                                </div>
+                                <input 
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                                    value={formData.seo_title}
+                                    onChange={(e) => setFormData({ ...formData, seo_title: e.target.value })}
+                                    placeholder="Enter meta title..."
+                                />
+                            </div>
+                            <div>
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-xs font-bold uppercase text-gray-500">Meta Description</label>
+                                    <span className={`text-xs ${(formData.meta_description?.length || 0) > 160 ? 'text-red-400' : 'text-green-400'}`}>
+                                        {formData.meta_description?.length || 0} / 160
+                                    </span>
+                                </div>
+                                <textarea 
+                                    rows={3}
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors resize-none"
+                                    value={formData.meta_description}
+                                    onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                                    placeholder="Enter meta description..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sidebar Options */}
+                <div className="space-y-6">
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6">
+                        <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Publishing</h4>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-2">Status</label>
+                                <select 
+                                    className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white focus:border-brand-purple/50 focus:outline-none"
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                >
+                                    <option value="Draft">Draft</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Archived">Archived</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6">
+                        <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Floating Pills</h4>
+                        <p className="text-xs text-gray-500 mb-4">Add up to 4 tags displayed on the service card.</p>
+                        <div className="space-y-3">
+                            {formData.pills.map((pill, idx) => (
+                                <div key={idx}>
+                                    <input 
+                                        value={pill}
+                                        onChange={(e) => handlePillChange(idx, e.target.value)}
+                                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-brand-orange/50 focus:outline-none transition-colors"
+                                        placeholder={`Pill #${idx + 1}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6">
+                        <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Featured Image</h4>
+                        <ImageUploader 
+                            value={formData.image} 
+                            onChange={(url) => setFormData({ ...formData, image: url })} 
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data: any) => void; onCancel: () => void }> = ({ post, categories, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -1382,21 +1779,10 @@ const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data: any) =
 
                     <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6">
                         <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Featured Image</h4>
-                        <div className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-white/5 transition-colors cursor-pointer group">
-                            <ImageIcon className="w-8 h-8 text-gray-600 group-hover:text-white mb-2 transition-colors" />
-                            <span className="text-xs text-gray-500">Paste Image URL</span>
-                        </div>
-                        <input 
-                            className="mt-4 w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:border-brand-purple/50 focus:outline-none"
-                            placeholder="https://..."
-                            value={formData.image}
-                            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                        <ImageUploader 
+                            value={formData.image} 
+                            onChange={(url) => setFormData({ ...formData, image: url })} 
                         />
-                        {formData.image && (
-                            <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
-                                <img src={formData.image} alt="Preview" className="w-full h-32 object-cover" />
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
@@ -1404,15 +1790,13 @@ const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data: any) =
     );
 };
 
-// Simple HTML Editor Component using contentEditable
+// ... RichTextEditor component ...
 const RichTextEditor: React.FC<{ content: string; onChange: (html: string) => void }> = ({ content, onChange }) => {
     const editorRef = useRef<HTMLDivElement>(null);
 
     // Sync initial content
     useEffect(() => {
         if (editorRef.current && content !== editorRef.current.innerHTML) {
-            // Only update if significantly different to avoid cursor jumping
-            // A simplified check. For production, use a library or better cursor mgmt.
             if (editorRef.current.innerHTML === '' || content === '') {
                 editorRef.current.innerHTML = content;
             }

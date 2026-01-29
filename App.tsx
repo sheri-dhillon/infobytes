@@ -10,6 +10,7 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { ServicesPage } from './pages/ServicesPage';
+import { ServiceDetailPage } from './pages/ServiceDetailPage';
 import { WorkPage } from './pages/WorkPage';
 import { ContactPage } from './pages/ContactPage';
 import { TestimonialsPage } from './pages/TestimonialsPage';
@@ -67,6 +68,7 @@ function App() {
           <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
           <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
           <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
+          <Route path="/services/:slug" element={<PublicLayout><ServiceDetailPage /></PublicLayout>} />
           <Route path="/work" element={<PublicLayout><WorkPage /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
           <Route path="/testimonials" element={<PublicLayout><TestimonialsPage /></PublicLayout>} />

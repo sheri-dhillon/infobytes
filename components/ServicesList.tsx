@@ -1,81 +1,85 @@
-import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, Monitor, Smartphone, PenTool, BarChart, Code2, Layout, Layers, Search, Mail, Cpu, Zap, Palette, Share2, Box, Fingerprint } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowUpRight, Monitor, Smartphone, PenTool, BarChart, Code2, Layout, Layers, Search, Mail, Cpu, Zap, Palette, Share2, Box, Fingerprint, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
-const services = [
+// Fallback static data in case DB is empty or loading fails initially
+const fallbackServices = [
   {
     id: "01",
     title: "UI/UX Design",
+    slug: "ui-ux-design",
     description: "Intuitive interfaces that drive engagement. We design user-centric systems for web and mobile that are strategically built to convert.",
-    tags: ["Website Design", "Product Design", "Wireframing"],
+    pills: ["Website Design", "Product Design", "Wireframing"],
+    // Default image if none provided
     image: "https://lh3.googleusercontent.com/pw/AP1GczPfhSAfQqZ1DrHsKDS-orBlGKSCsMymYAP_QnOMRtExlH5K2t99l5zrFPrJKVgRDBztXIElsKGagi3z4KePoLfDZsNY-SFHS6qdLmeo12jRdN-r119GAWOM0Z8bcIhMFoG00lYQRnYq-W3uaYBpG9ZF=w1367-h911-s-no-gm",
-    icons: [
-      { icon: PenTool, color: "text-purple-400" },
-      { icon: Layout, color: "text-pink-400" },
-      { icon: Layers, color: "text-blue-400" }
-    ],
-    gradient: "from-purple-500/10 to-blue-500/10",
-    accent: "text-purple-400"
-  },
-  {
-    id: "02",
-    title: "iOS App Development",
-    description: "Seamless mobile experiences. We build high-performance native iOS and cross-platform solutions that feel fluid and natural.",
-    tags: ["iOS Development", "React Native", "Flutter"],
-    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80",
-    icons: [
-      { icon: Smartphone, color: "text-orange-400" },
-      { icon: Fingerprint, color: "text-red-400" },
-      { icon: Cpu, color: "text-indigo-400" }
-    ],
-    gradient: "from-orange-500/10 to-red-500/10",
-    accent: "text-orange-400"
-  },
-  {
-    id: "03",
-    title: "Website Development",
-    description: "High-performance websites using modern frameworks. We build scalable digital products that capture attention and drive growth.",
-    tags: ["Frontend", "Backend", "Next.js"],
-    image: "https://lh3.googleusercontent.com/pw/AP1GczNzWgz2TUnEO9XVOBAvz3ARcUnJtrW0Ii1e8hyE3GXh2gacxdA3YqZJ3zj54WsMQRL9w3_eCKSYuSyaxh6kfSoAknrqHXoxq0IC5i3pfPSEbxJ1fhJQofkVhRmrqP-__Bze_W_EuvZET4U5Sdi1mN7x=w1000-h684-s-no-gm",
-    icons: [
-      { icon: Monitor, color: "text-emerald-400" },
-      { icon: Code2, color: "text-cyan-400" },
-      { icon: Zap, color: "text-yellow-400" }
-    ],
-    gradient: "from-emerald-500/10 to-cyan-500/10",
-    accent: "text-emerald-400"
-  },
-  {
-    id: "04",
-    title: "Branding",
-    description: "Building brands with depth and clarity. We create visual identities that connect, resonate, and stay memorable.",
-    tags: ["Logo Design", "Identity", "Motion"],
-    image: "https://lh3.googleusercontent.com/pw/AP1GczOB5TBJ3jM5ax2OA7KJv2ZwiuTYhg8hs7HtyG-Zrt4kRwsjaxAW7gMW57ZqzVp9kgJ37foAFTkPFk5QypnPUfLeA8Swh2YlJvkrczUWurwiDXEfbh1onCZD4dT3dx65qN0ZknDpigTEEFP7aWh21_Zh=w1000-h667-s-no-gm",
-    icons: [
-      { icon: Palette, color: "text-rose-400" },
-      { icon: Share2, color: "text-blue-400" },
-      { icon: Box, color: "text-violet-400" }
-    ],
-    gradient: "from-rose-500/10 to-blue-500/10",
-    accent: "text-rose-400"
-  },
-  {
-    id: "05",
-    title: "Email Marketing",
-    description: "Data-driven strategies to boost visibility. We turn traffic into loyal customers through targeted campaigns and automation.",
-    tags: ["Automation", "Retention", "Segmentation"],
-    image: "https://lh3.googleusercontent.com/pw/AP1GczO8deXXov5Q6U9MtOPwgmoidb0uNZ8GEsu0j5-R-lCFTjSd0DYQBsOab7A-gZ6sliPW--IE2eUDqfFjyzPHQ7e5Lt5OJrtQx9Q1LZIEjRtSL8ne9aVpZl8cgGiS6HOSWKPPk7-ME4z6k87--bRqABXz=w963-h911-s-no-gm",
-    icons: [
-      { icon: BarChart, color: "text-blue-400" },
-      { icon: Mail, color: "text-green-400" },
-      { icon: Search, color: "text-purple-400" }
-    ],
-    gradient: "from-blue-500/10 to-green-500/10",
-    accent: "text-blue-400"
   }
 ];
 
+// Helper to map DB services to UI style props (icons/gradients) based on index
+const getStyleProps = (index: number) => {
+    const styles = [
+        {
+            icons: [{ icon: PenTool, color: "text-purple-400" }, { icon: Layout, color: "text-pink-400" }, { icon: Layers, color: "text-blue-400" }],
+            accent: "text-purple-400",
+        },
+        {
+            icons: [{ icon: Smartphone, color: "text-orange-400" }, { icon: Fingerprint, color: "text-red-400" }, { icon: Cpu, color: "text-indigo-400" }],
+            accent: "text-orange-400",
+        },
+        {
+            icons: [{ icon: Monitor, color: "text-emerald-400" }, { icon: Code2, color: "text-cyan-400" }, { icon: Zap, color: "text-yellow-400" }],
+            accent: "text-emerald-400",
+        },
+        {
+            icons: [{ icon: Palette, color: "text-rose-400" }, { icon: Share2, color: "text-blue-400" }, { icon: Box, color: "text-violet-400" }],
+            accent: "text-rose-400",
+        },
+        {
+            icons: [{ icon: BarChart, color: "text-blue-400" }, { icon: Mail, color: "text-green-400" }, { icon: Search, color: "text-purple-400" }],
+            accent: "text-blue-400",
+        }
+    ];
+    return styles[index % styles.length];
+};
+
 export const ServicesList: React.FC = () => {
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('services')
+                .select('*')
+                .eq('status', 'Active')
+                .order('id', { ascending: true });
+
+            if (!error && data && data.length > 0) {
+                // Parse pills if they come as string
+                const formattedData = data.map((s: any, i: number) => ({
+                    ...s,
+                    id: `0${i + 1}`,
+                    pills: typeof s.pills === 'string' ? JSON.parse(s.pills) : (s.pills || []),
+                    // Merge with style props
+                    ...getStyleProps(i)
+                }));
+                setServices(formattedData);
+            } else {
+                // Use fallback formatted with styles
+                setServices(fallbackServices.map((s, i) => ({ ...s, ...getStyleProps(i) })));
+            }
+        } catch (err) {
+            console.error(err);
+             setServices(fallbackServices.map((s, i) => ({ ...s, ...getStyleProps(i) })));
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchServices();
+  }, []);
+
   return (
     <section className="bg-black relative overflow-hidden pb-40" id="services-detailed">
        {/* Background Grid */}
@@ -94,17 +98,23 @@ export const ServicesList: React.FC = () => {
              </p>
           </div>
 
-          <div className="flex flex-col gap-0">
-             {services.map((service, idx) => (
-                <StickyCard key={idx} index={idx} total={services.length} service={service} />
-             ))}
+          <div className="flex flex-col gap-0 min-h-[400px]">
+             {loading ? (
+                <div className="flex justify-center items-center py-20">
+                    <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
+                </div>
+             ) : (
+                 services.map((service, idx) => (
+                    <StickyCard key={idx} index={idx} total={services.length} service={service} />
+                 ))
+             )}
           </div>
        </div>
     </section>
   );
 };
 
-const StickyCard: React.FC<{ index: number; total: number; service: typeof services[0] }> = ({ index, total, service }) => {
+const StickyCard: React.FC<{ index: number; total: number; service: any }> = ({ index, total, service }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -174,9 +184,9 @@ const StickyCard: React.FC<{ index: number; total: number; service: typeof servi
                           <div className={`text-xs font-bold tracking-widest uppercase ${service.accent} bg-white/5 px-3 py-1 rounded-full border border-white/5`}>
                               {service.id} — Service
                           </div>
-                          {/* Icons */}
+                          {/* Icons - Styled based on merged props */}
                           <div className="flex -space-x-2">
-                              {service.icons.map((item, i) => (
+                              {service.icons && service.icons.map((item: any, i: number) => (
                                   <div key={i} className={`w-9 h-9 rounded-full bg-[#111] border border-white/10 flex items-center justify-center relative z-[${10-i}] shadow-lg`}>
                                       <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
                                   </div>
@@ -193,20 +203,22 @@ const StickyCard: React.FC<{ index: number; total: number; service: typeof servi
                       </p>
 
                       <div className="flex flex-wrap gap-2">
-                          {service.tags.map((tag, tIdx) => (
-                              <span key={tIdx} className="px-4 py-2 rounded-full border border-white/10 text-xs font-bold text-gray-400 bg-white/5 hover:bg-white/10 transition-colors">
-                                  {tag}
-                              </span>
+                          {Array.isArray(service.pills) && service.pills.map((tag: string, tIdx: number) => (
+                              tag && (
+                                <span key={tIdx} className="px-4 py-2 rounded-full border border-white/10 text-xs font-bold text-gray-400 bg-white/5 hover:bg-white/10 transition-colors">
+                                    {tag}
+                                </span>
+                              )
                           ))}
                       </div>
                   </div>
 
                   <div className="pt-2">
                       <Link 
-                        to="/contact" 
+                        to={service.slug ? `/services/${service.slug}` : '/contact'} 
                         className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-full font-bold text-sm tracking-wide transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,107,74,0.3)] hover:shadow-[0_0_30px_rgba(185,109,243,0.4)]"
                       >
-                          Start Project
+                          {service.slug ? 'View Details' : 'Start Project'}
                           <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-45">
                              <ArrowUpRight className="w-3 h-3 text-black" />
                           </div>
@@ -218,7 +230,7 @@ const StickyCard: React.FC<{ index: number; total: number; service: typeof servi
               <div className="flex-1 relative h-full overflow-hidden bg-[#0a0a0a]">
                   {/* Image */}
                   <img 
-                      src={service.image} 
+                      src={service.image || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80"} 
                       alt={service.title} 
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                   />
