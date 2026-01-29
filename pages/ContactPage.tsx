@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '../components/ui/Button';
-import { Mail, Phone, MapPin, ArrowRight, ChevronDown, Plus, Minus } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowRight, ChevronDown, Plus, Minus, Loader2, CheckCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const faqs = [
   {
@@ -30,9 +31,24 @@ const faqs = [
 ];
 
 export const ContactPage: React.FC = () => {
-  const [source, setSource] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   
+  // Form State
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    company_name: '',
+    mobile_number: '',
+    project_budget: '',
+    source: '',
+    source_other: '',
+    project_details: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
   // Magnetic button logic
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const footerSectionRef = useRef<HTMLElement>(null);
@@ -48,6 +64,54 @@ export const ContactPage: React.FC = () => {
 
   const handleMouseLeave = () => {
     setMousePos({ x: 0, y: 0 });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
+
+    try {
+        const finalSource = formData.source === 'Others' ? formData.source_other : formData.source;
+
+        const { error } = await supabase.from('leads').insert([{
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            company_name: formData.company_name,
+            mobile_number: formData.mobile_number,
+            project_budget: formData.project_budget,
+            source: finalSource,
+            project_details: formData.project_details,
+            status: 'New'
+        }]);
+
+        if (error) throw error;
+
+        setSubmitStatus('success');
+        setFormData({
+            first_name: '',
+            last_name: '',
+            email: '',
+            company_name: '',
+            mobile_number: '',
+            project_budget: '',
+            source: '',
+            source_other: '',
+            project_details: ''
+        });
+    } catch (err: any) {
+        console.error('Error submitting form:', err);
+        setSubmitStatus('error');
+        setErrorMessage(err.message || 'Something went wrong. Please try again.');
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   return (
@@ -146,88 +210,178 @@ export const ContactPage: React.FC = () => {
             <div className="lg:col-span-7">
                <div className="bg-[#111] p-8 md:p-12 rounded-[2.5rem] border border-white/10 sticky top-32">
                   <h3 className="text-2xl font-bold text-white mb-8">Send us a message</h3>
-                  <form className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400">First Name</label>
-                        <input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="John" />
+                  
+                  {submitStatus === 'success' ? (
+                      <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-8 text-center animate-fade-in">
+                          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
+                              <CheckCircle className="w-8 h-8" />
+                          </div>
+                          <h4 className="text-xl font-bold text-white mb-2">Message Sent!</h4>
+                          <p className="text-gray-400">Thank you for reaching out. We will get back to you shortly.</p>
+                          <button 
+                            onClick={() => setSubmitStatus('idle')}
+                            className="mt-6 text-brand-orange hover:text-white font-medium transition-colors"
+                          >
+                            Send another message
+                          </button>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400">Last Name</label>
-                        <input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="Doe" />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Email</label>
-                      <input type="email" className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="john@example.com" />
-                    </div>
+                  ) : (
+                      <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">First Name</label>
+                            <input 
+                                name="first_name"
+                                value={formData.first_name}
+                                onChange={handleInputChange}
+                                type="text" 
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                                placeholder="John" 
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Last Name</label>
+                            <input 
+                                name="last_name"
+                                value={formData.last_name}
+                                onChange={handleInputChange}
+                                type="text" 
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                                placeholder="Doe" 
+                                required
+                            />
+                        </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Email</label>
+                        <input 
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            type="email" 
+                            className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                            placeholder="john@example.com" 
+                            required
+                        />
+                        </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400">Company Name</label>
-                        <input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="Acme Inc." />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400">Mobile Number</label>
-                        <input type="tel" className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="+1 (555) 000-0000" />
-                      </div>
-                    </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Company Name</label>
+                            <input 
+                                name="company_name"
+                                value={formData.company_name}
+                                onChange={handleInputChange}
+                                type="text" 
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                                placeholder="Acme Inc." 
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Mobile Number</label>
+                            <input 
+                                name="mobile_number"
+                                value={formData.mobile_number}
+                                onChange={handleInputChange}
+                                type="tel" 
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                                placeholder="+1 (555) 000-0000" 
+                            />
+                        </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Project Budget</label>
-                      <div className="relative">
-                        <select className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors appearance-none cursor-pointer">
-                            <option value="" disabled selected>Select a range</option>
-                            <option value="less_1000">Less than $1,000</option>
-                            <option value="1000_2000">$1,000 - $2,000</option>
-                            <option value="2000_3000">$2,000 - $3,000</option>
-                            <option value="3000_plus">$3,000+</option>
-                            <option value="unknown">Don't know</option>
-                        </select>
-                        <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      </div>
-                    </div>
+                        <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Project Budget</label>
+                        <div className="relative">
+                            <select 
+                                name="project_budget"
+                                value={formData.project_budget}
+                                onChange={handleInputChange}
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors appearance-none cursor-pointer"
+                            >
+                                <option value="" disabled>Select a range</option>
+                                <option value="less_1000">Less than $1,000</option>
+                                <option value="1000_2000">$1,000 - $2,000</option>
+                                <option value="2000_3000">$2,000 - $3,000</option>
+                                <option value="3000_plus">$3,000+</option>
+                                <option value="unknown">Don't know</option>
+                            </select>
+                            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Where did you hear about us?</label>
-                      <div className="relative">
-                        <select 
-                            className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors appearance-none cursor-pointer"
-                            onChange={(e) => setSource(e.target.value)}
-                            value={source}
+                        <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Where did you hear about us?</label>
+                        <div className="relative">
+                            <select 
+                                name="source"
+                                value={formData.source}
+                                onChange={handleInputChange}
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors appearance-none cursor-pointer"
+                            >
+                                <option value="" disabled>Select an option</option>
+                                <option value="Google">Google</option>
+                                <option value="Linkedin">Linkedin</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="Dribbble">Dribbble</option>
+                                <option value="Behance.net">Behance.net</option>
+                                <option value="Referral">Friend's Referral</option>
+                                <option value="Email">Email</option>
+                                <option value="Others">Others</option>
+                            </select>
+                            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        </div>
+                        </div>
+                        
+                        {formData.source === 'Others' && (
+                        <div className="space-y-2 animate-fade-in">
+                            <label className="text-sm font-medium text-gray-400">Please specify</label>
+                            <input 
+                                name="source_other"
+                                value={formData.source_other}
+                                onChange={handleInputChange}
+                                type="text" 
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                                placeholder="e.g. Podcast, Event..." 
+                            />
+                        </div>
+                        )}
+
+                        <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Project Details</label>
+                        <textarea 
+                            name="project_details"
+                            value={formData.project_details}
+                            onChange={handleInputChange}
+                            rows={4} 
+                            className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" 
+                            placeholder="Tell us about your project goals, timeline, and requirements..."
+                        ></textarea>
+                        </div>
+
+                        {submitStatus === 'error' && (
+                            <p className="text-red-400 text-sm">{errorMessage}</p>
+                        )}
+
+                        <Button 
+                            disabled={isSubmitting}
+                            className="w-full justify-between group py-4 text-base disabled:opacity-50"
                         >
-                            <option value="" disabled>Select an option</option>
-                            <option value="Google">Google</option>
-                            <option value="Linkedin">Linkedin</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Dribbble">Dribbble</option>
-                            <option value="Behance.net">Behance.net</option>
-                            <option value="Referral">Friend's Referral</option>
-                            <option value="Email">Email</option>
-                            <option value="Others">Others</option>
-                        </select>
-                        <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      </div>
-                    </div>
-                    
-                    {source === 'Others' && (
-                      <div className="space-y-2 animate-fade-in">
-                        <label className="text-sm font-medium text-gray-400">Please specify</label>
-                        <input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="e.g. Podcast, Event..." />
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Project Details</label>
-                      <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors" placeholder="Tell us about your project goals, timeline, and requirements..."></textarea>
-                    </div>
-
-                    <Button className="w-full justify-between group py-4 text-base">
-                      Send Inquiry <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </form>
+                            {isSubmitting ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 className="w-4 h-4 animate-spin" /> Sending...
+                                </span>
+                            ) : (
+                                <>
+                                    Send Inquiry <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </Button>
+                    </form>
+                  )}
                </div>
             </div>
 
