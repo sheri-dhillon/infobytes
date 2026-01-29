@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check, Loader2, Wifi, WifiOff, Activity, MessageSquare, Star, ArrowLeft, Globe, Type, AlignLeft, List, Link as LinkIcon, Image as ImageIcon, Bold, Italic, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check, Loader2, Wifi, WifiOff, Activity, MessageSquare, Star, ArrowLeft, Globe, Type, AlignLeft, List, Link as LinkIcon, Image as ImageIcon, Bold, Italic, Tag } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 
 export const DashboardPage: React.FC = () => {
@@ -18,6 +18,7 @@ export const DashboardPage: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   // Connection State
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -26,6 +27,7 @@ export const DashboardPage: React.FC = () => {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
   const [isPostEditorOpen, setIsPostEditorOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; item: any | null; type: string }>({
@@ -46,8 +48,11 @@ export const DashboardPage: React.FC = () => {
         const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
         if (!error && data) setLeads(data);
       } else if (activeTab === 'posts') {
-        const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-        if (!error && data) setPosts(data);
+        const { data: postsData, error: postsError } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+        if (!postsError && postsData) setPosts(postsData);
+        
+        const { data: catsData, error: catsError } = await supabase.from('categories').select('*').order('name', { ascending: true });
+        if (!catsError && catsData) setCategories(catsData);
       } else if (activeTab === 'casestudies') {
         const { data, error } = await supabase.from('case_studies').select('*').order('id', { ascending: true });
         if (!error && data) setProjects(data);
@@ -88,7 +93,8 @@ export const DashboardPage: React.FC = () => {
   // Reset view mode when tab changes
   useEffect(() => {
     setViewMode('active');
-    setIsPostEditorOpen(false); // Close editor on tab change
+    setIsPostEditorOpen(false); 
+    setIsCategoryModalOpen(false);
   }, [activeTab]);
 
   // --- Actions ---
@@ -300,6 +306,7 @@ export const DashboardPage: React.FC = () => {
             return (
                 <PostEditor 
                     post={editingItem} 
+                    categories={categories}
                     onSave={handleSavePost} 
                     onCancel={() => { setIsPostEditorOpen(false); setEditingItem(null); }} 
                 />
@@ -315,6 +322,7 @@ export const DashboardPage: React.FC = () => {
                 onDelete={(item) => requestDelete(item, 'posts')}
                 onAdd={handleOpenAdd} 
                 onRestore={(item) => handleRestore(item, 'posts')}
+                onManageCategories={() => setIsCategoryModalOpen(true)}
                 viewMode={viewMode}
                 onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
             />
@@ -480,6 +488,15 @@ export const DashboardPage: React.FC = () => {
         />
       )}
 
+      {isCategoryModalOpen && (
+          <CategoryManagerModal 
+            isOpen={isCategoryModalOpen}
+            onClose={() => setIsCategoryModalOpen(false)}
+            categories={categories}
+            onUpdate={fetchData}
+          />
+      )}
+
       {deleteConfirmation.isOpen && (
           <DeleteConfirmationModal 
              isOpen={deleteConfirmation.isOpen}
@@ -491,9 +508,8 @@ export const DashboardPage: React.FC = () => {
   );
 };
 
-// --- Sub-Components ---
-
-// ... (NavItem, DashboardHome, TableView, ServiceModal, TestimonialModal, DeleteConfirmationModal remain unchanged)
+// ... (NavItem, DashboardHome, TableView, ServiceModal, TestimonialModal, DeleteConfirmationModal - KEEP AS IS)
+// [Code intentionally omitted for brevity as these components are unchanged from previous versions]
 const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
     <button 
         onClick={onClick}
@@ -510,7 +526,6 @@ const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean
 );
 
 const DashboardHome: React.FC = () => {
-    // ... same as before
     const stats = [
         { title: "Total Traffic", value: "45.2K", change: "+12%" },
         { title: "Active Projects", value: "24", change: "0%" },
@@ -574,13 +589,14 @@ interface TableViewProps {
     onDelete?: (item: any) => void;
     onAdd?: () => void;
     onRestore?: (item: any) => void;
+    onManageCategories?: () => void;
     viewMode: 'active' | 'archived';
     onToggleView: () => void;
     activeTab: string;
 }
 
 const TableView: React.FC<TableViewProps> = ({ 
-    title, data, columns, onEdit, onDelete, onAdd, onRestore, viewMode, onToggleView, activeTab
+    title, data, columns, onEdit, onDelete, onAdd, onRestore, onManageCategories, viewMode, onToggleView, activeTab
 }) => {
     const formatTabName = (tab: string) => {
         if (tab === 'casestudies') return 'Case Studies';
@@ -613,6 +629,15 @@ const TableView: React.FC<TableViewProps> = ({
                         <Archive className="w-4 h-4" /> 
                         {viewMode === 'archived' ? `Return to ${formatTabName(activeTab)}` : 'Archive'}
                     </button>
+
+                    {viewMode === 'active' && onManageCategories && (
+                        <button 
+                            onClick={onManageCategories}
+                            className="bg-transparent text-white border border-white/10 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-white/5 transition-colors"
+                        >
+                            <Tag className="w-4 h-4" /> Categories
+                        </button>
+                    )}
 
                     {viewMode === 'active' && onAdd && (
                         <button 
@@ -755,7 +780,6 @@ const TableView: React.FC<TableViewProps> = ({
     );
 };
 
-// ... (ServiceModal, TestimonialModal, DeleteConfirmationModal - KEEP AS IS)
 const ServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
     // ... same as before
     const [formData, setFormData] = useState({ 
@@ -1077,16 +1101,109 @@ const DeleteConfirmationModal: React.FC<{ isOpen: boolean, onClose: () => void, 
     );
 };
 
+const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => void, categories: any[], onUpdate: () => void }> = ({ isOpen, onClose, categories, onUpdate }) => {
+    const [newCategory, setNewCategory] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (!isOpen) return null;
+
+    const handleAdd = async () => {
+        if (!newCategory.trim()) return;
+        setIsSubmitting(true);
+        
+        const slug = newCategory.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        
+        const { error } = await supabase.from('categories').insert([{ name: newCategory, slug }]);
+        
+        if (!error) {
+            setNewCategory('');
+            onUpdate();
+        } else {
+            alert('Error adding category: ' + error.message);
+        }
+        setIsSubmitting(false);
+    };
+
+    const handleDelete = async (category: any) => {
+        // 1. Check if used in posts
+        const { count } = await supabase
+            .from('posts')
+            .select('id', { count: 'exact', head: true })
+            .eq('category', category.name);
+
+        if (count && count > 0) {
+            alert(`Cannot delete category "${category.name}" because it is used in ${count} blog post(s). Please reassign or delete those posts first.`);
+            return;
+        }
+
+        if (!window.confirm(`Are you sure you want to delete "${category.name}"?`)) return;
+        
+        const { error } = await supabase.from('categories').delete().eq('id', category.id);
+        if (!error) {
+            onUpdate();
+        } else {
+            alert('Error deleting category: ' + error.message);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative max-h-[80vh] flex flex-col">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                </button>
+                <h3 className="text-xl font-bold text-white mb-6">Manage Categories</h3>
+                
+                <div className="flex gap-2 mb-6">
+                    <input 
+                        type="text" 
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                        placeholder="New category name..."
+                        className="flex-1 bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                        onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                    />
+                    <button 
+                        onClick={handleAdd}
+                        disabled={isSubmitting}
+                        className="bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-gray-200 transition-colors disabled:opacity-50"
+                    >
+                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+                    {categories.length === 0 ? (
+                        <p className="text-gray-500 text-center text-sm py-4">No categories found.</p>
+                    ) : (
+                        categories.map((cat) => (
+                            <div key={cat.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5 group">
+                                <span className="text-gray-300 font-medium">{cat.name}</span>
+                                <button 
+                                    onClick={() => handleDelete(cat)}
+                                    className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- NEW POST EDITOR COMPONENTS ---
 
-const PostEditor: React.FC<{ post: any; onSave: (data: any) => void; onCancel: () => void }> = ({ post, onSave, onCancel }) => {
+const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data: any) => void; onCancel: () => void }> = ({ post, categories, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
         content: '',
         seo_title: '',
         meta_description: '',
-        category: 'Thought Leadership',
+        category: '',
         status: 'Draft',
         image: ''
     });
@@ -1099,12 +1216,14 @@ const PostEditor: React.FC<{ post: any; onSave: (data: any) => void; onCancel: (
                 content: post.content || '',
                 seo_title: post.seo_title || post.title || '',
                 meta_description: post.meta_description || '',
-                category: post.category || 'Thought Leadership',
+                category: post.category || (categories[0]?.name || ''),
                 status: post.status || 'Draft',
                 image: post.image || ''
             });
+        } else {
+             setFormData(prev => ({ ...prev, category: categories[0]?.name || '' }));
         }
-    }, [post]);
+    }, [post, categories]);
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const title = e.target.value;
@@ -1252,11 +1371,10 @@ const PostEditor: React.FC<{ post: any; onSave: (data: any) => void; onCancel: (
                                     value={formData.category}
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 >
-                                    <option value="Thought Leadership">Thought Leadership</option>
-                                    <option value="Growth">Growth</option>
-                                    <option value="Engineering">Engineering</option>
-                                    <option value="Design">Design</option>
-                                    <option value="Development">Development</option>
+                                    <option value="" disabled>Select Category</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -1324,4 +1442,32 @@ const RichTextEditor: React.FC<{ content: string; onChange: (html: string) => vo
                 <EditorBtn onClick={() => exec('formatBlock', 'H3')} icon={<span className="text-xs font-bold">H3</span>} title="Heading 3" />
                 <div className="w-px h-6 bg-white/10 mx-1"></div>
                 <EditorBtn onClick={() => exec('insertUnorderedList')} icon={<List className="w-4 h-4" />} title="List" />
-                <Editor
+                <EditorBtn onClick={() => {
+                    const url = prompt('Enter URL:');
+                    if (url) exec('createLink', url);
+                }} icon={<LinkIcon className="w-4 h-4" />} title="Link" />
+                <EditorBtn onClick={() => exec('justifyLeft')} icon={<AlignLeft className="w-4 h-4" />} title="Left Align" />
+                <div className="w-px h-6 bg-white/10 mx-1"></div>
+                <EditorBtn onClick={() => exec('removeFormat')} icon={<X className="w-4 h-4" />} title="Clear Format" />
+            </div>
+            <div 
+                ref={editorRef}
+                contentEditable 
+                onInput={handleInput}
+                className="flex-1 p-6 focus:outline-none text-gray-300 leading-relaxed prose prose-invert max-w-none overflow-y-auto min-h-[300px]"
+                style={{ minHeight: '300px' }}
+            />
+        </div>
+    );
+};
+
+const EditorBtn: React.FC<{ onClick: () => void; icon: React.ReactNode; title: string }> = ({ onClick, icon, title }) => (
+    <button 
+        onClick={(e) => { e.preventDefault(); onClick(); }}
+        className="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+        title={title}
+        type="button"
+    >
+        {icon}
+    </button>
+);
