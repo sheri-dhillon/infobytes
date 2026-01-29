@@ -1,37 +1,55 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: () => void;
+  user: User | null;
+  loading: boolean;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage on load to persist login across refreshes
-    const storedAuth = localStorage.getItem('isAdminAuthenticated');
-    if (storedAuth === 'true') {
-      setIsAuthenticated(true);
-    }
+    // 1. Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = () => {
-    localStorage.setItem('isAdminAuthenticated', 'true');
-    setIsAuthenticated(true);
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
   };
 
-  const logout = () => {
-    localStorage.removeItem('isAdminAuthenticated');
-    setIsAuthenticated(false);
+  const value = {
+    isAuthenticated: !!session,
+    user,
+    loading,
+    logout
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

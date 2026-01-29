@@ -1,34 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check, Loader2, Wifi, WifiOff, Activity, MessageSquare, Star, ArrowLeft, Globe, Type, AlignLeft, List, Link as LinkIcon, Image as ImageIcon, Bold, Italic, MoreHorizontal } from 'lucide-react';
 import { Logo } from '../../components/Logo';
-
-// --- Data Types & Initials ---
-
-const INITIAL_SERVICES = [
-  { id: 1, title: "Web Development", price: "$5,000+", status: "Active" },
-  { id: 2, title: "iOS App Development", price: "$12,000+", status: "Active" },
-  { id: 3, title: "UI/UX Design", price: "$4,000+", status: "Active" },
-  { id: 4, title: "SEO Optimization", price: "$1,500/mo", status: "Draft" },
-];
-
-const INITIAL_LEADS = [
-  { id: 1, name: "Alice Johnson", email: "alice@example.com", interest: "Web Dev", status: "New", date: "Oct 24, 2024" },
-  { id: 2, name: "Mark Smith", email: "mark@techcorp.com", interest: "App Dev", status: "Contacted", date: "Oct 23, 2024" },
-  { id: 3, name: "Sarah Williams", email: "sarah@design.studio", interest: "UI/UX", status: "Closed", date: "Oct 22, 2024" },
-];
-
-const INITIAL_POSTS = [
-  { id: 1, title: "The Future of AI in Design", category: "Thought Leadership", views: 1240, status: "Published" },
-  { id: 2, title: "Scaling Your SaaS Product", category: "Growth", views: 856, status: "Published" },
-  { id: 3, title: "React vs Vue: A Comparison", category: "Development", views: 2100, status: "Draft" },
-];
-
-const INITIAL_PROJECTS = [
-  { id: 1, title: "LuxeStay", client: "Luxury Rentals", category: "Web Dev", status: "Completed" },
-  { id: 2, title: "FinFlow", client: "FinTech Co", category: "App Dev", status: "In Progress" },
-  { id: 3, title: "Zenith UI", client: "Internal", category: "Product", status: "Live" },
-];
 
 export const DashboardPage: React.FC = () => {
   const { logout } = useAuth();
@@ -36,15 +10,23 @@ export const DashboardPage: React.FC = () => {
   // Navigation State
   const [activeTab, setActiveTab] = useState('home');
   const [viewMode, setViewMode] = useState<'active' | 'archived'>('active');
+  const [loading, setLoading] = useState(false);
 
   // Data State
-  const [services, setServices] = useState(INITIAL_SERVICES);
-  const [leads, setLeads] = useState(INITIAL_LEADS);
-  const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [projects, setProjects] = useState(INITIAL_PROJECTS);
+  const [services, setServices] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
-  // Modal States
+  // Connection State
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+
+  // Modal & Editor States
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
+  const [isPostEditorOpen, setIsPostEditorOpen] = useState(false);
+  
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; item: any | null; type: string }>({
     isOpen: false,
@@ -52,68 +34,204 @@ export const DashboardPage: React.FC = () => {
     type: ''
   });
 
+  // --- Fetch Data Logic ---
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === 'services') {
+        const { data, error } = await supabase.from('services').select('*').order('id', { ascending: true });
+        if (!error && data) setServices(data);
+      } else if (activeTab === 'leads') {
+        const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+        if (!error && data) setLeads(data);
+      } else if (activeTab === 'posts') {
+        const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+        if (!error && data) setPosts(data);
+      } else if (activeTab === 'casestudies') {
+        const { data, error } = await supabase.from('case_studies').select('*').order('id', { ascending: true });
+        if (!error && data) setProjects(data);
+      } else if (activeTab === 'testimonials') {
+        const { data, error } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false });
+        if (!error && data) setTestimonials(data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check Connection on Mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        // Lightweight check
+        const { error } = await supabase.from('services').select('count', { count: 'exact', head: true });
+        if (error && error.code !== 'PGRST116') throw error; 
+        setIsConnected(true);
+      } catch (err) {
+        console.error('Connection check failed:', err);
+        setIsConnected(false);
+      }
+    };
+    checkConnection();
+  }, []);
+
+  // Fetch on mount and tab change
+  useEffect(() => {
+    if (activeTab !== 'home') {
+        fetchData();
+    }
+  }, [activeTab]);
+
   // Reset view mode when tab changes
   useEffect(() => {
     setViewMode('active');
+    setIsPostEditorOpen(false); // Close editor on tab change
   }, [activeTab]);
 
   // --- Actions ---
 
-  const handleSaveService = (serviceData: any) => {
-    if (editingItem) {
-        // Update existing
-        setServices(prev => prev.map(item => item.id === serviceData.id ? serviceData : item));
-    } else {
-        // Create new
-        const newId = Math.max(...services.map(s => s.id), 0) + 1;
-        setServices(prev => [...prev, { ...serviceData, id: newId }]);
+  const handleSaveService = async (serviceData: any) => {
+    const { id, created_at, ...payload } = serviceData;
+    
+    // Ensure pills is a valid JSON array
+    if (!payload.pills) {
+        payload.pills = [];
     }
-    setIsServiceModalOpen(false);
+    
+    let error;
+    
+    if (editingItem && id) {
+        const { error: updateError } = await supabase.from('services').update(payload).eq('id', id);
+        error = updateError;
+    } else {
+        const { error: insertError } = await supabase.from('services').insert([payload]);
+        error = insertError;
+    }
+
+    if (!error) {
+        await fetchData();
+        setIsServiceModalOpen(false);
+        setEditingItem(null);
+    } else {
+        alert("Error saving service: " + error.message);
+    }
+  };
+
+  const handleSaveTestimonial = async (itemData: any) => {
+    const { id, created_at, ...payload } = itemData;
+    let error;
+
+    if (editingItem && id) {
+        const { error: updateError } = await supabase.from('testimonials').update(payload).eq('id', id);
+        error = updateError;
+    } else {
+        const { error: insertError } = await supabase.from('testimonials').insert([payload]);
+        error = insertError;
+    }
+
+    if (!error) {
+        await fetchData();
+        setIsTestimonialModalOpen(false);
+        setEditingItem(null);
+    } else {
+        alert("Error saving testimonial: " + error.message);
+    }
+  };
+
+  const handleSavePost = async (postData: any) => {
+      const { id, created_at, ...payload } = postData;
+      let error;
+
+      if (id) {
+          const { error: updateError } = await supabase.from('posts').update(payload).eq('id', id);
+          error = updateError;
+      } else {
+          const { error: insertError } = await supabase.from('posts').insert([payload]);
+          error = insertError;
+      }
+
+      if (!error) {
+          await fetchData();
+          setIsPostEditorOpen(false);
+          setEditingItem(null);
+      } else {
+          alert("Error saving post: " + error.message);
+      }
+  };
+
+  const handleOpenAdd = () => {
     setEditingItem(null);
+    if (activeTab === 'services') setIsServiceModalOpen(true);
+    if (activeTab === 'testimonials') setIsTestimonialModalOpen(true);
+    if (activeTab === 'posts') setIsPostEditorOpen(true);
   };
 
-  const handleOpenAddService = () => {
-    setEditingItem(null); // Ensure clean state for "Add"
-    setIsServiceModalOpen(true);
-  };
-
-  const handleOpenEditService = (item: any) => {
+  const handleOpenEdit = (item: any) => {
     setEditingItem(item);
-    setIsServiceModalOpen(true);
+    if (activeTab === 'services') setIsServiceModalOpen(true);
+    if (activeTab === 'testimonials') setIsTestimonialModalOpen(true);
+    if (activeTab === 'posts') setIsPostEditorOpen(true);
   };
 
   const requestDelete = (item: any, type: string) => {
     setDeleteConfirmation({ isOpen: true, item, type });
   };
 
-  const confirmDelete = () => {
+  const getTableName = (type: string) => {
+      switch(type) {
+          case 'services': return 'services';
+          case 'posts': return 'posts';
+          case 'casestudies': return 'case_studies';
+          case 'leads': return 'leads';
+          case 'testimonials': return 'testimonials';
+          default: return '';
+      }
+  };
+
+  const confirmDelete = async () => {
     const { item, type } = deleteConfirmation;
     if (!item) return;
 
-    const archiveItem = (dataList: any[], setList: Function) => {
-        setList(dataList.map(i => i.id === item.id ? { ...i, status: 'Archived' } : i));
-    };
-
-    switch (type) {
-        case 'services': archiveItem(services, setServices); break;
-        case 'posts': archiveItem(posts, setPosts); break;
-        case 'casestudies': archiveItem(projects, setProjects); break;
-        case 'leads': archiveItem(leads, setLeads); break;
+    const tableName = getTableName(type);
+    
+    if (tableName) {
+        const { error } = await supabase
+            .from(tableName)
+            .update({ status: 'Archived' })
+            .eq('id', item.id);
+        
+        if (!error) {
+            await fetchData();
+        } else {
+            console.error(error);
+        }
     }
 
     setDeleteConfirmation({ isOpen: false, item: null, type: '' });
   };
 
-  const handleRestore = (item: any, type: string) => {
-      const restoreItem = (dataList: any[], setList: Function, defaultStatus: string) => {
-          setList(dataList.map(i => i.id === item.id ? { ...i, status: defaultStatus } : i));
-      };
+  const handleRestore = async (item: any, type: string) => {
+      const tableName = getTableName(type);
+      let defaultStatus = 'Draft';
+      
+      if (type === 'leads') defaultStatus = 'New';
+      if (type === 'casestudies') defaultStatus = 'In Progress';
+      if (type === 'services') defaultStatus = 'Active';
+      if (type === 'testimonials') defaultStatus = 'Active';
+      if (type === 'posts') defaultStatus = 'Draft';
 
-      switch(type) {
-          case 'services': restoreItem(services, setServices, 'Draft'); break;
-          case 'posts': restoreItem(posts, setPosts, 'Draft'); break;
-          case 'casestudies': restoreItem(projects, setProjects, 'In Progress'); break;
-          case 'leads': restoreItem(leads, setLeads, 'New'); break;
+      if (tableName) {
+          const { error } = await supabase
+              .from(tableName)
+              .update({ status: defaultStatus })
+              .eq('id', item.id);
+          
+          if (!error) {
+              await fetchData();
+          }
       }
   };
 
@@ -128,32 +246,74 @@ export const DashboardPage: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (loading) {
+        return (
+            <div className="flex h-64 w-full items-center justify-center">
+                <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
+            </div>
+        );
+    }
+
     switch (activeTab) {
       case 'home':
         return <DashboardHome />;
       case 'services':
+        const servicesView = getFilteredData(services).map(s => ({
+            id: s.id,
+            title: s.title,
+            pills: s.pills,
+            status: s.status,
+            description: s.description,
+            created_at: s.created_at
+        }));
         return (
             <TableView 
                 title="Services" 
-                data={getFilteredData(services)} 
-                columns={['Title', 'Price', 'Status']} 
-                onEdit={handleOpenEditService}
+                activeTab={activeTab}
+                data={servicesView} 
+                columns={['Title', 'Pills', 'Status']} 
+                onEdit={handleOpenEdit}
                 onDelete={(item) => requestDelete(item, 'services')}
-                onAdd={handleOpenAddService}
+                onAdd={handleOpenAdd}
                 onRestore={(item) => handleRestore(item, 'services')}
                 viewMode={viewMode}
                 onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
             />
         );
+      case 'testimonials':
+        return (
+            <TableView 
+                title="Testimonials" 
+                activeTab={activeTab}
+                data={getFilteredData(testimonials)} 
+                columns={['Name', 'Business', 'Service', 'Rating', 'Status']} 
+                onEdit={handleOpenEdit}
+                onDelete={(item) => requestDelete(item, 'testimonials')}
+                onAdd={handleOpenAdd}
+                onRestore={(item) => handleRestore(item, 'testimonials')}
+                viewMode={viewMode}
+                onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
+            />
+        );
       case 'posts':
+        if (isPostEditorOpen) {
+            return (
+                <PostEditor 
+                    post={editingItem} 
+                    onSave={handleSavePost} 
+                    onCancel={() => { setIsPostEditorOpen(false); setEditingItem(null); }} 
+                />
+            );
+        }
         return (
             <TableView 
                 title="Blog Posts" 
+                activeTab={activeTab}
                 data={getFilteredData(posts)} 
                 columns={['Title', 'Category', 'Views', 'Status']} 
+                onEdit={handleOpenEdit}
                 onDelete={(item) => requestDelete(item, 'posts')}
-                // Add Post functionality can be added similarly later
-                onAdd={() => {}} 
+                onAdd={handleOpenAdd} 
                 onRestore={(item) => handleRestore(item, 'posts')}
                 viewMode={viewMode}
                 onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
@@ -163,8 +323,9 @@ export const DashboardPage: React.FC = () => {
         return (
             <TableView 
                 title="Case Studies" 
+                activeTab={activeTab}
                 data={getFilteredData(projects)} 
-                columns={['Project Title', 'Client', 'Category', 'Status']} 
+                columns={['Title', 'Client', 'Category', 'Status']} 
                 onDelete={(item) => requestDelete(item, 'casestudies')}
                 onAdd={() => {}}
                 onRestore={(item) => handleRestore(item, 'casestudies')}
@@ -176,6 +337,7 @@ export const DashboardPage: React.FC = () => {
         return (
             <TableView 
                 title="Leads & Inquiries" 
+                activeTab={activeTab}
                 data={getFilteredData(leads)} 
                 columns={['Name', 'Email', 'Interest', 'Status', 'Date']} 
                 onDelete={(item) => requestDelete(item, 'leads')}
@@ -213,6 +375,12 @@ export const DashboardPage: React.FC = () => {
                 onClick={() => setActiveTab('services')}
             />
             <NavItem 
+                icon={<MessageSquare className="w-4 h-4" />} 
+                label="Testimonials" 
+                active={activeTab === 'testimonials'} 
+                onClick={() => setActiveTab('testimonials')}
+            />
+            <NavItem 
                 icon={<FileText className="w-4 h-4" />} 
                 label="Posts" 
                 active={activeTab === 'posts'} 
@@ -235,7 +403,27 @@ export const DashboardPage: React.FC = () => {
             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" onClick={() => {}} />
          </nav>
 
-         <div className="p-4 border-t border-white/5">
+         <div className="p-4 border-t border-white/5 space-y-2">
+            {/* Connection Status Indicator */}
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all ${
+                isConnected === true
+                    ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                    : isConnected === false
+                    ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                    : 'bg-white/5 border-white/10 text-gray-400'
+            }`}>
+                {isConnected === true ? (
+                    <Wifi className="w-4 h-4" />
+                ) : isConnected === false ? (
+                    <WifiOff className="w-4 h-4" />
+                ) : (
+                    <Activity className="w-4 h-4 animate-spin" />
+                )}
+                <span className="text-xs font-bold uppercase tracking-wider">
+                    {isConnected === true ? 'System Online' : isConnected === false ? 'Offline' : 'Checking...'}
+                </span>
+            </div>
+
             <button 
                 onClick={logout}
                 className="flex items-center gap-3 px-4 py-3 w-full text-left text-gray-400 hover:text-red-400 hover:bg-red-400/5 rounded-lg transition-colors"
@@ -283,6 +471,14 @@ export const DashboardPage: React.FC = () => {
             onSave={handleSaveService} 
         />
       )}
+      
+      {isTestimonialModalOpen && (
+        <TestimonialModal
+            item={editingItem}
+            onClose={() => setIsTestimonialModalOpen(false)}
+            onSave={handleSaveTestimonial}
+        />
+      )}
 
       {deleteConfirmation.isOpen && (
           <DeleteConfirmationModal 
@@ -297,6 +493,7 @@ export const DashboardPage: React.FC = () => {
 
 // --- Sub-Components ---
 
+// ... (NavItem, DashboardHome, TableView, ServiceModal, TestimonialModal, DeleteConfirmationModal remain unchanged)
 const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
     <button 
         onClick={onClick}
@@ -313,6 +510,7 @@ const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean
 );
 
 const DashboardHome: React.FC = () => {
+    // ... same as before
     const stats = [
         { title: "Total Traffic", value: "45.2K", change: "+12%" },
         { title: "Active Projects", value: "24", change: "0%" },
@@ -378,11 +576,17 @@ interface TableViewProps {
     onRestore?: (item: any) => void;
     viewMode: 'active' | 'archived';
     onToggleView: () => void;
+    activeTab: string;
 }
 
 const TableView: React.FC<TableViewProps> = ({ 
-    title, data, columns, onEdit, onDelete, onAdd, onRestore, viewMode, onToggleView 
+    title, data, columns, onEdit, onDelete, onAdd, onRestore, viewMode, onToggleView, activeTab
 }) => {
+    const formatTabName = (tab: string) => {
+        if (tab === 'casestudies') return 'Case Studies';
+        return tab.charAt(0).toUpperCase() + tab.slice(1);
+    };
+
     return (
         <div className="animate-fade-in">
             <div className="flex justify-between items-center mb-6">
@@ -407,7 +611,7 @@ const TableView: React.FC<TableViewProps> = ({
                         }`}
                     >
                         <Archive className="w-4 h-4" /> 
-                        {viewMode === 'archived' ? 'Back to Active' : 'Archive'}
+                        {viewMode === 'archived' ? `Return to ${formatTabName(activeTab)}` : 'Archive'}
                     </button>
 
                     {viewMode === 'active' && onAdd && (
@@ -435,25 +639,71 @@ const TableView: React.FC<TableViewProps> = ({
                         <tbody className="divide-y divide-white/5">
                             {data.map((row, idx) => (
                                 <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
-                                    {Object.values(row).slice(1).map((val: any, vIdx) => (
-                                        <td key={vIdx} className="p-4 text-sm text-gray-300 font-medium">
-                                            {val === "Active" || val === "Published" || val === "Completed" || val === "New" ? (
-                                                <span className="px-2 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20">
-                                                    {val}
-                                                </span>
-                                            ) : val === "Draft" || val === "In Progress" || val === "Contacted" ? (
-                                                <span className="px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20">
-                                                    {val}
-                                                </span>
-                                            ) : val === "Archived" ? (
-                                                <span className="px-2 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/20">
-                                                    {val}
-                                                </span>
+                                    {/* Exclude ID, created_at, and description for table view, map specific fields */}
+                                    {columns.map((col, cIdx) => {
+                                        // Mapping columns to data fields logic
+                                        let content = null;
+                                        if (col === 'Title') content = row.title;
+                                        if (col === 'Name') content = row.name; // Testimonial Name
+                                        if (col === 'Pills') content = row.pills;
+                                        if (col === 'Business') content = row.business_name;
+                                        if (col === 'Service') content = row.service_name;
+                                        if (col === 'Rating') content = row.stars;
+                                        if (col === 'Status') content = row.status;
+                                        if (col === 'Category') content = row.category;
+                                        if (col === 'Client') content = row.client;
+                                        if (col === 'Views') content = row.views;
+                                        if (col === 'Email') content = row.email;
+                                        if (col === 'Interest') content = row.interest;
+                                        if (col === 'Date') content = new Date(row.created_at).toLocaleDateString();
+
+                                        return (
+                                            <React.Fragment key={cIdx}>
+                                            {Array.isArray(content) ? (
+                                                <td className="p-4">
+                                                    <div className="flex flex-wrap gap-2 max-w-xs">
+                                                        {content.length > 0 ? (
+                                                            content.map((tag: string, tIdx: number) => (
+                                                                <span key={tIdx} className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-gray-300 border border-white/5 whitespace-nowrap">
+                                                                    {tag}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span className="text-gray-600 text-xs italic">No pills</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            ) : col === 'Rating' ? (
+                                                <td className="p-4">
+                                                    <div className="flex gap-0.5">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} className={`w-3 h-3 ${i < Number(content) ? 'fill-brand-orange text-brand-orange' : 'text-gray-700'}`} />
+                                                        ))}
+                                                    </div>
+                                                </td>
                                             ) : (
-                                                val
+                                                <td className="p-4 text-sm text-gray-300 font-medium">
+                                                    {content === "Active" || content === "Published" || content === "Completed" || content === "New" ? (
+                                                        <span className="px-2 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20">
+                                                            {content}
+                                                        </span>
+                                                    ) : content === "Draft" || content === "In Progress" || content === "Contacted" ? (
+                                                        <span className="px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20">
+                                                            {content}
+                                                        </span>
+                                                    ) : content === "Archived" ? (
+                                                        <span className="px-2 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/20">
+                                                            {content}
+                                                        </span>
+                                                    ) : (
+                                                        content
+                                                    )}
+                                                </td>
                                             )}
-                                        </td>
-                                    ))}
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                    
                                     <td className="p-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {viewMode === 'active' ? (
@@ -505,18 +755,39 @@ const TableView: React.FC<TableViewProps> = ({
     );
 };
 
-// Modal Components
+// ... (ServiceModal, TestimonialModal, DeleteConfirmationModal - KEEP AS IS)
 const ServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
-    // If item is null, we are adding new, so default to empty
-    const [formData, setFormData] = useState(item || { title: '', price: '', status: 'Draft' });
+    // ... same as before
+    const [formData, setFormData] = useState({ 
+        title: '', 
+        description: '',
+        status: 'Draft',
+        pills: ['', '', '', ''] 
+    });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    useEffect(() => {
+        if (item) {
+            const existingPills = Array.isArray(item.pills) ? item.pills : [];
+            const paddedPills = [...existingPills, '', '', '', ''].slice(0, 4);
+            setFormData({ ...item, pills: paddedPills, description: item.description || '' });
+        } else {
+            setFormData({ title: '', description: '', status: 'Draft', pills: ['', '', '', ''] });
+        }
+    }, [item]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handlePillChange = (index: number, value: string) => {
+        const newPills = [...formData.pills];
+        newPills[index] = value;
+        setFormData({ ...formData, pills: newPills });
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative">
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
                     <X className="w-5 h-5" />
                 </button>
@@ -533,15 +804,31 @@ const ServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: an
                             placeholder="e.g. Web Development"
                         />
                     </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Price</label>
-                        <input 
-                            name="price"
-                            value={formData.price} 
+                     <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Description</label>
+                        <textarea 
+                            name="description"
+                            value={formData.description} 
                             onChange={handleChange}
-                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
-                            placeholder="e.g. $5,000+"
+                            rows={4}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors resize-none"
+                            placeholder="Brief description of the service..."
                         />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Hover Pills (4 Items)</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            {formData.pills.map((pill, idx) => (
+                                <div key={idx}>
+                                    <input 
+                                        value={pill}
+                                        onChange={(e) => handlePillChange(idx, e.target.value)}
+                                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-brand-orange/50 focus:outline-none transition-colors"
+                                        placeholder={`Pill #${idx + 1}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Status</label>
@@ -564,12 +851,193 @@ const ServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: an
                     </div>
                     
                     <button 
-                        onClick={() => onSave(formData)}
+                        onClick={() => {
+                            const cleanPills = formData.pills.filter(p => p.trim() !== '');
+                            onSave({ ...formData, pills: cleanPills });
+                        }}
                         className="w-full bg-white text-black font-bold py-3.5 rounded-lg mt-4 hover:bg-gray-200 transition-colors"
                     >
                         {item ? 'Save Changes' : 'Create Service'}
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+const TestimonialModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
+    const [formData, setFormData] = useState({ 
+        name: '', 
+        designation: '',
+        business_name: '',
+        service_name: '',
+        review: '',
+        stars: 5,
+        status: 'Active'
+    });
+
+    const [serviceList, setServiceList] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (item) {
+            setFormData({ ...item });
+        } else {
+            setFormData({ 
+                name: '', 
+                designation: '',
+                business_name: '',
+                service_name: '',
+                review: '',
+                stars: 5,
+                status: 'Active'
+            });
+        }
+    }, [item]);
+
+    // Fetch services specifically for the dropdown
+    useEffect(() => {
+        const getServices = async () => {
+            const { data } = await supabase.from('services').select('title, status').order('created_at', { ascending: false });
+            if (data) setServiceList(data);
+        };
+        getServices();
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const activeServices = serviceList.filter(s => s.status === 'Active');
+    const inactiveServices = serviceList.filter(s => s.status !== 'Active');
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                </button>
+                <h3 className="text-xl font-bold text-white mb-6">{item ? 'Edit Testimonial' : 'Add New Testimonial'}</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Client Name</label>
+                        <input 
+                            name="name"
+                            value={formData.name} 
+                            onChange={handleChange}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                            placeholder="John Doe"
+                        />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Designation</label>
+                        <input 
+                            name="designation"
+                            value={formData.designation} 
+                            onChange={handleChange}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                            placeholder="CEO, Founder"
+                        />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Business Name</label>
+                        <input 
+                            name="business_name"
+                            value={formData.business_name} 
+                            onChange={handleChange}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                            placeholder="Acme Corp"
+                        />
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Service Provided</label>
+                        <div className="relative">
+                            <select 
+                                name="service_name"
+                                value={formData.service_name} 
+                                onChange={handleChange}
+                                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none appearance-none cursor-pointer transition-colors"
+                            >
+                                <option value="" disabled>Select a Service</option>
+                                {activeServices.map((s, i) => (
+                                    <option key={`active-${i}`} value={s.title}>{s.title}</option>
+                                ))}
+                                {inactiveServices.length > 0 && (
+                                    <>
+                                         <option disabled>────────────────</option>
+                                         {inactiveServices.map((s, i) => (
+                                             <option key={`inactive-${i}`} value={s.title} disabled className="text-gray-500">
+                                                 {s.title} (Inactive)
+                                             </option>
+                                         ))}
+                                    </>
+                                )}
+                            </select>
+                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-span-2">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Review</label>
+                        <textarea 
+                            name="review"
+                            value={formData.review} 
+                            onChange={handleChange}
+                            rows={4}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors resize-none"
+                            placeholder="The client's feedback..."
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Star Rating</label>
+                        <div className="relative">
+                            <select 
+                                name="stars"
+                                value={formData.stars} 
+                                onChange={handleChange}
+                                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none appearance-none cursor-pointer transition-colors"
+                            >
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                <Star className="w-4 h-4 fill-current" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-span-1">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Status</label>
+                        <div className="relative">
+                            <select 
+                                name="status"
+                                value={formData.status} 
+                                onChange={handleChange}
+                                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none appearance-none cursor-pointer transition-colors"
+                            >
+                                <option value="Active">Active</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button 
+                    onClick={() => onSave(formData)}
+                    className="w-full bg-white text-black font-bold py-3.5 rounded-lg mt-6 hover:bg-gray-200 transition-colors"
+                >
+                    {item ? 'Save Changes' : 'Create Testimonial'}
+                </button>
             </div>
         </div>
     );
@@ -608,3 +1076,252 @@ const DeleteConfirmationModal: React.FC<{ isOpen: boolean, onClose: () => void, 
         </div>
     );
 };
+
+// --- NEW POST EDITOR COMPONENTS ---
+
+const PostEditor: React.FC<{ post: any; onSave: (data: any) => void; onCancel: () => void }> = ({ post, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+        title: '',
+        slug: '',
+        content: '',
+        seo_title: '',
+        meta_description: '',
+        category: 'Thought Leadership',
+        status: 'Draft',
+        image: ''
+    });
+
+    useEffect(() => {
+        if (post) {
+            setFormData({
+                title: post.title || '',
+                slug: post.slug || '',
+                content: post.content || '',
+                seo_title: post.seo_title || post.title || '',
+                meta_description: post.meta_description || '',
+                category: post.category || 'Thought Leadership',
+                status: post.status || 'Draft',
+                image: post.image || ''
+            });
+        }
+    }, [post]);
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const title = e.target.value;
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        setFormData(prev => ({
+            ...prev,
+            title,
+            slug: prev.slug && post ? prev.slug : slug, // Only auto-update slug if creating new or slug empty
+            seo_title: prev.seo_title && post ? prev.seo_title : title // Auto update SEO title if likely new
+        }));
+    };
+
+    return (
+        <div className="animate-fade-in w-full max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+                <button onClick={onCancel} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                    <ArrowLeft className="w-5 h-5" /> Back to Posts
+                </button>
+                <div className="flex gap-4">
+                    <button onClick={onCancel} className="px-6 py-2.5 rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 transition-colors font-medium">
+                        Discard
+                    </button>
+                    <button 
+                        onClick={() => onSave({ ...post, ...formData })}
+                        className="px-6 py-2.5 rounded-lg bg-white text-black font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
+                    >
+                        <Check className="w-4 h-4" /> Save Post
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-8">
+                {/* Main Editor Column */}
+                <div className="lg:col-span-2 space-y-8">
+                    
+                    {/* Title & Slug */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 md:p-8">
+                        <div className="mb-6">
+                            <input 
+                                type="text" 
+                                placeholder="Enter post title..." 
+                                className="w-full bg-transparent text-3xl md:text-4xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                                value={formData.title}
+                                onChange={handleTitleChange}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-lg border border-white/5">
+                            <Globe className="w-4 h-4 shrink-0" />
+                            <span>https://infobytes.io/blog/</span>
+                            <input 
+                                type="text" 
+                                value={formData.slug}
+                                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                className="bg-transparent text-white focus:outline-none flex-1 font-mono text-xs md:text-sm"
+                                placeholder="url-slug-goes-here"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Rich Text Content */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 min-h-[500px] flex flex-col">
+                        <RichTextEditor 
+                            content={formData.content} 
+                            onChange={(html) => setFormData({ ...formData, content: html })} 
+                        />
+                    </div>
+
+                    {/* SEO Settings */}
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 md:p-8">
+                        <div className="flex items-center gap-2 mb-6 text-white font-bold text-lg">
+                            <Search className="w-5 h-5 text-brand-purple" />
+                            <h3>Search Engine Optimization</h3>
+                        </div>
+
+                        <div className="mb-8 p-4 bg-black rounded-xl border border-white/5">
+                            <div className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                                <Globe className="w-3 h-3" /> Preview
+                            </div>
+                            <div className="font-sans">
+                                <div className="text-[#9aa0a6] text-xs mb-1">infobytes.io › blog › {formData.slug || 'post-url'}</div>
+                                <div className="text-[#8ab4f8] text-xl font-medium mb-1 truncate cursor-pointer hover:underline">
+                                    {formData.seo_title || formData.title || 'Post Title'}
+                                </div>
+                                <div className="text-[#bdc1c6] text-sm line-clamp-2">
+                                    {formData.meta_description || "Please provide a meta description to see how your post will look in search engine results."}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-xs font-bold uppercase text-gray-500">SEO Title</label>
+                                    <span className={`text-xs ${(formData.seo_title?.length || 0) > 60 ? 'text-red-400' : 'text-green-400'}`}>
+                                        {formData.seo_title?.length || 0} / 60
+                                    </span>
+                                </div>
+                                <input 
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                                    value={formData.seo_title}
+                                    onChange={(e) => setFormData({ ...formData, seo_title: e.target.value })}
+                                    placeholder="Enter meta title..."
+                                />
+                            </div>
+                            <div>
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-xs font-bold uppercase text-gray-500">Meta Description</label>
+                                    <span className={`text-xs ${(formData.meta_description?.length || 0) > 160 ? 'text-red-400' : 'text-green-400'}`}>
+                                        {formData.meta_description?.length || 0} / 160
+                                    </span>
+                                </div>
+                                <textarea 
+                                    rows={3}
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors resize-none"
+                                    value={formData.meta_description}
+                                    onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                                    placeholder="Enter meta description..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sidebar Options */}
+                <div className="space-y-6">
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6">
+                        <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Publishing</h4>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-2">Status</label>
+                                <select 
+                                    className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white focus:border-brand-purple/50 focus:outline-none"
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                >
+                                    <option value="Draft">Draft</option>
+                                    <option value="Published">Published</option>
+                                    <option value="Archived">Archived</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs text-gray-500 mb-2">Category</label>
+                                <select 
+                                    className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white focus:border-brand-purple/50 focus:outline-none"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                >
+                                    <option value="Thought Leadership">Thought Leadership</option>
+                                    <option value="Growth">Growth</option>
+                                    <option value="Engineering">Engineering</option>
+                                    <option value="Design">Design</option>
+                                    <option value="Development">Development</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6">
+                        <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Featured Image</h4>
+                        <div className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-white/5 transition-colors cursor-pointer group">
+                            <ImageIcon className="w-8 h-8 text-gray-600 group-hover:text-white mb-2 transition-colors" />
+                            <span className="text-xs text-gray-500">Paste Image URL</span>
+                        </div>
+                        <input 
+                            className="mt-4 w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:border-brand-purple/50 focus:outline-none"
+                            placeholder="https://..."
+                            value={formData.image}
+                            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                        />
+                        {formData.image && (
+                            <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
+                                <img src={formData.image} alt="Preview" className="w-full h-32 object-cover" />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Simple HTML Editor Component using contentEditable
+const RichTextEditor: React.FC<{ content: string; onChange: (html: string) => void }> = ({ content, onChange }) => {
+    const editorRef = useRef<HTMLDivElement>(null);
+
+    // Sync initial content
+    useEffect(() => {
+        if (editorRef.current && content !== editorRef.current.innerHTML) {
+            // Only update if significantly different to avoid cursor jumping
+            // A simplified check. For production, use a library or better cursor mgmt.
+            if (editorRef.current.innerHTML === '' || content === '') {
+                editorRef.current.innerHTML = content;
+            }
+        }
+    }, []);
+
+    const exec = (command: string, value: string | undefined = undefined) => {
+        document.execCommand(command, false, value);
+        if (editorRef.current) {
+            onChange(editorRef.current.innerHTML);
+        }
+    };
+
+    const handleInput = () => {
+        if (editorRef.current) {
+            onChange(editorRef.current.innerHTML);
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-full">
+            <div className="flex items-center gap-1 p-2 border-b border-white/10 bg-white/5 rounded-t-xl overflow-x-auto">
+                <EditorBtn onClick={() => exec('bold')} icon={<Bold className="w-4 h-4" />} title="Bold" />
+                <EditorBtn onClick={() => exec('italic')} icon={<Italic className="w-4 h-4" />} title="Italic" />
+                <div className="w-px h-6 bg-white/10 mx-1"></div>
+                <EditorBtn onClick={() => exec('formatBlock', 'H2')} icon={<Type className="w-4 h-4" />} title="Heading 2" />
+                <EditorBtn onClick={() => exec('formatBlock', 'H3')} icon={<span className="text-xs font-bold">H3</span>} title="Heading 3" />
+                <div className="w-px h-6 bg-white/10 mx-1"></div>
+                <EditorBtn onClick={() => exec('insertUnorderedList')} icon={<List className="w-4 h-4" />} title="List" />
+                <Editor
