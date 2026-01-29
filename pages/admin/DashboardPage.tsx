@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, Layers, Briefcase, Plus, Search, Trash2, Edit2, BarChart, X, Archive, RotateCcw, AlertTriangle, Check } from 'lucide-react';
 import { Logo } from '../../components/Logo';
 
-// Mock Data for Views
-const MOCK_LEADS = [
-  { id: 1, name: "Alice Johnson", email: "alice@example.com", interest: "Web Dev", status: "New", date: "Oct 24, 2024" },
-  { id: 2, name: "Mark Smith", email: "mark@techcorp.com", interest: "App Dev", status: "Contacted", date: "Oct 23, 2024" },
-  { id: 3, name: "Sarah Williams", email: "sarah@design.studio", interest: "UI/UX", status: "Closed", date: "Oct 22, 2024" },
-];
+// --- Data Types & Initials ---
 
 const INITIAL_SERVICES = [
   { id: 1, title: "Web Development", price: "$5,000+", status: "Active" },
@@ -17,13 +12,19 @@ const INITIAL_SERVICES = [
   { id: 4, title: "SEO Optimization", price: "$1,500/mo", status: "Draft" },
 ];
 
-const MOCK_POSTS = [
+const INITIAL_LEADS = [
+  { id: 1, name: "Alice Johnson", email: "alice@example.com", interest: "Web Dev", status: "New", date: "Oct 24, 2024" },
+  { id: 2, name: "Mark Smith", email: "mark@techcorp.com", interest: "App Dev", status: "Contacted", date: "Oct 23, 2024" },
+  { id: 3, name: "Sarah Williams", email: "sarah@design.studio", interest: "UI/UX", status: "Closed", date: "Oct 22, 2024" },
+];
+
+const INITIAL_POSTS = [
   { id: 1, title: "The Future of AI in Design", category: "Thought Leadership", views: 1240, status: "Published" },
   { id: 2, title: "Scaling Your SaaS Product", category: "Growth", views: 856, status: "Published" },
   { id: 3, title: "React vs Vue: A Comparison", category: "Development", views: 2100, status: "Draft" },
 ];
 
-const MOCK_PROJECTS = [
+const INITIAL_PROJECTS = [
   { id: 1, title: "LuxeStay", client: "Luxury Rentals", category: "Web Dev", status: "Completed" },
   { id: 2, title: "FinFlow", client: "FinTech Co", category: "App Dev", status: "In Progress" },
   { id: 3, title: "Zenith UI", client: "Internal", category: "Product", status: "Live" },
@@ -31,22 +32,99 @@ const MOCK_PROJECTS = [
 
 export const DashboardPage: React.FC = () => {
   const { logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
   
-  // State for Services Editing
-  const [services, setServices] = useState(INITIAL_SERVICES);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  // Navigation State
+  const [activeTab, setActiveTab] = useState('home');
+  const [viewMode, setViewMode] = useState<'active' | 'archived'>('active');
 
-  const handleEditService = (item: any) => {
-    setEditingItem(item);
-    setIsEditModalOpen(true);
+  // Data State
+  const [services, setServices] = useState(INITIAL_SERVICES);
+  const [leads, setLeads] = useState(INITIAL_LEADS);
+  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [projects, setProjects] = useState(INITIAL_PROJECTS);
+
+  // Modal States
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; item: any | null; type: string }>({
+    isOpen: false,
+    item: null,
+    type: ''
+  });
+
+  // Reset view mode when tab changes
+  useEffect(() => {
+    setViewMode('active');
+  }, [activeTab]);
+
+  // --- Actions ---
+
+  const handleSaveService = (serviceData: any) => {
+    if (editingItem) {
+        // Update existing
+        setServices(prev => prev.map(item => item.id === serviceData.id ? serviceData : item));
+    } else {
+        // Create new
+        const newId = Math.max(...services.map(s => s.id), 0) + 1;
+        setServices(prev => [...prev, { ...serviceData, id: newId }]);
+    }
+    setIsServiceModalOpen(false);
+    setEditingItem(null);
   };
 
-  const handleSaveService = (updatedItem: any) => {
-    setServices(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
-    setIsEditModalOpen(false);
-    setEditingItem(null);
+  const handleOpenAddService = () => {
+    setEditingItem(null); // Ensure clean state for "Add"
+    setIsServiceModalOpen(true);
+  };
+
+  const handleOpenEditService = (item: any) => {
+    setEditingItem(item);
+    setIsServiceModalOpen(true);
+  };
+
+  const requestDelete = (item: any, type: string) => {
+    setDeleteConfirmation({ isOpen: true, item, type });
+  };
+
+  const confirmDelete = () => {
+    const { item, type } = deleteConfirmation;
+    if (!item) return;
+
+    const archiveItem = (dataList: any[], setList: Function) => {
+        setList(dataList.map(i => i.id === item.id ? { ...i, status: 'Archived' } : i));
+    };
+
+    switch (type) {
+        case 'services': archiveItem(services, setServices); break;
+        case 'posts': archiveItem(posts, setPosts); break;
+        case 'casestudies': archiveItem(projects, setProjects); break;
+        case 'leads': archiveItem(leads, setLeads); break;
+    }
+
+    setDeleteConfirmation({ isOpen: false, item: null, type: '' });
+  };
+
+  const handleRestore = (item: any, type: string) => {
+      const restoreItem = (dataList: any[], setList: Function, defaultStatus: string) => {
+          setList(dataList.map(i => i.id === item.id ? { ...i, status: defaultStatus } : i));
+      };
+
+      switch(type) {
+          case 'services': restoreItem(services, setServices, 'Draft'); break;
+          case 'posts': restoreItem(posts, setPosts, 'Draft'); break;
+          case 'casestudies': restoreItem(projects, setProjects, 'In Progress'); break;
+          case 'leads': restoreItem(leads, setLeads, 'New'); break;
+      }
+  };
+
+
+  // --- Render Helpers ---
+
+  const getFilteredData = (data: any[]) => {
+      if (viewMode === 'archived') {
+          return data.filter(item => item.status === 'Archived');
+      }
+      return data.filter(item => item.status !== 'Archived');
   };
 
   const renderContent = () => {
@@ -54,13 +132,59 @@ export const DashboardPage: React.FC = () => {
       case 'home':
         return <DashboardHome />;
       case 'services':
-        return <TableView title="Services" data={services} columns={['Title', 'Price', 'Status']} onEdit={handleEditService} />;
+        return (
+            <TableView 
+                title="Services" 
+                data={getFilteredData(services)} 
+                columns={['Title', 'Price', 'Status']} 
+                onEdit={handleOpenEditService}
+                onDelete={(item) => requestDelete(item, 'services')}
+                onAdd={handleOpenAddService}
+                onRestore={(item) => handleRestore(item, 'services')}
+                viewMode={viewMode}
+                onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
+            />
+        );
       case 'posts':
-        return <TableView title="Blog Posts" data={MOCK_POSTS} columns={['Title', 'Category', 'Views', 'Status']} />;
+        return (
+            <TableView 
+                title="Blog Posts" 
+                data={getFilteredData(posts)} 
+                columns={['Title', 'Category', 'Views', 'Status']} 
+                onDelete={(item) => requestDelete(item, 'posts')}
+                // Add Post functionality can be added similarly later
+                onAdd={() => {}} 
+                onRestore={(item) => handleRestore(item, 'posts')}
+                viewMode={viewMode}
+                onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
+            />
+        );
       case 'casestudies':
-        return <TableView title="Case Studies" data={MOCK_PROJECTS} columns={['Project Title', 'Client', 'Category', 'Status']} />;
+        return (
+            <TableView 
+                title="Case Studies" 
+                data={getFilteredData(projects)} 
+                columns={['Project Title', 'Client', 'Category', 'Status']} 
+                onDelete={(item) => requestDelete(item, 'casestudies')}
+                onAdd={() => {}}
+                onRestore={(item) => handleRestore(item, 'casestudies')}
+                viewMode={viewMode}
+                onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
+            />
+        );
       case 'leads':
-        return <TableView title="Leads & Inquiries" data={MOCK_LEADS} columns={['Name', 'Email', 'Interest', 'Status', 'Date']} />;
+        return (
+            <TableView 
+                title="Leads & Inquiries" 
+                data={getFilteredData(leads)} 
+                columns={['Name', 'Email', 'Interest', 'Status', 'Date']} 
+                onDelete={(item) => requestDelete(item, 'leads')}
+                onAdd={() => {}}
+                onRestore={(item) => handleRestore(item, 'leads')}
+                viewMode={viewMode}
+                onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
+            />
+        );
       default:
         return <DashboardHome />;
     }
@@ -151,19 +275,28 @@ export const DashboardPage: React.FC = () => {
          </div>
       </main>
 
-      {/* Edit Service Modal */}
-      {isEditModalOpen && editingItem && (
-        <EditServiceModal 
+      {/* Modals */}
+      {isServiceModalOpen && (
+        <ServiceModal 
             item={editingItem} 
-            onClose={() => setIsEditModalOpen(false)} 
+            onClose={() => setIsServiceModalOpen(false)} 
             onSave={handleSaveService} 
         />
+      )}
+
+      {deleteConfirmation.isOpen && (
+          <DeleteConfirmationModal 
+             isOpen={deleteConfirmation.isOpen}
+             onClose={() => setDeleteConfirmation({ isOpen: false, item: null, type: '' })}
+             onConfirm={confirmDelete}
+          />
       )}
     </div>
   );
 };
 
-// Sub-Components
+// --- Sub-Components ---
+
 const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
     <button 
         onClick={onClick}
@@ -235,14 +368,57 @@ const DashboardHome: React.FC = () => {
     );
 };
 
-const TableView: React.FC<{ title: string, data: any[], columns: string[], onEdit?: (item: any) => void }> = ({ title, data, columns, onEdit }) => {
+interface TableViewProps {
+    title: string;
+    data: any[];
+    columns: string[];
+    onEdit?: (item: any) => void;
+    onDelete?: (item: any) => void;
+    onAdd?: () => void;
+    onRestore?: (item: any) => void;
+    viewMode: 'active' | 'archived';
+    onToggleView: () => void;
+}
+
+const TableView: React.FC<TableViewProps> = ({ 
+    title, data, columns, onEdit, onDelete, onAdd, onRestore, viewMode, onToggleView 
+}) => {
     return (
         <div className="animate-fade-in">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">{title}</h2>
-                <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors">
-                    <Plus className="w-4 h-4" /> Add New
-                </button>
+                <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold text-white">
+                        {viewMode === 'archived' ? `Archived ${title}` : title}
+                    </h2>
+                    {viewMode === 'archived' && (
+                        <span className="px-3 py-1 bg-red-500/10 text-red-400 text-xs font-bold rounded-full border border-red-500/20">
+                            Archive Mode
+                        </span>
+                    )}
+                </div>
+                
+                <div className="flex gap-3">
+                    <button 
+                        onClick={onToggleView}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors border ${
+                            viewMode === 'archived' 
+                            ? 'bg-brand-purple text-white border-brand-purple' 
+                            : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30 hover:text-white'
+                        }`}
+                    >
+                        <Archive className="w-4 h-4" /> 
+                        {viewMode === 'archived' ? 'Back to Active' : 'Archive'}
+                    </button>
+
+                    {viewMode === 'active' && onAdd && (
+                        <button 
+                            onClick={onAdd}
+                            className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors"
+                        >
+                            <Plus className="w-4 h-4" /> Add New
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden">
@@ -269,6 +445,10 @@ const TableView: React.FC<{ title: string, data: any[], columns: string[], onEdi
                                                 <span className="px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20">
                                                     {val}
                                                 </span>
+                                            ) : val === "Archived" ? (
+                                                <span className="px-2 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/20">
+                                                    {val}
+                                                </span>
                                             ) : (
                                                 val
                                             )}
@@ -276,15 +456,38 @@ const TableView: React.FC<{ title: string, data: any[], columns: string[], onEdi
                                     ))}
                                     <td className="p-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button 
-                                                onClick={() => onEdit && onEdit(row)}
-                                                className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-1.5 hover:bg-red-500/10 rounded-md text-gray-400 hover:text-red-400 transition-colors">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            {viewMode === 'active' ? (
+                                                <>
+                                                    {onEdit && (
+                                                        <button 
+                                                            onClick={() => onEdit(row)}
+                                                            className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                    {onDelete && (
+                                                        <button 
+                                                            onClick={() => onDelete(row)}
+                                                            className="p-1.5 hover:bg-red-500/10 rounded-md text-gray-400 hover:text-red-400 transition-colors"
+                                                            title="Archive"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                onRestore && (
+                                                    <button 
+                                                        onClick={() => onRestore(row)}
+                                                        className="p-1.5 hover:bg-green-500/10 rounded-md text-green-400 hover:text-green-300 transition-colors flex items-center gap-1 text-xs font-bold"
+                                                        title="Restore"
+                                                    >
+                                                        <RotateCcw className="w-4 h-4" /> Restore
+                                                    </button>
+                                                )
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -293,16 +496,19 @@ const TableView: React.FC<{ title: string, data: any[], columns: string[], onEdi
                     </table>
                 </div>
                 {data.length === 0 && (
-                    <div className="p-8 text-center text-gray-500 text-sm">No records found.</div>
+                    <div className="p-8 text-center text-gray-500 text-sm">
+                        {viewMode === 'archived' ? 'No archived items found.' : 'No records found.'}
+                    </div>
                 )}
             </div>
         </div>
     );
 };
 
-// Edit Modal Component
-const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
-    const [formData, setFormData] = useState(item);
+// Modal Components
+const ServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item: any) => void }> = ({ item, onClose, onSave }) => {
+    // If item is null, we are adding new, so default to empty
+    const [formData, setFormData] = useState(item || { title: '', price: '', status: 'Draft' });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -314,7 +520,7 @@ const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
                     <X className="w-5 h-5" />
                 </button>
-                <h3 className="text-xl font-bold text-white mb-6">Edit Service</h3>
+                <h3 className="text-xl font-bold text-white mb-6">{item ? 'Edit Service' : 'Add New Service'}</h3>
                 
                 <div className="space-y-4">
                     <div>
@@ -324,6 +530,7 @@ const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item
                             value={formData.title} 
                             onChange={handleChange}
                             className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                            placeholder="e.g. Web Development"
                         />
                     </div>
                     <div>
@@ -333,6 +540,7 @@ const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item
                             value={formData.price} 
                             onChange={handleChange}
                             className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none transition-colors"
+                            placeholder="e.g. $5,000+"
                         />
                     </div>
                     <div>
@@ -346,7 +554,6 @@ const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item
                             >
                                 <option value="Active">Active</option>
                                 <option value="Draft">Draft</option>
-                                <option value="Archived">Archived</option>
                             </select>
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -360,10 +567,44 @@ const EditServiceModal: React.FC<{ item: any, onClose: () => void, onSave: (item
                         onClick={() => onSave(formData)}
                         className="w-full bg-white text-black font-bold py-3.5 rounded-lg mt-4 hover:bg-gray-200 transition-colors"
                     >
-                        Save Changes
+                        {item ? 'Save Changes' : 'Create Service'}
                     </button>
                 </div>
             </div>
+        </div>
+    );
+};
+
+const DeleteConfirmationModal: React.FC<{ isOpen: boolean, onClose: () => void, onConfirm: () => void }> = ({ isOpen, onClose, onConfirm }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+             <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-sm p-6 relative text-center">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                    <AlertTriangle className="w-8 h-8" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-white mb-2">Archive Item?</h3>
+                <p className="text-gray-400 text-sm mb-6">
+                    Are you sure you want to remove this item? It will be moved to the archive list and can be restored later.
+                </p>
+
+                <div className="flex gap-3">
+                    <button 
+                        onClick={onClose}
+                        className="flex-1 px-4 py-3 bg-white/5 text-white font-bold rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={onConfirm}
+                        className="flex-1 px-4 py-3 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Check className="w-4 h-4" /> Confirm
+                    </button>
+                </div>
+             </div>
         </div>
     );
 };
