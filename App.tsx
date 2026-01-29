@@ -20,7 +20,10 @@ import { BlogPage } from './pages/BlogPage';
 // Admin Pages
 import { LoginPage } from './pages/admin/LoginPage';
 import { ForgotPasswordPage } from './pages/admin/ForgotPasswordPage';
-import { DashboardPage } from './pages/admin/DashboardPage';
+import { AdminLayout } from './layouts/AdminLayout';
+import { DashboardHome } from './pages/admin/DashboardHome';
+import { ContentManager } from './pages/admin/ContentManager';
+import { SettingsPage } from './pages/admin/SettingsPage';
 
 // Scroll to top component that listens to route changes
 const ScrollToTopOnNavigate = () => {
@@ -56,12 +59,16 @@ function App() {
       <Router>
         <ScrollToTopOnNavigate />
         <Routes>
-          {/* Admin Routes (No Header/Footer) */}
+          {/* Admin Routes */}
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
           
           <Route element={<ProtectedRoute />}>
-             <Route path="/admin/dashboard" element={<DashboardPage />} />
+             <Route path="/admin/dashboard" element={<AdminLayout />}>
+                <Route index element={<DashboardHome />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path=":section" element={<ContentManager />} />
+             </Route>
           </Route>
 
           {/* Public Routes (Wrapped with Header/Footer) */}
