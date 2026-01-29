@@ -97,21 +97,39 @@ export const Header: React.FC = () => {
              </Link>
           </div>
 
-          {/* Right: Menu Toggle */}
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            className={`pointer-events-auto bg-gradient-to-r from-brand-orange to-brand-purple rounded-full flex items-center gap-3 text-white font-medium text-sm hover:shadow-[0_0_20px_rgba(255,107,74,0.4)] transition-all duration-500 z-50 shadow-lg justify-center ${isScrolled ? 'px-5 py-2 min-w-[90px]' : 'px-6 py-3 min-w-[100px]'}`}
-          >
-             <span>{isOpen ? 'Close' : 'Menu'}</span>
-             {isOpen ? (
-                <X className="w-5 h-5" />
-             ) : (
+          {/* Right: Actions Group */}
+          <div className={`flex items-center gap-3 pointer-events-auto z-50 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+             {/* Login Button */}
+             <Link 
+                to="/admin/login"
+                className={`hidden md:flex items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white font-medium transition-all duration-500 backdrop-blur-md hover:border-white/30 ${isScrolled ? 'px-5 py-2 text-xs' : 'px-6 py-3 text-sm'}`}
+             >
+                Login
+             </Link>
+
+             {/* Menu Toggle */}
+             <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`bg-gradient-to-r from-brand-orange to-brand-purple rounded-full flex items-center gap-3 text-white font-medium text-sm hover:shadow-[0_0_20px_rgba(255,107,74,0.4)] transition-all duration-500 shadow-lg justify-center ${isScrolled ? 'px-5 py-2 min-w-[90px]' : 'px-6 py-3 min-w-[100px]'}`}
+             >
+                <span>Menu</span>
                 <div className="w-5 flex flex-col items-end gap-1">
                   <span className="w-full h-0.5 bg-white rounded-full"></span>
                   <span className="w-3/4 h-0.5 bg-white rounded-full"></span>
                </div>
-             )}
-          </button>
+             </button>
+          </div>
+          
+          {/* Close Button for Menu (Absolute positioned when open) */}
+          {isOpen && (
+            <button 
+                onClick={() => setIsOpen(false)}
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 pointer-events-auto bg-white/10 hover:bg-white/20 rounded-full p-2 text-white transition-all z-[60]"
+            >
+                <X className="w-6 h-6" />
+            </button>
+          )}
+
         </div>
       </header>
 
@@ -133,6 +151,15 @@ export const Header: React.FC = () => {
                  {item.name}
                </Link>
              ))}
+             {/* Mobile Menu Login Link */}
+             <Link 
+               to="/admin/login" 
+               onClick={() => setIsOpen(false)} 
+               className="md:hidden mt-4 px-8 py-3 rounded-full border border-white/10 bg-white/5 text-white font-medium opacity-0 animate-slide-up-fade"
+               style={{ animationDelay: `${100 + navItems.length * 100}ms` }}
+             >
+               Login to Admin
+             </Link>
            </nav>
         </div>
       )}
