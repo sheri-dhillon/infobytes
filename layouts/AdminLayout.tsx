@@ -89,7 +89,7 @@ export const AdminLayout: React.FC = () => {
             )}
             
             <div className="px-4 py-2 text-xs font-bold text-gray-600 uppercase tracking-widest mt-8 mb-2">System</div>
-            {/* <NavItem icon={<FolderOpen className="w-4 h-4" />} label="Files" href="/admin/dashboard/files" active={location.pathname.includes('/files')} /> */}
+            <NavItem icon={<FolderOpen className="w-4 h-4" />} label="Files" href="/admin/dashboard/files" active={location.pathname.includes('/files')} />
             <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" href="/admin/dashboard/settings" active={location.pathname.includes('/settings')} />
          </nav>
 

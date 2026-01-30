@@ -24,6 +24,7 @@ import { AdminLayout } from './layouts/AdminLayout';
 import { DashboardHome } from './pages/admin/DashboardHome';
 import { ContentManager } from './pages/admin/ContentManager';
 import { SettingsPage } from './pages/admin/SettingsPage';
+import { FileManager } from './pages/admin/FileManager';
 
 // Scroll to top component that listens to route changes
 const ScrollToTopOnNavigate = () => {
@@ -67,6 +68,7 @@ function App() {
              <Route path="/admin/dashboard" element={<AdminLayout />}>
                 <Route index element={<DashboardHome />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="files" element={<FileManager />} />
                 <Route path=":section" element={<ContentManager />} />
              </Route>
           </Route>
