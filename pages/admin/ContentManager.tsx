@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { TableView, ServiceEditor, PostEditor, TestimonialModal, LeadDetailsModal, DeleteConfirmationModal, CategoryManagerModal } from '../../components/admin/AdminComponents';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 
 export const ContentManager: React.FC = () => {
     const { section } = useParams<{ section: string }>();
@@ -25,8 +25,12 @@ export const ContentManager: React.FC = () => {
     // Managers can view but not edit (unless it's leads status, etc - simplified here to read-only for table structure)
     const canEdit = !isManager; 
 
+    // Access Control Logic
+    const isRestricted = isBlogger && (section !== 'posts');
+
     // Fetch Data Logic
     const fetchData = async () => {
+        if (isRestricted) return;
         setLoading(true);
         try {
             let query: any;
@@ -100,15 +104,26 @@ export const ContentManager: React.FC = () => {
         if (!canEdit && section !== 'leads') return; // Leads can update status by managers often, but keeping simple
         
         let table = section === 'casestudies' ? 'case_studies' : section;
+        
+        // Deep copy payload to avoid mutating original
         let payload = { ...itemData };
         let id = itemData.id;
 
         // Specific payload cleaning
+        if (section === 'services') {
+            // Ensure pills are JSON stringified if they are an array, as DB might expect text
+            if (Array.isArray(payload.pills)) {
+                payload.pills = JSON.stringify(payload.pills);
+            }
+        }
+
         if (section === 'posts') {
             // Ensure author is set on creation
             if (!id) payload.author_id = user?.id;
             delete payload.author; // Remove joined object
         }
+
+        console.log('Saving to', table, payload); // Debug
 
         let error;
         if (id) {
@@ -124,6 +139,7 @@ export const ContentManager: React.FC = () => {
             setIsEditorOpen(false);
             setEditingItem(null);
         } else {
+            console.error("Supabase Save Error:", error);
             alert("Error saving: " + error.message);
         }
     };
@@ -131,10 +147,30 @@ export const ContentManager: React.FC = () => {
     const confirmDelete = async () => {
         if (!deleteConfirmation.item) return;
         let table = section === 'casestudies' ? 'case_studies' : section;
-        await supabase.from(table!).update({ status: 'Archived' }).eq('id', deleteConfirmation.item.id);
-        await fetchData();
-        setDeleteConfirmation({ isOpen: false, item: null });
+        
+        const { error } = await supabase.from(table!).update({ status: 'Archived' }).eq('id', deleteConfirmation.item.id);
+        
+        if (error) {
+            console.error("Delete error:", error);
+            alert("Failed to delete: " + error.message);
+        } else {
+            await fetchData();
+            setDeleteConfirmation({ isOpen: false, item: null });
+        }
     };
+
+    // Access Denied View
+    if (isRestricted) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[50vh] text-center p-6">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20 text-red-500">
+                    <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-2">Access Denied</h2>
+                <p className="text-gray-400 max-w-md">Your account role ({profile?.role}) does not have permission to access the <strong>{getTableTitle()}</strong> section.</p>
+            </div>
+        );
+    }
 
     // Render Editor
     if (isEditorOpen) {

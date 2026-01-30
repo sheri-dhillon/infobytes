@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Archive, Eye, Edit2, Trash2, Plus, Star, Tag, X, User, Upload, Check, Search, Filter, Globe, Info, LayoutTemplate, Monitor, Image as ImageIcon, Loader2, Link as LinkIcon, RefreshCw, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Archive, Eye, Edit2, Trash2, Plus, Star, Tag, X, User, Upload, Check, Search, Filter, Globe, Info, LayoutTemplate, Monitor, Image as ImageIcon, Loader2, Link as LinkIcon, RefreshCw, ChevronRight, Bold, Italic, List, Code } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 // --- Table View ---
@@ -78,23 +78,23 @@ export const TableView: React.FC<TableViewProps> = ({
                                     <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
                                         {columns.map((col, cIdx) => {
                                             let content = null;
-                                            if (col === 'Title') content = <span className="text-white font-medium">{row.title}</span>;
-                                            if (col === 'Full Name' || col === 'Name') content = <span className="text-white font-medium">{row.fullname || row.name}</span>;
+                                            if (col === 'Title') content = <span className="text-white font-medium">{row.title || 'Untitled'}</span>;
+                                            if (col === 'Full Name' || col === 'Name') content = <span className="text-white font-medium">{row.fullname || row.name || 'Unknown'}</span>;
                                             if (col === 'Status') content = (
                                                 <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded border ${
                                                     row.status === 'Published' || row.status === 'Active' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
                                                     row.status === 'Draft' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
                                                     'bg-gray-500/10 text-gray-400 border-gray-500/20'
                                                 }`}>
-                                                    {row.status}
+                                                    {row.status || 'Draft'}
                                                 </span>
                                             );
-                                            if (col === 'Category') content = row.category;
-                                            if (col === 'Client') content = row.client;
+                                            if (col === 'Category') content = row.category || '-';
+                                            if (col === 'Client') content = row.client || '-';
                                             if (col === 'Views') content = <span className="font-mono text-gray-400">{row.views || 0}</span>;
-                                            if (col === 'Email') content = row.email;
-                                            if (col === 'Company') content = row.company;
-                                            if (col === 'Date') content = <span className="text-gray-500 text-xs">{new Date(row.created_at).toLocaleDateString()}</span>;
+                                            if (col === 'Email') content = row.email || '-';
+                                            if (col === 'Company') content = row.company || '-';
+                                            if (col === 'Date') content = <span className="text-gray-500 text-xs">{row.created_at ? new Date(row.created_at).toLocaleDateString() : '-'}</span>;
                                             
                                             if (col === 'Author') {
                                                 return (
@@ -110,18 +110,34 @@ export const TableView: React.FC<TableViewProps> = ({
                                             }
 
                                             if (col === 'Pills') {
+                                                let pillsToRender: any[] = [];
+                                                if (Array.isArray(row.pills)) pillsToRender = row.pills;
+                                                else if (typeof row.pills === 'string') {
+                                                    try {
+                                                        const parsed = JSON.parse(row.pills);
+                                                        if(Array.isArray(parsed)) pillsToRender = parsed;
+                                                        else pillsToRender = row.pills.split(',');
+                                                    } catch {
+                                                        pillsToRender = row.pills.split(',').filter((p: string) => p.trim());
+                                                    }
+                                                }
+
                                                 return (
                                                     <td key={cIdx} className="p-5">
                                                         <div className="flex gap-2 flex-wrap max-w-[200px]">
-                                                            {Array.isArray(row.pills) && row.pills.map((p:string, i:number) => (
-                                                                <span key={i} className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-gray-400 border border-white/5">{p}</span>
-                                                            ))}
+                                                            {pillsToRender.map((p, i) => {
+                                                                // Safety check: ensure p is a string or number before rendering
+                                                                const val = typeof p === 'object' ? JSON.stringify(p) : p;
+                                                                return (
+                                                                    <span key={i} className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-gray-400 border border-white/5">{val}</span>
+                                                                );
+                                                            })}
                                                         </div>
                                                     </td>
                                                 )
                                             }
                                             if (col === 'Rating') {
-                                                return <td key={cIdx} className="p-5"><div className="flex gap-0.5">{[...Array(5)].map((_,i) => <Star key={i} className={`w-3 h-3 ${i<Number(row.stars)?'text-brand-orange fill-brand-orange':'text-gray-800'}`} />)}</div></td>
+                                                return <td key={cIdx} className="p-5"><div className="flex gap-0.5">{[...Array(5)].map((_,i) => <Star key={i} className={`w-3 h-3 ${i<Number(row.stars || 0)?'text-brand-orange fill-brand-orange':'text-gray-800'}`} />)}</div></td>
                                             }
 
                                             return (
@@ -171,6 +187,55 @@ export const DeleteConfirmationModal: React.FC<{ isOpen: boolean, onClose: () =>
 };
 
 // --- Helper Components ---
+
+const SimpleEditor: React.FC<{ value: string; onChange: (val: string) => void; placeholder?: string; height?: string }> = ({ value, onChange, placeholder, height = "400px" }) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const insertTag = (tagStart: string, tagEnd: string = '') => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const before = text.substring(0, start);
+        const selected = text.substring(start, end);
+        const after = text.substring(end);
+
+        const newValue = `${before}${tagStart}${selected}${tagEnd}${after}`;
+        onChange(newValue);
+
+        // Restore focus and selection
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + tagStart.length, end + tagStart.length);
+        }, 0);
+    };
+
+    return (
+        <div className="w-full bg-[#111] border border-white/10 rounded-xl overflow-hidden flex flex-col">
+            <div className="flex items-center gap-1 p-2 border-b border-white/5 bg-white/5 overflow-x-auto">
+                <button type="button" onClick={() => insertTag('<strong>', '</strong>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white" title="Bold"><Bold className="w-4 h-4" /></button>
+                <button type="button" onClick={() => insertTag('<em>', '</em>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white" title="Italic"><Italic className="w-4 h-4" /></button>
+                <div className="w-px h-4 bg-white/10 mx-1"></div>
+                <button type="button" onClick={() => insertTag('<h2>', '</h2>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white text-xs font-bold" title="H2">H2</button>
+                <button type="button" onClick={() => insertTag('<h3>', '</h3>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white text-xs font-bold" title="H3">H3</button>
+                <div className="w-px h-4 bg-white/10 mx-1"></div>
+                <button type="button" onClick={() => insertTag('<ul>\n  <li>', '</li>\n</ul>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white" title="List"><List className="w-4 h-4" /></button>
+                <button type="button" onClick={() => insertTag('<a href="url">', '</a>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white" title="Link"><LinkIcon className="w-4 h-4" /></button>
+                <button type="button" onClick={() => insertTag('<pre><code>', '</code></pre>')} className="p-2 hover:bg-white/10 rounded text-gray-400 hover:text-white" title="Code"><Code className="w-4 h-4" /></button>
+            </div>
+            <textarea
+                ref={textareaRef}
+                className="w-full bg-transparent border-none p-4 text-white font-mono text-sm focus:ring-0 outline-none resize-none leading-relaxed"
+                style={{ height }}
+                placeholder={placeholder || "Start writing..."}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        </div>
+    );
+};
 
 const ImagePicker: React.FC<{ value: string; onChange: (url: string) => void }> = ({ value, onChange }) => {
     const [uploading, setUploading] = useState(false);
@@ -336,7 +401,7 @@ const SlugInput: React.FC<{ baseUrl: string; slug: string; onChange: (val: strin
             </span>
             <input 
                 type="text" 
-                value={slug} 
+                value={slug || ''} 
                 onChange={(e) => onChange(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                 className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none font-mono"
                 placeholder="url-slug"
@@ -348,13 +413,30 @@ const SlugInput: React.FC<{ baseUrl: string; slug: string; onChange: (val: strin
 // --- Main Editors ---
 
 export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void; onCancel: () => void }> = ({ service, onSave, onCancel }) => {
-    const [formData, setFormData] = useState(service || { 
-        title: '', slug: '', description: '', status: 'Draft', pills: [], 
-        seo_title: '', meta_description: '', keywords: '' 
+    // Correctly initialize state with safety checks
+    const [formData, setFormData] = useState({ 
+        title: service?.title || '', 
+        slug: service?.slug || '', 
+        description: service?.description || '', 
+        content: service?.content || '',
+        image: service?.image || '',
+        status: service?.status || 'Draft', 
+        pills: service?.pills || [], 
+        seo_title: service?.seo_title || '', 
+        meta_description: service?.meta_description || '', 
+        keywords: service?.keywords || '',
+        id: service?.id // Preserve ID for updates
     });
     
+    // Safely handle pill input (array vs string from DB)
     const handlePills = (val: string) => {
         setFormData({...formData, pills: val.split(',').map(s => s.trim())});
+    };
+
+    const getPillsString = () => {
+        if (Array.isArray(formData.pills)) return formData.pills.join(', ');
+        if (typeof formData.pills === 'string') return formData.pills;
+        return '';
     };
 
     // Auto-generate slug from title if slug is empty
@@ -392,24 +474,22 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
                                 <input 
                                     className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-bold focus:border-white/30 focus:outline-none transition-colors" 
                                     placeholder="Enter service title here..." 
-                                    value={formData.title} 
+                                    value={formData.title || ''} 
                                     onChange={e => setFormData({...formData, title: e.target.value})} 
                                 />
                             </div>
 
                             <SlugInput 
                                 baseUrl="https://infobytes.io/services/" 
-                                slug={formData.slug} 
+                                slug={formData.slug || ''} 
                                 onChange={(val) => setFormData({...formData, slug: val})} 
                             />
 
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-2">HTML Content</label>
-                                <textarea 
-                                    className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-4 text-white h-[400px] font-mono text-sm focus:border-white/30 focus:outline-none leading-relaxed resize-y" 
-                                    placeholder="<p>Write your service details here...</p>" 
+                                <SimpleEditor 
                                     value={formData.content || ''} 
-                                    onChange={e => setFormData({...formData, content: e.target.value})} 
+                                    onChange={(val) => setFormData({...formData, content: val})} 
                                 />
                             </div>
                         </div>
@@ -429,7 +509,7 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
                                 <label className="block text-xs font-bold text-gray-500 mb-2">Status</label>
                                 <select 
                                     className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-white/30 outline-none"
-                                    value={formData.status} 
+                                    value={formData.status || 'Draft'} 
                                     onChange={e => setFormData({...formData, status: e.target.value})}
                                 >
                                     <option value="Draft">Draft</option>
@@ -443,7 +523,7 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
                     {/* Featured Image */}
                     <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Featured Image</h4>
-                        <ImagePicker value={formData.image} onChange={(url) => setFormData({...formData, image: url})} />
+                        <ImagePicker value={formData.image || ''} onChange={(url) => setFormData({...formData, image: url})} />
                     </div>
 
                     {/* Tags */}
@@ -452,7 +532,7 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
                         <input 
                             className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm mb-3 focus:border-white/30 outline-none" 
                             placeholder="Web, Mobile, App (comma separated)" 
-                            value={Array.isArray(formData.pills) ? formData.pills.join(', ') : ''} 
+                            value={getPillsString()} 
                             onChange={e => handlePills(e.target.value)} 
                         />
                         <div className="flex flex-wrap gap-2">
@@ -468,7 +548,7 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
                         <textarea 
                             className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm h-24 resize-none focus:border-white/30 outline-none" 
                             placeholder="Brief summary for cards..." 
-                            value={formData.description} 
+                            value={formData.description || ''} 
                             onChange={e => setFormData({...formData, description: e.target.value})} 
                         />
                     </div>
@@ -479,10 +559,39 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
 };
 
 export const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data: any) => void; onCancel: () => void }> = ({ post, categories, onSave, onCancel }) => {
-    const [formData, setFormData] = useState(post || { 
-        title: '', slug: '', content: '', status: 'Draft', category: '',
-        seo_title: '', meta_description: '', keywords: '' 
+    const [formData, setFormData] = useState({ 
+        title: post?.title || '', 
+        slug: post?.slug || '', 
+        content: post?.content || '', 
+        status: post?.status || 'Draft', 
+        category: post?.category || '',
+        image: post?.image || '',
+        seo_title: post?.seo_title || '', 
+        meta_description: post?.meta_description || '', 
+        keywords: post?.keywords || '',
+        id: post?.id
     });
+
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (post && post.category) {
+            // Split comma separated string back to array for UI
+            setSelectedCategories(post.category.split(',').map((c: string) => c.trim()));
+        }
+    }, [post]);
+
+    // Update form data whenever selection changes
+    useEffect(() => {
+        setFormData(prev => ({ ...prev, category: selectedCategories.join(', ') }));
+    }, [selectedCategories]);
+
+    const toggleCategory = (catName: string) => {
+        setSelectedCategories(prev => {
+            if (prev.includes(catName)) return prev.filter(c => c !== catName);
+            return [...prev, catName];
+        });
+    };
 
     // Auto-generate slug
     useEffect(() => {
@@ -517,22 +626,22 @@ export const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data:
                             <input 
                                 className="w-full bg-transparent border-none text-4xl font-bold text-white placeholder-gray-600 focus:ring-0 px-0 outline-none" 
                                 placeholder="Enter post title..." 
-                                value={formData.title} 
+                                value={formData.title || ''} 
                                 onChange={e => setFormData({...formData, title: e.target.value})} 
                             />
                             
                             <SlugInput 
                                 baseUrl="https://infobytes.io/blog/" 
-                                slug={formData.slug} 
+                                slug={formData.slug || ''} 
                                 onChange={(val) => setFormData({...formData, slug: val})} 
                             />
 
                             <div className="min-h-[500px] border-t border-white/5 pt-6">
-                                <textarea 
-                                    className="w-full bg-transparent border-none text-gray-300 h-[500px] focus:ring-0 leading-relaxed resize-y font-mono text-sm outline-none" 
-                                    placeholder="Write your story... (HTML supported)" 
-                                    value={formData.content} 
-                                    onChange={e => setFormData({...formData, content: e.target.value})} 
+                                <SimpleEditor 
+                                    height="600px"
+                                    placeholder="Write your story... (HTML supported)"
+                                    value={formData.content || ''} 
+                                    onChange={(val) => setFormData({...formData, content: val})} 
                                 />
                             </div>
                         </div>
@@ -549,7 +658,7 @@ export const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data:
                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Publish</h4>
                         <select 
                             className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-white/30 outline-none"
-                            value={formData.status} 
+                            value={formData.status || 'Draft'} 
                             onChange={e => setFormData({...formData, status: e.target.value})}
                         >
                             <option value="Draft">Draft</option>
@@ -558,23 +667,37 @@ export const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data:
                         </select>
                     </div>
 
-                    {/* Category */}
+                    {/* Categories Multi-Select */}
                     <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
-                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Category</h4>
-                        <select 
-                            className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-white/30 outline-none" 
-                            value={formData.category} 
-                            onChange={e => setFormData({...formData, category: e.target.value})}
-                        >
-                            <option value="">Select Category</option>
-                            {categories.map((c: any) => <option key={c.id} value={c.name}>{c.name}</option>)}
-                        </select>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Categories</h4>
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                            {categories && categories.length > 0 ? (
+                                categories.map((c: any) => (
+                                    <label key={c.id} className="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCategories.includes(c.name) ? 'bg-brand-purple border-brand-purple' : 'border-white/30 group-hover:border-white'}`}>
+                                            {selectedCategories.includes(c.name) && <Check className="w-3 h-3 text-white" />}
+                                        </div>
+                                        <input 
+                                            type="checkbox" 
+                                            className="hidden" 
+                                            checked={selectedCategories.includes(c.name)}
+                                            onChange={() => toggleCategory(c.name)}
+                                        />
+                                        <span className={`text-sm ${selectedCategories.includes(c.name) ? 'text-white' : 'text-gray-400 group-hover:text-gray-200'}`}>
+                                            {c.name}
+                                        </span>
+                                    </label>
+                                ))
+                            ) : (
+                                <p className="text-xs text-gray-500 italic">No categories found.</p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Featured Image */}
                     <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Featured Image</h4>
-                        <ImagePicker value={formData.image} onChange={(url) => setFormData({...formData, image: url})} />
+                        <ImagePicker value={formData.image || ''} onChange={(url) => setFormData({...formData, image: url})} />
                     </div>
                 </div>
             </div>
@@ -591,13 +714,13 @@ export const TestimonialModal: React.FC<{ item: any, onClose: () => void, onSave
                 <button onClick={onClose} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
                 <h3 className="text-xl font-bold text-white mb-6">{item ? 'Edit Testimonial' : 'New Testimonial'}</h3>
                 <div className="space-y-4">
-                    <input className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/30 focus:outline-none" placeholder="Client Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                    <input className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/30 focus:outline-none" placeholder="Business / Role" value={formData.business_name} onChange={e => setFormData({...formData, business_name: e.target.value})} />
-                    <input className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/30 focus:outline-none" placeholder="Service Provided" value={formData.service_name} onChange={e => setFormData({...formData, service_name: e.target.value})} />
-                    <textarea className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white h-24 focus:border-white/30 focus:outline-none" placeholder="Review" value={formData.review} onChange={e => setFormData({...formData, review: e.target.value})} />
+                    <input className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/30 focus:outline-none" placeholder="Client Name" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} />
+                    <input className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/30 focus:outline-none" placeholder="Business / Role" value={formData.business_name || ''} onChange={e => setFormData({...formData, business_name: e.target.value})} />
+                    <input className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/30 focus:outline-none" placeholder="Service Provided" value={formData.service_name || ''} onChange={e => setFormData({...formData, service_name: e.target.value})} />
+                    <textarea className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white h-24 focus:border-white/30 focus:outline-none" placeholder="Review" value={formData.review || ''} onChange={e => setFormData({...formData, review: e.target.value})} />
                     <div className="flex items-center gap-4 bg-white/5 p-3 rounded-xl border border-white/5">
                         <label className="text-gray-400 text-sm font-medium">Rating:</label>
-                        <input type="number" min="1" max="5" className="bg-black border border-white/10 rounded px-2 py-1 text-white w-16 text-center" value={formData.stars} onChange={e => setFormData({...formData, stars: e.target.value})} />
+                        <input type="number" min="1" max="5" className="bg-black border border-white/10 rounded px-2 py-1 text-white w-16 text-center" value={formData.stars || 5} onChange={e => setFormData({...formData, stars: e.target.value})} />
                         <div className="flex gap-1">
                             {[...Array(Number(formData.stars) || 0)].map((_, i) => <Star key={i} className="w-4 h-4 fill-brand-orange text-brand-orange" />)}
                         </div>
@@ -652,11 +775,11 @@ export const CategoryManagerModal: React.FC<{ isOpen: boolean, onClose: () => vo
                     <button onClick={handleAdd} className="bg-white text-black px-4 rounded-lg font-bold text-sm hover:bg-gray-200">Add</button>
                 </div>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                    {categories.map(c => (
+                    {categories && categories.length > 0 ? categories.map(c => (
                         <div key={c.id} className="flex justify-between items-center text-sm text-gray-300 bg-white/5 px-3 py-2 rounded-lg border border-white/5">
                             {c.name}
                         </div>
-                    ))}
+                    )) : <p className="text-gray-500 text-xs italic">No categories yet.</p>}
                 </div>
                 <button onClick={onClose} className="mt-6 w-full border border-white/10 py-2.5 rounded-lg text-white text-sm hover:bg-white/5 font-medium">Close</button>
             </div>
