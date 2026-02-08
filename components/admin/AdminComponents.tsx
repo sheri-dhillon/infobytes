@@ -427,7 +427,21 @@ const SlugInput: React.FC<{ baseUrl: string; slug: string; onChange: (val: strin
 // --- Main Editors ---
 
 export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void; onCancel: () => void }> = ({ service, onSave, onCancel }) => {
-    // Correctly initialize state with safety checks
+    // Helper to ensure pills is array
+    const parsePills = (val: any) => {
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') {
+            try { 
+                const parsed = JSON.parse(val);
+                if (Array.isArray(parsed)) return parsed;
+            } catch(e) {
+                // If not JSON, split by comma and remove empty
+                return val.split(',').map(s => s.trim()).filter(s => s !== '');
+            }
+        }
+        return [];
+    };
+
     const [formData, setFormData] = useState({ 
         title: service?.title || '', 
         slug: service?.slug || '', 
@@ -435,22 +449,34 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
         content: service?.content || '',
         image: service?.image || '',
         status: service?.status || 'Draft', 
-        pills: service?.pills || [], 
+        pills: parsePills(service?.pills), 
         seo_title: service?.seo_title || '', 
         meta_description: service?.meta_description || '', 
         keywords: service?.keywords || '',
-        id: service?.id // Preserve ID for updates
+        id: service?.id
     });
     
-    // Safely handle pill input (array vs string from DB)
-    const handlePills = (val: string) => {
-        setFormData({...formData, pills: val.split(',').map(s => s.trim())});
+    const [pillInput, setPillInput] = useState('');
+
+    const handleAddPill = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const trimmed = pillInput.trim();
+            if (trimmed && formData.pills.length < 4) {
+                setFormData(prev => ({
+                    ...prev,
+                    pills: [...prev.pills, trimmed]
+                }));
+                setPillInput('');
+            }
+        }
     };
 
-    const getPillsString = () => {
-        if (Array.isArray(formData.pills)) return formData.pills.join(', ');
-        if (typeof formData.pills === 'string') return formData.pills;
-        return '';
+    const removePill = (indexToRemove: number) => {
+        setFormData(prev => ({
+            ...prev,
+            pills: prev.pills.filter((_:any, idx:number) => idx !== indexToRemove)
+        }));
     };
 
     // Auto-generate slug from title if slug is empty
@@ -540,23 +566,41 @@ export const ServiceEditor: React.FC<{ service: any; onSave: (data: any) => void
                         <ImagePicker value={formData.image || ''} onChange={(url) => setFormData({...formData, image: url})} />
                     </div>
 
-                    {/* Tags */}
+                    {/* Tags (New Implementation) */}
                     <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
-                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Service Tags (Pills)</h4>
-                        <input 
-                            className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm mb-3 focus:border-white/30 outline-none" 
-                            placeholder="Web, Mobile, App (comma separated)" 
-                            value={getPillsString()} 
-                            onChange={e => handlePills(e.target.value)} 
-                        />
-                        <div className="flex flex-wrap gap-2">
-                            {Array.isArray(formData.pills) && formData.pills.map((pill: string, idx: number) => (
-                                pill && <span key={idx} className="text-[10px] bg-white/10 border border-white/5 px-2 py-1 rounded text-gray-300">{pill}</span>
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Service Tags (Max 4)</h4>
+                            <span className={`text-xs font-bold ${formData.pills.length >= 4 ? 'text-red-400' : 'text-gray-500'}`}>{formData.pills.length}/4</span>
+                        </div>
+                        
+                        {/* Pills List */}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                            {formData.pills.map((pill: string, idx: number) => (
+                                <span key={idx} className="inline-flex items-center gap-1 text-xs bg-white/10 border border-white/5 px-2.5 py-1.5 rounded-lg text-gray-200 group animate-fade-in">
+                                    {pill}
+                                    <button 
+                                        onClick={() => removePill(idx)}
+                                        type="button"
+                                        className="ml-1.5 text-gray-400 hover:text-red-400 transition-colors p-0.5 rounded-full hover:bg-white/10"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </span>
                             ))}
                         </div>
+
+                        <input 
+                            className={`w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-white/30 outline-none transition-all ${formData.pills.length >= 4 ? 'opacity-50 cursor-not-allowed bg-white/5' : ''}`} 
+                            placeholder={formData.pills.length >= 4 ? "Limit reached (4/4)" : "Type tag and hit Enter..."} 
+                            value={pillInput} 
+                            onChange={e => setPillInput(e.target.value)} 
+                            onKeyDown={handleAddPill}
+                            disabled={formData.pills.length >= 4}
+                        />
+                        <p className="text-[10px] text-gray-500 mt-2">Press Enter to add. Shows as pill overlay on service cards.</p>
                     </div>
 
-                    {/* Short Description */}
+                    {/* Excerpt */}
                     <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Excerpt</h4>
                         <textarea 
@@ -583,7 +627,8 @@ export const PostEditor: React.FC<{ post: any; categories: any[]; onSave: (data:
         seo_title: post?.seo_title || '', 
         meta_description: post?.meta_description || '', 
         keywords: post?.keywords || '',
-        id: post?.id
+        id: post?.id,
+        views: post?.views || 0 // Preserve views
     });
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);

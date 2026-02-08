@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { Link } from 'react-router-dom';
 
 // Predefined layouts for pills to ensure they look designed
 const pillLayouts = [
@@ -44,6 +45,7 @@ interface ServicePill {
 interface ServiceItem {
     id: string;
     title: string;
+    slug: string;
     description: string;
     pills: ServicePill[];
 }
@@ -95,6 +97,7 @@ export const Services: React.FC = () => {
                     return {
                         id: `0${index + 1}`,
                         title: item.title,
+                        slug: item.slug,
                         description: item.description || '', // Handle null description
                         pills
                     };
@@ -139,9 +142,10 @@ export const Services: React.FC = () => {
              </div>
            ) : services.length > 0 ? (
                services.map((service, idx) => (
-                 <div 
+                 <Link 
+                   to={`/services/${service.slug}`}
                    key={idx}
-                   className="group relative flex flex-col md:flex-row items-start md:items-center justify-between py-16 md:py-20 border-t border-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
+                   className="group relative flex flex-col md:flex-row items-start md:items-center justify-between py-16 md:py-20 border-t border-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer block"
                  >
                     {/* Background Hover Effect for Row (Subtle) */}
                     <div className="absolute inset-0 bg-white/5 transition-opacity duration-300 -z-10 opacity-0 group-hover:opacity-100" />
@@ -191,7 +195,7 @@ export const Services: React.FC = () => {
                           <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-white relative z-10" />
                        </div>
                     </div>
-                 </div>
+                 </Link>
                ))
            ) : (
                <div className="py-20 text-center text-gray-500 border-t border-white/10 flex flex-col items-center">

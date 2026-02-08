@@ -132,20 +132,50 @@ export const ContentManager: React.FC = () => {
         
         let table = section === 'casestudies' ? 'case_studies' : section;
         
-        // Deep copy payload to avoid mutating original
+        // Prepare payload (start with all data)
         let payload = { ...itemData };
         let id = itemData.id;
 
-        // Clean up payload - remove ID (Supabase handles it) and derived fields
+        // Clean up common fields
         delete payload.id;
-        delete payload.author; // Remove joined object
-        delete payload.fullname; // Derived field if any
+        delete payload.author;
+        delete payload.fullname;
+        delete payload.created_at; // Don't try to update timestamp
 
-        // Specific payload logic
-        if (section === 'posts') {
-            // Ensure author is set on creation
-            if (!id) payload.author_id = user?.id;
+        // --- SPECIFIC PAYLOAD SANITIZATION ---
+        // This ensures we only send fields that exist in the DB columns
+        
+        if (section === 'services') {
+            payload = {
+                title: itemData.title,
+                slug: itemData.slug,
+                description: itemData.description,
+                content: itemData.content,
+                image: itemData.image,
+                status: itemData.status,
+                // Ensure pills are stored as a JSON string for the DB
+                pills: Array.isArray(itemData.pills) ? JSON.stringify(itemData.pills) : itemData.pills,
+                seo_title: itemData.seo_title,
+                meta_description: itemData.meta_description
+            };
+        } else if (section === 'posts') {
+            payload = {
+                title: itemData.title,
+                slug: itemData.slug,
+                content: itemData.content,
+                image: itemData.image,
+                category: itemData.category,
+                status: itemData.status,
+                seo_title: itemData.seo_title,
+                meta_description: itemData.meta_description,
+                views: itemData.views || 0
+            };
+            if (!id) {
+                payload.author_id = user?.id; // Set author only on create
+            }
         }
+
+        console.log('Saving to', table, payload);
 
         let error;
         if (id) {
