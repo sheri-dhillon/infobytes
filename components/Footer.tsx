@@ -1,18 +1,72 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { Logo } from './Logo';
+import { supabase } from '../lib/supabase';
+
+// Default config matching the provided design
+const DEFAULT_CONFIG = {
+    marquee_text_1: "Let's Make Something Great",
+    marquee_text_2: "Together",
+    contact_heading: "Got a vision?",
+    contact_subheading: "Let's architect your digital legacy with precision and style.",
+    email: "hello@infobytes.io",
+    booking_link: "https://calendly.com/shehryar-infobytes/30min",
+    copyright_text: "© 2026 InfoBytes Agency. All rights reserved.",
+    social_links: [
+        { name: 'Facebook', icon: 'fa-brands fa-facebook-f', href: '#' },
+        { name: 'Instagram', icon: 'fa-brands fa-instagram', href: '#' },
+        { name: 'LinkedIn', icon: 'fa-brands fa-linkedin-in', href: '#' },
+        { name: 'Twitter', icon: 'fa-brands fa-x-twitter', href: '#' },
+        { name: 'Behance', icon: 'fa-brands fa-behance', href: '#' },
+        { name: 'Dribbble', icon: 'fa-brands fa-dribbble', href: '#' },
+    ],
+    columns: [
+      {
+        title: "Expertise",
+        links: [
+           { label: "UI/UX Design Strategy", href: "/services" },
+           { label: "Native iOS Development", href: "/services" },
+           { label: "Web Development", href: "/services" },
+           { label: "Email Marketing", href: "/services" },
+           { label: "Growth Strategy", href: "/services" }
+        ]
+      },
+      {
+        title: "Agency",
+        links: [
+           { label: "About Us", href: "/about" },
+           { label: "Client Success", href: "/work" },
+           { label: "Pricing Plans", href: "/pricing" },
+           { label: "Contact", href: "/contact" },
+           { label: "Privacy Policy", href: "/privacy" }
+        ]
+      }
+    ]
+};
 
 export const Footer: React.FC = () => {
-  
-  const socialLinks = [
-    { name: 'Facebook', icon: 'fa-brands fa-facebook-f', href: '#' },
-    { name: 'Instagram', icon: 'fa-brands fa-instagram', href: '#' },
-    { name: 'LinkedIn', icon: 'fa-brands fa-linkedin-in', href: '#' },
-    { name: 'Twitter', icon: 'fa-brands fa-x-twitter', href: '#' },
-    { name: 'Behance', icon: 'fa-brands fa-behance', href: '#' },
-    { name: 'Dribbble', icon: 'fa-brands fa-dribbble', href: '#' },
-  ];
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+
+  useEffect(() => {
+      const fetchConfig = async () => {
+          try {
+              const { data } = await supabase
+                  .from('site_settings')
+                  .select('value')
+                  .eq('key', 'footer')
+                  .single();
+              
+              if (data && data.value) {
+                  // Merge with defaults to prevent crashes if DB has incomplete data
+                  setConfig({ ...DEFAULT_CONFIG, ...data.value });
+              }
+          } catch (err) {
+              console.error("Error fetching footer config:", err);
+          }
+      };
+      fetchConfig();
+  }, []);
 
   return (
     <footer className="bg-[#050505] relative overflow-hidden font-sans pt-0 border-t border-white/5">
@@ -26,11 +80,11 @@ export const Footer: React.FC = () => {
              <div className="flex shrink-0 animate-scroll-left items-center gap-12 md:gap-24 pr-12 md:pr-24">
                  {[1, 2].map((i) => (
                      <React.Fragment key={i}>
-                         <span className="text-[10vw] font-black uppercase leading-none text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40 tracking-tighter">
-                             Let's Make Something Great
+                         <span className="text-[10vw] font-black uppercase leading-none text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40 tracking-tighter whitespace-nowrap">
+                             {config.marquee_text_1}
                          </span>
-                         <span className="text-[10vw] font-black uppercase leading-none text-brand-orange font-serif italic tracking-tighter">
-                             Together
+                         <span className="text-[10vw] font-black uppercase leading-none text-brand-orange font-serif italic tracking-tighter whitespace-nowrap">
+                             {config.marquee_text_2}
                          </span>
                      </React.Fragment>
                  ))}
@@ -49,20 +103,20 @@ export const Footer: React.FC = () => {
                       <span className="text-[10px] md:text-xs font-bold tracking-widest text-white uppercase">Accepting New Projects</span>
                    </div>
 
-                   <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Got a vision?</h3>
-                   <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-md">Let's architect your digital legacy with precision and style.</p>
+                   <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">{config.contact_heading}</h3>
+                   <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-md">{config.contact_subheading}</p>
 
                    <div className="mb-12">
                        <span className="block text-xs font-bold text-brand-orange tracking-widest uppercase mb-4">Inquiry</span>
-                       <a href="mailto:hello@infobytes.io" className="text-3xl sm:text-5xl md:text-7xl font-bold text-white hover:text-gray-300 transition-colors break-all leading-none decoration-brand-orange/50 underline-offset-8 hover:underline">
-                           hello@infobytes.io
+                       <a href={`mailto:${config.email}`} className="text-3xl sm:text-5xl md:text-7xl font-bold text-white hover:text-gray-300 transition-colors break-all leading-none decoration-brand-orange/50 underline-offset-8 hover:underline">
+                           {config.email}
                        </a>
                    </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
                      <a 
-                       href="https://calendly.com/shehryar-infobytes/30min" 
+                       href={config.booking_link} 
                        target="_blank" 
                        rel="noopener noreferrer"
                        className="px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all hover:scale-105 flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(255,255,255,0.15)]"
@@ -78,35 +132,30 @@ export const Footer: React.FC = () => {
 
             {/* Right Column: Links */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-10 border-t lg:border-t-0 lg:border-l border-white/10 pt-12 lg:pt-0 lg:pl-12">
-                 <div>
-                    <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-8 opacity-70">Expertise</h4>
-                    <ul className="flex flex-col gap-4">
-                       <li><Link to="/services" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">UI/UX Design Strategy</Link></li>
-                       <li><Link to="/services" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Native iOS Development</Link></li>
-                       <li><Link to="/services" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Web Development</Link></li>
-                       <li><Link to="/services" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Email Marketing</Link></li>
-                       <li><Link to="/services" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Growth Strategy</Link></li>
-                    </ul>
-                 </div>
-
-                 <div>
-                    <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-8 opacity-70">Agency</h4>
-                    <ul className="flex flex-col gap-4">
-                       <li><Link to="/about" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">About Us</Link></li>
-                       <li><Link to="/work" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Client Success</Link></li>
-                       <li><Link to="/pricing" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Pricing Plans</Link></li>
-                       <li><Link to="/contact" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Contact</Link></li>
-                       <li><Link to="/privacy" className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">Privacy Policy</Link></li>
-                    </ul>
-                 </div>
+                 {config.columns && config.columns.map((col, idx) => (
+                     <div key={idx}>
+                        <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-8 opacity-70">{col.title}</h4>
+                        <ul className="flex flex-col gap-4">
+                           {col.links.map((link, lIdx) => (
+                               <li key={lIdx}>
+                                   <Link to={link.href} className="text-gray-400 hover:text-brand-orange transition-colors text-sm md:text-base font-medium">
+                                       {link.label}
+                                   </Link>
+                               </li>
+                           ))}
+                        </ul>
+                     </div>
+                 ))}
                  
                  <div className="col-span-2 mt-4">
                      <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-6 opacity-70">Follow Us</h4>
                      <div className="flex gap-4 flex-wrap">
-                        {socialLinks.map((social) => (
+                        {config.social_links.map((social) => (
                           <a 
                             key={social.name}
                             href={social.href} 
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all hover:scale-110 group"
                             aria-label={`Follow us on ${social.name}`}
                           >
@@ -124,7 +173,7 @@ export const Footer: React.FC = () => {
                <Logo className="h-8 w-auto" />
             </Link>
             <div className="text-gray-600 text-sm font-mono">
-               © 2026 InfoBytes Agency. All rights reserved.
+               {config.copyright_text}
             </div>
         </div>
       </div>

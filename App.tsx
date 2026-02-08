@@ -30,6 +30,7 @@ import { HeroEditor } from './pages/admin/ui/HeroEditor';
 import { PricingEditor } from './pages/admin/ui/PricingEditor';
 import { FAQEditor } from './pages/admin/ui/FAQEditor';
 import { CarouselsEditor } from './pages/admin/ui/CarouselsEditor';
+import { FooterEditor } from './pages/admin/ui/FooterEditor';
 
 // Scroll to top component that listens to route changes
 const ScrollToTopOnNavigate = () => {
@@ -79,6 +80,7 @@ function App() {
                 <Route path="ui-components/pricing" element={<PricingEditor />} />
                 <Route path="ui-components/faq" element={<FAQEditor />} />
                 <Route path="ui-components/carousels" element={<CarouselsEditor />} />
+                <Route path="ui-components/footer" element={<FooterEditor />} />
                 <Route path=":section" element={<ContentManager />} />
              </Route>
           </Route>

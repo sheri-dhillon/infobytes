@@ -107,6 +107,7 @@ export const AdminLayout: React.FC = () => {
                             <SubNavItem label="Pricing Plans" href="/admin/dashboard/ui-components/pricing" active={location.pathname.includes('/pricing')} />
                             <SubNavItem label="FAQ Section" href="/admin/dashboard/ui-components/faq" active={location.pathname.includes('/faq')} />
                             <SubNavItem label="Carousels" href="/admin/dashboard/ui-components/carousels" active={location.pathname.includes('/carousels')} />
+                            <SubNavItem label="Footer" href="/admin/dashboard/ui-components/footer" active={location.pathname.includes('/footer')} />
                         </div>
                     )}
                 </div>
