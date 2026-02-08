@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Archive, Eye, Edit2, Trash2, Plus, Star, Tag, X, User, Upload, Check, Search, Filter, Globe, Info, LayoutTemplate, Monitor, Image as ImageIcon, Loader2, Link as LinkIcon, RefreshCw, ChevronRight, Bold, Italic, List, Code } from 'lucide-react';
+import { Archive, Eye, Edit2, Trash2, Plus, Star, Tag, X, User, Upload, Check, Search, Filter, Globe, Info, LayoutTemplate, Monitor, Image as ImageIcon, Loader2, Link as LinkIcon, RefreshCw, ChevronRight, Bold, Italic, List, Code, RotateCcw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 // --- Table View ---
@@ -10,6 +10,7 @@ interface TableViewProps {
     onEdit?: (item: any) => void;
     onView?: (item: any) => void;
     onDelete?: (item: any) => void;
+    onRestore?: (item: any) => void; // Added Restore prop
     onAdd?: () => void;
     onManageCategories?: () => void;
     viewMode: 'active' | 'archived';
@@ -19,7 +20,7 @@ interface TableViewProps {
 }
 
 export const TableView: React.FC<TableViewProps> = ({ 
-    title, data, columns, onEdit, onView, onDelete, onAdd, onManageCategories, viewMode, onToggleView, canEdit
+    title, data, columns, onEdit, onView, onDelete, onRestore, onAdd, onManageCategories, viewMode, onToggleView, canEdit
 }) => {
     return (
         <div className="animate-fade-in w-full">
@@ -110,7 +111,7 @@ export const TableView: React.FC<TableViewProps> = ({
                                             }
 
                                             if (col === 'Pills') {
-                                                let pillsToRender: any[] = [];
+                                                let pillsToRender: string[] = [];
                                                 if (Array.isArray(row.pills)) pillsToRender = row.pills;
                                                 else if (typeof row.pills === 'string') {
                                                     try {
@@ -125,9 +126,9 @@ export const TableView: React.FC<TableViewProps> = ({
                                                 return (
                                                     <td key={cIdx} className="p-5">
                                                         <div className="flex gap-2 flex-wrap max-w-[200px]">
-                                                            {pillsToRender.map((p, i) => {
-                                                                // Safety check: ensure p is a string or number before rendering
-                                                                const val = typeof p === 'object' ? JSON.stringify(p) : p;
+                                                            {pillsToRender.map((p:string, i:number) => {
+                                                                // Ensure p is string
+                                                                const val = typeof p === 'string' ? p : JSON.stringify(p);
                                                                 return (
                                                                     <span key={i} className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-gray-400 border border-white/5">{val}</span>
                                                                 );
@@ -150,8 +151,21 @@ export const TableView: React.FC<TableViewProps> = ({
                                         <td className="p-5 text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 {onView && <button onClick={() => onView(row)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="View"><Eye className="w-4 h-4" /></button>}
-                                                {canEdit && onEdit && <button onClick={() => onEdit(row)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="Edit"><Edit2 className="w-4 h-4" /></button>}
-                                                {canEdit && onDelete && <button onClick={() => onDelete(row)} className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors" title="Archive"><Trash2 className="w-4 h-4" /></button>}
+                                                
+                                                {/* Restore Button for Archived Items */}
+                                                {viewMode === 'archived' && canEdit && onRestore && (
+                                                    <button onClick={() => onRestore(row)} className="p-2 hover:bg-green-500/10 rounded-lg text-gray-400 hover:text-green-400 transition-colors" title="Restore"><RotateCcw className="w-4 h-4" /></button>
+                                                )}
+
+                                                {/* Edit Button (Active Items Only or if allowed) */}
+                                                {canEdit && onEdit && viewMode === 'active' && <button onClick={() => onEdit(row)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="Edit"><Edit2 className="w-4 h-4" /></button>}
+                                                
+                                                {/* Delete Button (Archive for Active, Permanent for Archived) */}
+                                                {canEdit && onDelete && (
+                                                    <button onClick={() => onDelete(row)} className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors" title={viewMode === 'archived' ? 'Delete Permanently' : 'Archive'}>
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -175,8 +189,8 @@ export const DeleteConfirmationModal: React.FC<{ isOpen: boolean, onClose: () =>
                 <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
                     <Trash2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-white font-bold mb-2 text-xl">Archive Item?</h3>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">This item will be hidden from the public site but can be restored later from the archive.</p>
+                <h3 className="text-white font-bold mb-2 text-xl">Confirm Action</h3>
+                <p className="text-gray-400 text-sm mb-8 leading-relaxed">Are you sure you want to proceed? This action might be irreversible.</p>
                 <div className="flex gap-3 justify-center">
                     <button onClick={onClose} className="px-6 py-3 text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors font-medium">Cancel</button>
                     <button onClick={onConfirm} className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors shadow-lg shadow-red-900/20">Confirm</button>

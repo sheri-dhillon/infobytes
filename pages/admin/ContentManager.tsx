@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { TableView, ServiceEditor, PostEditor, TestimonialModal, LeadDetailsModal, DeleteConfirmationModal, CategoryManagerModal } from '../../components/admin/AdminComponents';
@@ -8,6 +8,10 @@ import { Loader2, ShieldAlert } from 'lucide-react';
 export const ContentManager: React.FC = () => {
     const { section } = useParams<{ section: string }>();
     const { profile, user } = useAuth();
+    
+    // Safely consume refresh context
+    const context = useOutletContext<{ refreshKey: number }>();
+    const refreshKey = context?.refreshKey || 0;
     
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -29,8 +33,9 @@ export const ContentManager: React.FC = () => {
     const isRestricted = isBlogger && (section !== 'posts');
 
     // Fetch Data Logic
-    const fetchData = async () => {
-        if (isRestricted) return;
+    const fetchData = useCallback(async () => {
+        if (isRestricted || !section) return;
+        
         setLoading(true);
         try {
             let query: any;
@@ -46,34 +51,56 @@ export const ContentManager: React.FC = () => {
                 default: table = '';
             }
 
-            if (!table) { setData([]); setLoading(false); return; }
+            if (!table) { 
+                setData([]); 
+                setLoading(false); 
+                return; 
+            }
 
-            // Special query for posts to get author
+            // Fetch categories for posts independently to avoid blocking
             if (table === 'posts') {
-                query = supabase.from(table).select(`*, author:author_id(full_name, avatar_url)`).order('created_at', { ascending: false });
-                // Also fetch categories for posts
-                const { data: catData } = await supabase.from('categories').select('*');
-                if(catData) setCategories(catData);
+                supabase.from('categories').select('*').then(({ data: catData }) => {
+                    if (catData) setCategories(catData);
+                });
+                
+                query = supabase
+                    .from(table)
+                    .select(`*, author:author_id(full_name, avatar_url)`)
+                    .order('created_at', { ascending: false });
             } else {
-                query = supabase.from(table).select('*').order('created_at', { ascending: false });
+                query = supabase
+                    .from(table)
+                    .select('*')
+                    .order('created_at', { ascending: false });
             }
 
             const { data: result, error } = await query;
-            if (!error && result) setData(result);
+            
+            if (error) {
+                console.error(`Error fetching ${table}:`, error);
+                // Optionally show error toast here
+            }
+            
+            if (result) {
+                setData(result);
+            }
             
         } catch (err) {
-            console.error(err);
+            console.error("Fetch data error:", err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [section, isRestricted]);
 
+    // Re-fetch when section changes or refreshKey updates
     useEffect(() => {
         fetchData();
-        setViewMode('active');
-        setIsEditorOpen(false);
-        setEditingItem(null);
-    }, [section]);
+        if (section) {
+            setViewMode('active');
+            setIsEditorOpen(false);
+            setEditingItem(null);
+        }
+    }, [fetchData, refreshKey, section]);
 
     // Helpers
     const getColumns = () => {
@@ -101,7 +128,7 @@ export const ContentManager: React.FC = () => {
 
     // Actions
     const handleSave = async (itemData: any) => {
-        if (!canEdit && section !== 'leads') return; // Leads can update status by managers often, but keeping simple
+        if (!canEdit && section !== 'leads') return; 
         
         let table = section === 'casestudies' ? 'case_studies' : section;
         
@@ -109,21 +136,16 @@ export const ContentManager: React.FC = () => {
         let payload = { ...itemData };
         let id = itemData.id;
 
-        // Specific payload cleaning
-        if (section === 'services') {
-            // Ensure pills are JSON stringified if they are an array, as DB might expect text
-            if (Array.isArray(payload.pills)) {
-                payload.pills = JSON.stringify(payload.pills);
-            }
-        }
+        // Clean up payload - remove ID (Supabase handles it) and derived fields
+        delete payload.id;
+        delete payload.author; // Remove joined object
+        delete payload.fullname; // Derived field if any
 
+        // Specific payload logic
         if (section === 'posts') {
             // Ensure author is set on creation
             if (!id) payload.author_id = user?.id;
-            delete payload.author; // Remove joined object
         }
-
-        console.log('Saving to', table, payload); // Debug
 
         let error;
         if (id) {
@@ -148,14 +170,39 @@ export const ContentManager: React.FC = () => {
         if (!deleteConfirmation.item) return;
         let table = section === 'casestudies' ? 'case_studies' : section;
         
-        const { error } = await supabase.from(table!).update({ status: 'Archived' }).eq('id', deleteConfirmation.item.id);
+        // Check either the item status OR current view mode to determine hard delete
+        const isPermanent = deleteConfirmation.item.status === 'Archived' || viewMode === 'archived';
+
+        if (isPermanent) {
+             const { error } = await supabase.from(table!).delete().eq('id', deleteConfirmation.item.id);
+             if (error) {
+                console.error("Delete error:", error);
+                alert("Failed to delete permanently: " + error.message);
+             }
+        } else {
+             // Soft Delete (Archive)
+             const { error } = await supabase.from(table!).update({ status: 'Archived' }).eq('id', deleteConfirmation.item.id);
+             if (error) {
+                console.error("Archive error:", error);
+                alert("Failed to archive: " + error.message);
+             }
+        }
+        
+        await fetchData();
+        setDeleteConfirmation({ isOpen: false, item: null });
+    };
+
+    const handleRestore = async (item: any) => {
+        if (!item) return;
+        let table = section === 'casestudies' ? 'case_studies' : section;
+        
+        const { error } = await supabase.from(table!).update({ status: 'Draft' }).eq('id', item.id);
         
         if (error) {
-            console.error("Delete error:", error);
-            alert("Failed to delete: " + error.message);
+            console.error("Restore error:", error);
+            alert("Failed to restore: " + error.message);
         } else {
             await fetchData();
-            setDeleteConfirmation({ isOpen: false, item: null });
         }
     };
 
@@ -196,6 +243,7 @@ export const ContentManager: React.FC = () => {
                 onEdit={(item) => { setEditingItem(item); setIsEditorOpen(true); }}
                 onView={section === 'leads' ? (item) => { setEditingItem(item); setIsEditorOpen(true); } : undefined}
                 onDelete={(item) => setDeleteConfirmation({ isOpen: true, item })}
+                onRestore={handleRestore}
                 onManageCategories={section === 'posts' ? () => setIsCategoryModalOpen(true) : undefined}
             />
 

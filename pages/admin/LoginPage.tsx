@@ -29,12 +29,15 @@ export const LoginPage: React.FC = () => {
     setMessage('');
     setLoading(true);
 
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
     try {
       if (isLoginMode) {
         // --- LOGIN LOGIC ---
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: trimmedEmail,
+          password: trimmedPassword,
         });
 
         if (error) throw error;
@@ -45,8 +48,8 @@ export const LoginPage: React.FC = () => {
       } else {
         // --- SIGN UP LOGIC ---
         const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: trimmedEmail,
+          password: trimmedPassword,
           options: {
             data: {
               role: 'admin' // Optional metadata, actual role handled by DB trigger
@@ -62,8 +65,9 @@ export const LoginPage: React.FC = () => {
              navigate('/admin/dashboard');
           } else {
              // If no session, email confirmation likely required
-             setMessage('Account created! Please check your email to confirm your account before logging in.');
+             setMessage('Account created! Please check your email inbox (and spam) to confirm your account before logging in.');
              setIsLoginMode(true); // Switch back to login mode
+             setPassword(''); // Clear password for security
           }
         }
       }
@@ -76,7 +80,7 @@ export const LoginPage: React.FC = () => {
       if (errorMessage.includes('Failed to fetch')) {
         errorMessage = 'Network error: Could not connect to Supabase. Your project might be paused or your internet is down.';
       } else if (errorMessage.includes('Invalid login credentials')) {
-        errorMessage = 'Incorrect email or password. If you just signed up, please check your email for a confirmation link.';
+        errorMessage = 'Incorrect email or password. If you recently signed up, please ensure you have confirmed your email address.';
       }
       
       setError(errorMessage);
@@ -113,9 +117,9 @@ export const LoginPage: React.FC = () => {
         )}
 
         {message && (
-          <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm animate-fade-in">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {message}
+          <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl mb-6 flex items-start gap-2 text-sm animate-fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{message}</span>
           </div>
         )}
 

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
+import { Loader2 } from 'lucide-react';
 
 // Define the shape of our Profile
 export interface UserProfile {
@@ -77,7 +78,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        // If we already have the correct profile, avoid refetching to reduce flickering
+        if (session.user.id !== user?.id) {
+             await fetchProfile(session.user.id);
+        }
       } else {
         setProfile(null);
       }
@@ -94,14 +98,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(null);
       setUser(null);
       setProfile(null);
-      // Optional: Clear local storage if you store anything else
       localStorage.clear(); 
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
       setLoading(false);
-      // Force reload to ensure clean state if needed, or router will handle it
-      // window.location.href = '/'; 
     }
   };
 
@@ -118,9 +119,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refreshProfile
   };
 
+  if (loading) {
+      return (
+          <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-brand-purple animate-spin" />
+          </div>
+      );
+  }
+
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { createClient } from '@supabase/supabase-js'; // Import to create temp client
-import { User, Lock, Mail, Shield, Save, CheckCircle, AlertCircle, Loader2, Trash2, Edit2, Plus, UserPlus, Upload, X } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js'; 
+import { User, Lock, Shield, Save, CheckCircle, AlertCircle, Loader2, Upload } from 'lucide-react';
+
+// Define VITE env vars for manual client creation
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://yzhiautmlscflysrqxtm.supabase.co';
+const SUPABASE_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6aGlhdXRtbHNjZmx5c3JxeHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDU2NzcsImV4cCI6MjA4NTI4MTY3N30.1ZL3Db_rUstFttlJ7PKYJYLz9w9CFn2Fk-2bYFpSZcU';
 
 // Reuse upload helper
 const uploadImage = async (file: File) => {
@@ -48,7 +52,6 @@ export const SettingsPage: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [isLoadingTeam, setIsLoadingTeam] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null); // For role updates
-  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false); // Modal state
 
   useEffect(() => {
     if (profile) {
@@ -119,15 +122,24 @@ export const SettingsPage: React.FC = () => {
     setPassMsg({ type: '', text: '' });
 
     try {
-      // 1. Verify old password by attempting to sign in (Verify credential)
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // 1. Verify old password using a TEMPORARY client.
+      // We do this to prevent the main session from refreshing/changing which causes infinite loaders or redirects.
+      const tempClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: {
+              persistSession: false, // Important: Don't overwrite local storage
+              autoRefreshToken: false,
+              detectSessionInUrl: false
+          }
+      });
+
+      const { error: signInError } = await tempClient.auth.signInWithPassword({
         email: user?.email || '',
         password: passwords.old
       });
 
       if (signInError) throw new Error("Incorrect old password.");
 
-      // 2. Update password
+      // 2. Update password using the MAIN client (authenticated user)
       const { error: updateError } = await supabase.auth.updateUser({
         password: passwords.new
       });
@@ -139,7 +151,7 @@ export const SettingsPage: React.FC = () => {
     } catch (err: any) {
       setPassMsg({ type: 'error', text: err.message });
     } finally {
-      setIsChangingPass(false); // Ensure this runs to stop loader
+      setIsChangingPass(false);
     }
   };
 
@@ -345,21 +357,14 @@ export const SettingsPage: React.FC = () => {
                     </div>
                     <div>
                         <h4 className="text-white font-bold mb-1">Manage Access</h4>
-                        <p className="text-gray-400 text-sm mb-2">Only Admins can add new members. Default role is Manager.</p>
+                        <p className="text-gray-400 text-sm mb-2">Manage team roles and permissions.</p>
                         <ul className="text-xs text-gray-500 space-y-1 list-disc pl-4">
                             <li><strong className="text-gray-300">Admin:</strong> Full access + Team management.</li>
                             <li><strong className="text-gray-300">Manager:</strong> Read-only access.</li>
-                            <li><strong className="text-gray-300">Blogger:</strong> Full access to Posts only.</li>
+                            <li><strong className="text-gray-300">Editor:</strong> Full access to Posts only.</li>
                         </ul>
                     </div>
                 </div>
-                
-                <button 
-                    onClick={() => setIsAddMemberOpen(true)}
-                    className="bg-white text-black px-4 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-lg"
-                >
-                    <UserPlus className="w-4 h-4" /> Add Member
-                </button>
            </div>
 
            <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden">
@@ -396,7 +401,7 @@ export const SettingsPage: React.FC = () => {
                                 >
                                    <option value="admin">Admin</option>
                                    <option value="manager">Manager</option>
-                                   <option value="blogger">Blogger</option>
+                                   <option value="blogger">Editor</option>
                                 </select>
                              ) : (
                                 <span className={`px-2 py-1 rounded text-xs font-bold uppercase border ${
@@ -404,7 +409,7 @@ export const SettingsPage: React.FC = () => {
                                    member.role === 'blogger' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'
                                 }`}>
-                                   {member.role}
+                                   {member.role === 'blogger' ? 'Editor' : member.role}
                                 </span>
                              )}
                           </td>
@@ -428,134 +433,6 @@ export const SettingsPage: React.FC = () => {
            </div>
         </div>
       )}
-
-      {/* Add Member Modal */}
-      {isAddMemberOpen && (
-          <AddMemberModal 
-            onClose={() => setIsAddMemberOpen(false)}
-            onSuccess={() => {
-                fetchTeam();
-                setIsAddMemberOpen(false);
-            }}
-          />
-      )}
     </div>
   );
-};
-
-// --- Helper Component: Add Member Modal ---
-const AddMemberModal: React.FC<{ onClose: () => void, onSuccess: () => void }> = ({ onClose, onSuccess }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [fullName, setFullName] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-
-        try {
-            // Trick: Create a temporary Supabase client instance that DOES NOT persist the session.
-            // This allows us to sign up a new user without logging out the current admin.
-            const tempClient = createClient(
-                'https://yzhiautmlscflysrqxtm.supabase.co',
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6aGlhdXRtbHNjZmx5c3JxeHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDU2NzcsImV4cCI6MjA4NTI4MTY3N30.1ZL3Db_rUstFttlJ7PKYJYLz9w9CFn2Fk-2bYFpSZcU',
-                {
-                    auth: {
-                        persistSession: false, // CRITICAL: Don't overwrite local storage
-                        autoRefreshToken: false,
-                        detectSessionInUrl: false
-                    }
-                }
-            );
-
-            const { data, error: signUpError } = await tempClient.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: fullName,
-                        role: 'manager' // Default role
-                    }
-                }
-            });
-
-            if (signUpError) throw signUpError;
-
-            if (data.user) {
-                // User created. The trigger in DB will handle profile creation.
-                alert("Member added successfully! They can now log in.");
-                onSuccess();
-            }
-        } catch (err: any) {
-            console.error("Error adding member:", err);
-            setError(err.message || 'Failed to add member.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md p-6 relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
-                    <X className="w-5 h-5" />
-                </button>
-                <h3 className="text-xl font-bold text-white mb-6">Add New Member</h3>
-                
-                {error && (
-                    <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-sm mb-4">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
-                        <input 
-                            type="text" 
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Email</label>
-                        <input 
-                            type="email" 
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Password</label>
-                        <input 
-                            type="password" 
-                            className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-purple/50 focus:outline-none"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            minLength={6}
-                        />
-                    </div>
-                    
-                    <div className="pt-4">
-                        <button 
-                            type="submit" 
-                            disabled={isLoading}
-                            className="w-full bg-white text-black font-bold py-3.5 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-                        >
-                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-                            Create Account
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
 };

@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
-import { LayoutDashboard, FolderOpen, Layers, MessageSquare, FileText, Briefcase, Users, Settings, LogOut, Bell, User } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Layers, MessageSquare, FileText, Briefcase, Users, Settings, LogOut, Bell, User, RefreshCw } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
   const { logout, profile } = useAuth();
@@ -13,6 +13,8 @@ export const AdminLayout: React.FC = () => {
   // Notification State
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // State to trigger refreshes
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
   const isBlogger = profile?.role === 'blogger';
@@ -56,6 +58,13 @@ export const AdminLayout: React.FC = () => {
         return () => { supabase.removeChannel(channel); };
       }
   }, [isBlogger]);
+
+  const handleRefresh = () => {
+      setIsRefreshing(true);
+      setRefreshKey(prev => prev + 1);
+      // Simulate a small delay for visual feedback if data fetches are too fast
+      setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
@@ -115,6 +124,17 @@ export const AdminLayout: React.FC = () => {
          <header className="h-16 bg-[#0a0a0a]/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 sticky top-0 z-30">
             <h1 className="text-white font-bold text-lg capitalize">{location.pathname.split('/').pop()}</h1>
             <div className="flex items-center gap-4">
+                
+                {/* Refresh Button */}
+                <button 
+                    onClick={handleRefresh} 
+                    className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-all hover:bg-white/10"
+                    title="Refresh Data"
+                >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-brand-orange' : ''}`} />
+                </button>
+
+                {/* Notifications */}
                 <div className="relative" ref={notificationRef}>
                     <button onClick={() => setIsNotificationOpen(!isNotificationOpen)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors relative">
                         <Bell className="w-4 h-4" />
@@ -144,7 +164,7 @@ export const AdminLayout: React.FC = () => {
          </header>
 
          <div className="p-6 md:p-8 flex-1">
-            <Outlet />
+            <Outlet context={{ refreshKey }} />
          </div>
       </main>
     </div>
