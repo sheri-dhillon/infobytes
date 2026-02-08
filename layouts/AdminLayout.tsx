@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Logo } from '../components/Logo';
-import { LayoutDashboard, FolderOpen, Layers, MessageSquare, FileText, Briefcase, Users, Settings, LogOut, Bell, User, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Layers, MessageSquare, FileText, Briefcase, Users, Settings, LogOut, Bell, User, RefreshCw, ChevronDown, LayoutTemplate } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
   const { logout, profile } = useAuth();
@@ -13,9 +13,12 @@ export const AdminLayout: React.FC = () => {
   // Notification State
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // State to trigger refreshes
+  const [refreshKey, setRefreshKey] = useState(0); 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  // UI Components Dropdown State
+  const [isUiMenuOpen, setIsUiMenuOpen] = useState(location.pathname.includes('/ui-components'));
 
   const isBlogger = profile?.role === 'blogger';
 
@@ -62,7 +65,6 @@ export const AdminLayout: React.FC = () => {
   const handleRefresh = () => {
       setIsRefreshing(true);
       setRefreshKey(prev => prev + 1);
-      // Simulate a small delay for visual feedback if data fetches are too fast
       setTimeout(() => setIsRefreshing(false), 500);
   };
 
@@ -76,11 +78,40 @@ export const AdminLayout: React.FC = () => {
             <Logo className="h-6 w-auto" />
          </div>
          
-         <nav className="flex-1 p-4 space-y-1">
+         <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
             <div className="px-4 py-2 text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Menu</div>
             <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Home" href="/admin/dashboard" active={location.pathname === '/admin/dashboard'} />
             
-            {/* Conditional Rendering based on Role */}
+            {/* UI Components Dropdown */}
+            {!isBlogger && (
+                <div className="space-y-1">
+                    <button 
+                        onClick={() => setIsUiMenuOpen(!isUiMenuOpen)}
+                        className={`flex items-center justify-between px-4 py-3 w-full text-left rounded-lg transition-all duration-200 group ${
+                            location.pathname.includes('/ui-components')
+                            ? 'text-white bg-white/5' 
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <LayoutTemplate className="w-4 h-4" />
+                            <span className="text-sm">UI Components</span>
+                        </div>
+                        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isUiMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {isUiMenuOpen && (
+                        <div className="pl-4 space-y-1 animate-slide-up-fade" style={{ animationDuration: '0.2s' }}>
+                            <SubNavItem label="Header" href="/admin/dashboard/ui-components/header" active={location.pathname.includes('/header')} />
+                            <SubNavItem label="Hero Section" href="/admin/dashboard/ui-components/hero" active={location.pathname.includes('/hero')} />
+                            <SubNavItem label="Pricing Plans" href="/admin/dashboard/ui-components/pricing" active={location.pathname.includes('/pricing')} />
+                            <SubNavItem label="FAQ Section" href="/admin/dashboard/ui-components/faq" active={location.pathname.includes('/faq')} />
+                            <SubNavItem label="Carousels" href="/admin/dashboard/ui-components/carousels" active={location.pathname.includes('/carousels')} />
+                        </div>
+                    )}
+                </div>
+            )}
+
             {!isBlogger && (
                 <>
                     <NavItem icon={<Layers className="w-4 h-4" />} label="Services" href="/admin/dashboard/services" active={location.pathname.includes('/services')} />
@@ -122,10 +153,12 @@ export const AdminLayout: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 md:ml-64 relative min-h-screen bg-[#050505] flex flex-col">
          <header className="h-16 bg-[#0a0a0a]/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 sticky top-0 z-30">
-            <h1 className="text-white font-bold text-lg capitalize">{location.pathname.split('/').pop()}</h1>
+            <div className="flex items-center gap-2">
+                <h1 className="text-white font-bold text-lg capitalize">{location.pathname.split('/').pop()}</h1>
+            </div>
+            
             <div className="flex items-center gap-4">
                 
-                {/* Refresh Button */}
                 <button 
                     onClick={handleRefresh} 
                     className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-all hover:bg-white/10"
@@ -134,7 +167,6 @@ export const AdminLayout: React.FC = () => {
                     <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-brand-orange' : ''}`} />
                 </button>
 
-                {/* Notifications */}
                 <div className="relative" ref={notificationRef}>
                     <button onClick={() => setIsNotificationOpen(!isNotificationOpen)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors relative">
                         <Bell className="w-4 h-4" />
@@ -185,6 +217,23 @@ const NavItem: React.FC<{ icon: React.ReactNode; label: string; active?: boolean
             <span className={`${active ? 'text-black' : 'group-hover:text-white'}`}>{icon}</span>
             <span className="text-sm">{label}</span>
             {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-orange"></div>}
+        </button>
+    );
+};
+
+const SubNavItem: React.FC<{ label: string; active?: boolean; href: string }> = ({ label, active, href }) => {
+    const navigate = useNavigate();
+    return (
+        <button 
+            onClick={() => navigate(href)}
+            className={`flex items-center gap-3 px-4 py-2 w-full text-left rounded-lg transition-all duration-200 pl-11 ${
+                active 
+                ? 'text-white font-bold' 
+                : 'text-gray-500 hover:text-white'
+            }`}
+        >
+            <div className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-brand-orange' : 'bg-white/20'}`}></div>
+            <span className="text-sm">{label}</span>
         </button>
     );
 };

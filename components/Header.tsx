@@ -2,32 +2,74 @@ import React, { useState, useEffect } from 'react';
 import { Phone, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
+import { supabase } from '../lib/supabase';
+
+// Default config matches original hardcoded values
+const DEFAULT_CONFIG = {
+    logo_url: '', // Falls back to Logo component default
+    logo_alt: 'InfoBytes Agency', // Default alt text
+    cta_text: 'Book a 30 mins call',
+    cta_link: 'https://calendly.com/shehryar-infobytes/30min',
+    availability_status: 'available', // Default status
+    menu_items: [
+        { label: 'Home', href: '/' },
+        { label: 'About', href: '/about' },
+        { label: 'Service', href: '/services' },
+        { label: 'Portfolio', href: '/work' },
+        { label: 'Reviews', href: '/testimonials' },
+        { label: 'Contact', href: '/contact' },
+    ]
+};
 
 export const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+
+  // Fetch dynamic configuration
+  useEffect(() => {
+      const fetchHeaderConfig = async () => {
+          try {
+              const { data } = await supabase
+                  .from('site_settings')
+                  .select('value')
+                  .eq('key', 'header')
+                  .single();
+              
+              if (data && data.value) {
+                  // Merge with defaults to ensure safety
+                  setConfig({
+                      ...DEFAULT_CONFIG,
+                      ...data.value,
+                      menu_items: data.value.menu_items || DEFAULT_CONFIG.menu_items
+                  });
+              }
+          } catch (error) {
+              console.error('Error loading header config', error);
+          }
+      };
+      fetchHeaderConfig();
+  }, []);
 
   // Prevent scrolling when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden'; // Ensure lock on html as well for some browsers
+      document.documentElement.style.overflow = 'hidden'; 
     } else {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     }
-    
     return () => {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     };
   }, [isOpen]);
 
-  // Close menu on route change and FORCE unlock scroll
+  // Close menu on route change
   useEffect(() => {
     setIsOpen(false);
-    // Force unlock immediately on navigation to prevent race conditions
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
   }, [location]);
@@ -37,19 +79,23 @@ export const Header: React.FC = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Service', href: '/services' },
-    { name: 'Portfolio', href: '/work' },
-    { name: 'Reviews', href: '/testimonials' },
-    { name: 'Contact', href: '/contact' },
-  ];
+  // Helper for status visual
+  const getStatusDisplay = (status: string) => {
+      switch(status) {
+          case 'partially_available':
+              return { color: 'bg-yellow-500', text: 'Limited availability' };
+          case 'not_available':
+              return { color: 'bg-red-500', text: 'Fully booked' };
+          default:
+              return { color: 'bg-green-500', text: 'Available now' };
+      }
+  };
+
+  const statusDisplay = getStatusDisplay(config.availability_status || 'available');
 
   return (
     <>
@@ -62,9 +108,9 @@ export const Header: React.FC = () => {
       >
         <div className="max-w-[1400px] mx-auto flex items-center justify-between relative z-50">
           
-          {/* Left: Contact Pill (Hidden on Mobile) */}
+          {/* Left: Contact Pill (Dynamic CTA) */}
           <a 
-            href="https://calendly.com/shehryar-infobytes/30min" 
+            href={config.cta_link} 
             target="_blank" 
             rel="noopener noreferrer" 
             className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${
@@ -75,25 +121,33 @@ export const Header: React.FC = () => {
                 <Phone className={`fill-current transition-all duration-500 ${isScrolled ? 'w-4 h-4' : 'w-6 h-6'}`} />
              </div>
              <div className="flex flex-col">
-                <span className={`font-bold text-white leading-tight transition-all duration-500 ${isScrolled ? 'text-sm' : 'text-base'}`}>Book a 30 mins call</span>
+                <span className={`font-bold text-white leading-tight transition-all duration-500 ${isScrolled ? 'text-sm' : 'text-base'}`}>{config.cta_text}</span>
                 <div className={`flex items-center gap-2 transition-all duration-500 ${isScrolled ? 'mt-0' : 'mt-1'}`}>
-                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                   <span className={`text-gray-400 font-medium transition-all duration-500 ${isScrolled ? 'text-xs' : 'text-sm'}`}>Available now</span>
+                   <span className={`w-2 h-2 rounded-full ${statusDisplay.color} animate-pulse`}></span>
+                   <span className={`text-gray-400 font-medium transition-all duration-500 ${isScrolled ? 'text-xs' : 'text-sm'}`}>{statusDisplay.text}</span>
                 </div>
              </div>
           </a>
 
-          {/* Mobile Logo (Visible on Mobile, aligned left in flex container) */}
+          {/* Mobile Logo */}
           <div className={`md:hidden pointer-events-auto transition-opacity duration-300 text-white ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
-               <Logo className="h-8 w-auto" />
+                {config.logo_url ? (
+                    <img src={config.logo_url} alt={config.logo_alt || "InfoBytes Logo"} className="h-8 w-auto object-contain" />
+                ) : (
+                    <Logo className="h-8 w-auto" />
+                )}
              </Link>
           </div>
 
-          {/* Center: Desktop Logo (Absolute Center) */}
+          {/* Center: Desktop Logo */}
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out text-white ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
-               <Logo className={`w-auto transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
+                {config.logo_url ? (
+                    <img src={config.logo_url} alt={config.logo_alt || "InfoBytes Logo"} className={`w-auto object-contain transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
+                ) : (
+                    <Logo className={`w-auto transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
+                )}
              </Link>
           </div>
 
@@ -120,7 +174,7 @@ export const Header: React.FC = () => {
              </button>
           </div>
           
-          {/* Close Button for Menu (Absolute positioned when open) */}
+          {/* Close Button for Menu */}
           {isOpen && (
             <button 
                 onClick={() => setIsOpen(false)}
@@ -140,15 +194,15 @@ export const Header: React.FC = () => {
            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-purple/5 blur-[120px] rounded-full pointer-events-none"></div>
 
            <nav className="flex flex-col items-center gap-6 md:gap-8 text-center p-4 relative z-10">
-             {navItems.map((item, index) => (
+             {config.menu_items.map((item, index) => (
                <Link 
-                 key={item.name} 
+                 key={index} 
                  to={item.href} 
                  onClick={() => setIsOpen(false)} 
                  className="text-4xl md:text-5xl lg:text-7xl font-bold text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-brand-orange hover:to-brand-purple transition-all opacity-0 animate-slide-up-fade font-sans tracking-tight"
                  style={{ animationDelay: `${100 + index * 100}ms` }}
                >
-                 {item.name}
+                 {item.label}
                </Link>
              ))}
              {/* Mobile Menu Login Link */}
@@ -156,7 +210,7 @@ export const Header: React.FC = () => {
                to="/admin/login" 
                onClick={() => setIsOpen(false)} 
                className="md:hidden mt-4 px-8 py-3 rounded-full border border-white/10 bg-white/5 text-white font-medium opacity-0 animate-slide-up-fade"
-               style={{ animationDelay: `${100 + navItems.length * 100}ms` }}
+               style={{ animationDelay: `${100 + config.menu_items.length * 100}ms` }}
              >
                Login to Admin
              </Link>

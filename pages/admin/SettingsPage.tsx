@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { createClient } from '@supabase/supabase-js'; 
 import { User, Lock, Shield, Save, CheckCircle, AlertCircle, Loader2, Upload } from 'lucide-react';
 
-// Define VITE env vars for manual client creation
-const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://yzhiautmlscflysrqxtm.supabase.co';
-const SUPABASE_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6aGlhdXRtbHNjZmx5c3JxeHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDU2NzcsImV4cCI6MjA4NTI4MTY3N30.1ZL3Db_rUstFttlJ7PKYJYLz9w9CFn2Fk-2bYFpSZcU';
+// Use hardcoded values to ensure tempClient creation never fails due to env var issues
+const SUPABASE_URL = 'https://yzhiautmlscflysrqxtm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6aGlhdXRtbHNjZmx5c3JxeHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDU2NzcsImV4cCI6MjA4NTI4MTY3N30.1ZL3Db_rUstFttlJ7PKYJYLz9w9CFn2Fk-2bYFpSZcU';
 
 // Reuse upload helper
 const uploadImage = async (file: File) => {
@@ -35,12 +35,20 @@ const uploadImage = async (file: File) => {
 export const SettingsPage: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'team'>('profile');
+  
+  // Mounted ref to prevent state updates on unmounted component
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+      isMounted.current = true;
+      return () => { isMounted.current = false; };
+  }, []);
 
   // --- Profile State ---
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false); // New state
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
 
   // --- Password State ---
@@ -69,8 +77,8 @@ export const SettingsPage: React.FC = () => {
   const fetchTeam = async () => {
     setIsLoadingTeam(true);
     const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-    if (data) setTeamMembers(data);
-    setIsLoadingTeam(false);
+    if (data && isMounted.current) setTeamMembers(data);
+    if (isMounted.current) setIsLoadingTeam(false);
   };
 
   // --- Profile Actions ---
@@ -81,11 +89,11 @@ export const SettingsPage: React.FC = () => {
       setProfileMsg({ type: '', text: '' });
       try {
           const url = await uploadImage(e.target.files[0]);
-          setAvatarUrl(url);
+          if (isMounted.current) setAvatarUrl(url);
       } catch (error: any) {
-          setProfileMsg({ type: 'error', text: 'Failed to upload image: ' + error.message });
+          if (isMounted.current) setProfileMsg({ type: 'error', text: 'Failed to upload image: ' + error.message });
       } finally {
-          setIsUploadingAvatar(false);
+          if (isMounted.current) setIsUploadingAvatar(false);
       }
   };
 
@@ -103,11 +111,11 @@ export const SettingsPage: React.FC = () => {
       if (error) throw error;
 
       await refreshProfile();
-      setProfileMsg({ type: 'success', text: 'Profile updated successfully.' });
+      if (isMounted.current) setProfileMsg({ type: 'success', text: 'Profile updated successfully.' });
     } catch (err: any) {
-      setProfileMsg({ type: 'error', text: err.message });
+      if (isMounted.current) setProfileMsg({ type: 'error', text: err.message });
     } finally {
-      setIsSavingProfile(false);
+      if (isMounted.current) setIsSavingProfile(false);
     }
   };
 
@@ -139,6 +147,8 @@ export const SettingsPage: React.FC = () => {
 
       if (signInError) throw new Error("Incorrect old password.");
 
+      if (!isMounted.current) return;
+
       // 2. Update password using the MAIN client (authenticated user)
       const { error: updateError } = await supabase.auth.updateUser({
         password: passwords.new
@@ -146,12 +156,14 @@ export const SettingsPage: React.FC = () => {
 
       if (updateError) throw updateError;
 
-      setPassMsg({ type: 'success', text: 'Password updated successfully.' });
-      setPasswords({ old: '', new: '', confirm: '' });
+      if (isMounted.current) {
+          setPassMsg({ type: 'success', text: 'Password updated successfully.' });
+          setPasswords({ old: '', new: '', confirm: '' });
+      }
     } catch (err: any) {
-      setPassMsg({ type: 'error', text: err.message });
+      if (isMounted.current) setPassMsg({ type: 'error', text: err.message });
     } finally {
-      setIsChangingPass(false);
+      if (isMounted.current) setIsChangingPass(false);
     }
   };
 

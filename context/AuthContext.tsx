@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { Loader2, WifiOff } from 'lucide-react';
@@ -28,7 +28,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Track mounting to prevent state updates on unmount
+  const mounted = useRef(true);
+  
+  // Track current user ID to prevent redundant fetches or stale state logic
+  const currentUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+      mounted.current = true;
+      return () => { mounted.current = false; };
+  }, []);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -38,7 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .eq('id', userId)
         .single();
       
-      if (!error && data) {
+      if (!error && data && mounted.current) {
         setProfile(data);
       }
     } catch (err) {
@@ -47,34 +57,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    let mounted = true;
-
     // 1. Get initial session with timeout safety
     const initSession = async () => {
       try {
-        // Create a timeout promise (increased to 60s)
         const timeout = new Promise((_, reject) => 
             setTimeout(() => reject(new Error("Connection timeout")), 60000)
         );
 
-        // Race fetching session against timeout
         const { data } = await Promise.race([
             supabase.auth.getSession(),
             timeout.then(() => { throw new Error("Timeout") })
         ]) as any;
 
-        if (mounted) {
+        if (mounted.current) {
             setSession(data.session);
             setUser(data.session?.user ?? null);
+            currentUserIdRef.current = data.session?.user?.id ?? null;
+            
             if (data.session?.user) {
               await fetchProfile(data.session.user.id);
             }
         }
       } catch (error: any) {
         console.error("Session init error:", error);
-        if (mounted) setError(error.message || "Failed to connect");
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted.current) setLoading(false);
       }
     };
 
@@ -82,49 +89,53 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
+      if (!mounted.current) return;
       
-      // Handle explicit sign out event
       if (event === 'SIGNED_OUT') {
         setSession(null);
         setUser(null);
         setProfile(null);
+        currentUserIdRef.current = null;
         setLoading(false);
         return;
       }
 
+      // Optimization: Only update if session/user actually changed significantly
+      const newUserId = session?.user?.id;
+      
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        // If we already have the correct profile, avoid refetching to reduce flickering
-        if (session.user.id !== user?.id) {
-             await fetchProfile(session.user.id);
-        }
-      } else {
-        setProfile(null);
+      if (newUserId && newUserId !== currentUserIdRef.current) {
+         currentUserIdRef.current = newUserId;
+         await fetchProfile(newUserId);
+      } else if (!newUserId) {
+         setProfile(null);
+         currentUserIdRef.current = null;
       }
+      
       setLoading(false);
     });
 
     return () => {
-        mounted = false;
         subscription.unsubscribe();
     };
   }, []);
 
   const logout = async () => {
     try {
-      setLoading(true);
+      if (mounted.current) setLoading(true);
       await supabase.auth.signOut();
-      setSession(null);
-      setUser(null);
-      setProfile(null);
+      if (mounted.current) {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+      }
       localStorage.clear(); 
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
   };
 
@@ -149,11 +160,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           </div>
       );
   }
-
-  // If critical init error (like Supabase down), allow showing children? 
-  // Usually we still want to show the app so they can maybe login or see a friendly error.
-  // But if session check failed hard, we might be in an inconsistent state.
-  // For now, if loading is done, we render. isAuthenticated will be false if session failed.
 
   return (
     <AuthContext.Provider value={value}>

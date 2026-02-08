@@ -1,158 +1,42 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Star, ArrowLeft, ArrowRight } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
-const testimonials = [
-  // Category 1: Email Marketing & Automation
-  {
-    quote: "Working with this team changed our entire retention strategy. They didn't just set up email flows; they built a high-converting revenue engine. We’ve seen a massive jump in recovered carts since the launch. Truly a professional with deep knowledge.",
-    name: "Jonas Wadel",
-    role: "Founder, E-com Collective",
-    service: "Email Marketing & Automation",
-    stars: 5
-  },
-  {
-    quote: "The communication was exceptional, but the results were even better. They took our messy email list and turned it into an automated profit center. If you need someone who understands the technical side of email marketing, look no further.",
-    name: "Thomas Poppa",
-    role: "Marketing Director",
-    service: "Email Marketing & Automation",
-    stars: 5
-  },
-  {
-    quote: "Simply the best. They mapped out our entire customer journey and implemented flows that actually feel personal to our users. Our repeat purchase rate has never been higher. Highly recommended for any serious brand.",
-    name: "Brittany Miller",
-    role: "CEO, Glow Brands",
-    service: "Email Marketing & Automation",
-    stars: 5
-  },
-  {
-    quote: "Exceptional work! They simplified a very complex automation task for us. Their knowledge of email deliverability and design is top-tier. A great professional who delivers exactly what is promised, and then some.",
-    name: "Edward Sullivan",
-    role: "Operations Manager",
-    service: "Email Marketing & Automation",
-    stars: 5
-  },
-  {
-    quote: "Clear communication and incredible execution. They built a lifecycle marketing system that works while we sleep. It's rare to find an agency that understands both the creative and the data-driven side of marketing so well.",
-    name: "Dionne Richards",
-    role: "Founder, Lifestyle Co.",
-    service: "Email Marketing & Automation",
-    stars: 5
-  },
-
-  // Category 2: Web Design & Development
-  {
-    quote: "Our new site is lightning fast and looks incredible. They took our vision and engineered a web experience that has already improved our conversion rate by 40%. Great work and very communicative throughout the process.",
-    name: "Muhammad Afzaal",
-    role: "Tech Lead",
-    service: "Web Design & Development",
-    stars: 5
-  },
-  {
-    quote: "They handled our complex web development needs with total ease. Even when we ran into heavy workloads, they remained professional and delivered a high-performance site that exceeds our expectations. Highly recommended!",
-    name: "Uzma Khan",
-    role: "Creative Director",
-    service: "Web Design & Development",
-    stars: 5
-  },
-  {
-    quote: "A truly professional experience. They didn't just build a website; they built a digital storefront that sells. Their knowledge of modern web architecture is evident in the final product. Speed, SEO, and style—they nailed it all.",
-    name: "Daniel Townes",
-    role: "Startup Founder",
-    service: "Web Design & Development",
-    stars: 5
-  },
-  {
-    quote: "Great and fast! They turned our outdated site into a modern, responsive powerhouse. The transition was seamless, and the code is remarkably clean. We will definitely be back for our future development projects.",
-    name: "Sarah Pointer",
-    role: "E-commerce Manager",
-    service: "Web Design & Development",
-    stars: 5
-  },
-  {
-    quote: "Communication was great, but the final build was even better. They have a unique ability to blend technical development with a high-end design aesthetic. Looking forward to working together on the next phase of our growth.",
-    name: "Brooklyn Wilson",
-    role: "Managing Partner",
-    service: "Web Design & Development",
-    stars: 5
-  },
-
-  // Category 3: UI/UX Design
-  {
-    quote: "The UI/UX work was transformative. They identified friction points we didn't even know existed and redesigned our user flow to be incredibly intuitive. The design is clean, modern, and perfectly aligned with our brand.",
-    name: "Marcus Sterling",
-    role: "Head of Product",
-    service: "UI/UX Design",
-    stars: 5
-  },
-  {
-    quote: "They have a deep understanding of human-centric design. Our new interface isn't just beautiful; it's functional and easy to navigate. They truly turned our concept into a world-class digital product.",
-    name: "Elena Vance",
-    role: "App Founder",
-    service: "UI/UX Design",
-    stars: 5
-  },
-  {
-    quote: "Highly professional design process. From wireframes to high-fidelity prototypes, every step was handled with precision. They created a design system that is scalable and absolutely stunning.",
-    name: "Julian Thorne",
-    role: "CEO, Fintech Solutions",
-    service: "UI/UX Design",
-    stars: 5
-  },
-  {
-    quote: "They took our rough ideas and polished them into a high-end user experience. Their attention to detail in the UI elements is what sets them apart from other agencies. An amazing partner for any creative project.",
-    name: "Sarah Jenkins",
-    role: "Marketing Lead",
-    service: "UI/UX Design",
-    stars: 5
-  },
-  {
-    quote: "The UI/UX strategy they delivered helped us secure our next round of funding. Investors were blown away by the clarity and professionalism of the interface. Exceptional knowledge and execution.",
-    name: "Robert Chen",
-    role: "CTO",
-    service: "UI/UX Design",
-    stars: 5
-  },
-
-  // Category 4: iOS App Development
-  {
-    quote: "The technical precision of our iOS app is outstanding. It’s fast, stable, and follows all of Apple’s latest HIG standards. They turned a complex set of features into a seamless mobile experience.",
-    name: "David Rossi",
-    role: "Founder, HealthTech App",
-    service: "iOS App Development",
-    stars: 5
-  },
-  {
-    quote: "Working with this team on our native iOS app was the best decision we made. The communication was constant, and the technical execution was flawless. They truly know how to build for the App Store.",
-    name: "Lisa Kensington",
-    role: "Product Manager",
-    service: "iOS App Development",
-    stars: 5
-  },
-  {
-    quote: "Clean code, great architecture, and a beautiful front-end. They handled everything from API integration to the final deployment. Our app is scaling perfectly, and user feedback has been 100% positive.",
-    name: "Michael Park",
-    role: "Tech Entrepreneur",
-    service: "iOS App Development",
-    stars: 5
-  },
-  {
-    quote: "They delivered our iOS project ahead of schedule and with zero bugs. Their ability to solve complex technical problems on the fly is impressive. If you want a native app done right, this is the agency.",
-    name: "Karen Wu",
-    role: "Director of Innovation",
-    service: "iOS App Development",
-    stars: 5
-  },
-  {
-    quote: "From initial consultation to the App Store launch, the journey was perfect. They are not just developers; they are strategic partners who care about the success of your product. Five stars all the way.",
-    name: "Alex Turner",
-    role: "Founder, Social Ventures",
-    service: "iOS App Development",
-    stars: 5
-  }
-];
+interface TestimonialItem {
+    id: number;
+    name: string;
+    business_name: string; // role in UI
+    service_name: string;
+    review: string;
+    stars: number;
+}
 
 export const Testimonials: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      const fetchTestimonials = async () => {
+          try {
+              const { data, error } = await supabase
+                  .from('testimonials')
+                  .select('*')
+                  .eq('status', 'Active')
+                  .order('created_at', { ascending: false }); // Newest first
+
+              if (!error && data) {
+                  setTestimonials(data);
+              }
+          } catch (err) {
+              console.error("Error loading testimonials:", err);
+          } finally {
+              setLoading(false);
+          }
+      };
+
+      fetchTestimonials();
+  }, []);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
@@ -168,6 +52,9 @@ export const Testimonials: React.FC = () => {
       });
     }
   };
+
+  if (loading) return null; // Or a loading skeleton if preferred
+  if (testimonials.length === 0) return null;
 
   return (
     <section className="py-20 md:py-24 bg-black relative overflow-hidden">
@@ -232,7 +119,7 @@ export const Testimonials: React.FC = () => {
               >
                 {testimonials.map((t, i) => (
                   <div 
-                    key={i} 
+                    key={t.id || i} 
                     className="min-w-[300px] md:min-w-[380px] lg:min-w-[420px] bg-[#0a0a0a] border border-white/10 p-6 md:p-8 rounded-3xl snap-center group hover:border-white/20 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[360px]"
                   >
                      {/* Hover Gradient */}
@@ -245,19 +132,19 @@ export const Testimonials: React.FC = () => {
                          ))}
                        </div>
                        <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-                         "{t.quote}"
+                         "{t.review}"
                        </p>
                      </div>
   
                      <div className="mt-8 relative z-10 pt-6 border-t border-white/5">
                         <div className="mb-3">
                             <span className="text-[10px] font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-purple uppercase">
-                                {t.service}
+                                {t.service_name}
                             </span>
                         </div>
                         <div>
                            <div className="text-white font-bold text-sm">{t.name}</div>
-                           <div className="text-xs text-gray-500">{t.role}</div>
+                           <div className="text-xs text-gray-500">{t.business_name}</div>
                         </div>
                      </div>
                   </div>

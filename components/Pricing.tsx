@@ -1,50 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+interface Plan {
+    id: string;
+    name: string;
+    tagline: string;
+    description: string;
+    price: string;
+    frequency: string;
+    isCustom: boolean;
+    features: string[];
+    highlight: boolean;
+}
 
 export const Pricing: React.FC = () => {
-  const plans = [
-    {
-      name: "The Launchpad",
-      tagline: "Design Focus",
-      description: "Best for early-stage brands needing a world-class foundation.",
-      price: "5,000",
-      features: [
-        "Premium UI/UX Strategy & Wireframing",
-        "High-Performance Custom Website (Up to 5 Pages)",
-        "Foundational SEO & Speed Optimization",
-        "Brand Style Guide & Component Library",
-        "2 Rounds of High-Fidelity Revisions"
-      ]
-    },
-    {
-      name: "The Accelerator",
-      tagline: "Development & Email Focus",
-      description: "Our most popular plan for scaling eCommerce and Mobile products.",
-      price: "12,500",
-      highlight: true,
-      features: [
-        "iOS App Development (Native Swift/SwiftUI)",
-        "Advanced eCommerce Optimization",
-        "Revenue-Generating Email Marketing",
-        "Comprehensive Lead Capture Systems",
-        "Priority Engineering Support & Weekly Sprints"
-      ]
-    },
-    {
-      name: "The Enterprise",
-      tagline: "Scale Focus",
-      description: "A full-cycle partnership for global market dominance.",
-      price: "Custom Quote",
-      customPrice: true,
-      features: [
-        "Full-Funnel Email Marketing & Retention",
-        "Cross-Platform Development (iOS + Web + Backend)",
-        "Dedicated Project Manager & Senior Architect",
-        "Quarterly Brand Workshops & Competitor Audits",
-        "Continuous A/B Testing & Lifecycle Optimization"
-      ]
-    }
-  ];
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      const fetchPlans = async () => {
+          try {
+              const { data } = await supabase
+                  .from('site_settings')
+                  .select('value')
+                  .eq('key', 'pricing_plans')
+                  .single();
+              
+              if (data && data.value) {
+                  setPlans(data.value);
+              }
+          } catch (err) {
+              console.error("Error fetching pricing plans", err);
+          } finally {
+              setLoading(false);
+          }
+      };
+      fetchPlans();
+  }, []);
+
+  if (loading) return null; // Or a skeleton loader if preferred
+
+  // If no plans, hide section (or show empty state)
+  if (plans.length === 0) return null;
 
   return (
     <section className="py-24 md:py-32 bg-[#050505] relative overflow-hidden" id="pricing">
@@ -64,7 +62,7 @@ export const Pricing: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+        <div className={`grid gap-8 items-stretch ${plans.length === 1 ? 'max-w-md mx-auto' : plans.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
            {plans.map((plan, idx) => (
              <div key={idx} className="h-full">
                {plan.highlight ? (
@@ -89,7 +87,7 @@ export const Pricing: React.FC = () => {
   );
 };
 
-const CardContent: React.FC<{ plan: any }> = ({ plan }) => (
+const CardContent: React.FC<{ plan: Plan }> = ({ plan }) => (
   <>
     <div className="mb-8">
         <div className={`text-xs font-bold tracking-wider uppercase mb-3 ${plan.highlight ? 'text-brand-orange' : 'text-gray-500'}`}>
@@ -100,7 +98,7 @@ const CardContent: React.FC<{ plan: any }> = ({ plan }) => (
     </div>
 
     <div className="mb-10 pb-8 border-b border-white/5">
-        {plan.customPrice ? (
+        {plan.isCustom ? (
             <div className="text-3xl md:text-4xl font-bold text-white tracking-tight py-1">
                 Custom Quote
             </div>
@@ -108,7 +106,9 @@ const CardContent: React.FC<{ plan: any }> = ({ plan }) => (
             <div className="flex items-baseline gap-1">
                 <span className="text-xl text-gray-500 font-medium">$</span>
                 <span className="text-4xl md:text-5xl font-bold text-white tracking-tight">{plan.price}</span>
-                <span className="text-sm text-gray-500 font-medium ml-2">/ month</span>
+                {plan.frequency !== 'one-time' && (
+                    <span className="text-sm text-gray-500 font-medium ml-2">/ {plan.frequency}</span>
+                )}
             </div>
         )}
     </div>

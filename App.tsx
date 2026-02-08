@@ -25,13 +25,17 @@ import { DashboardHome } from './pages/admin/DashboardHome';
 import { ContentManager } from './pages/admin/ContentManager';
 import { SettingsPage } from './pages/admin/SettingsPage';
 import { FileManager } from './pages/admin/FileManager';
+import { HeaderEditor } from './pages/admin/ui/HeaderEditor';
+import { HeroEditor } from './pages/admin/ui/HeroEditor';
+import { PricingEditor } from './pages/admin/ui/PricingEditor';
+import { FAQEditor } from './pages/admin/ui/FAQEditor';
+import { CarouselsEditor } from './pages/admin/ui/CarouselsEditor';
 
 // Scroll to top component that listens to route changes
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Ensure scroll is unlocked and at top
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
     window.scrollTo(0, 0);
@@ -69,6 +73,12 @@ function App() {
                 <Route index element={<DashboardHome />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="files" element={<FileManager />} />
+                {/* UI Components Routes */}
+                <Route path="ui-components/header" element={<HeaderEditor />} />
+                <Route path="ui-components/hero" element={<HeroEditor />} />
+                <Route path="ui-components/pricing" element={<PricingEditor />} />
+                <Route path="ui-components/faq" element={<FAQEditor />} />
+                <Route path="ui-components/carousels" element={<CarouselsEditor />} />
                 <Route path=":section" element={<ContentManager />} />
              </Route>
           </Route>
