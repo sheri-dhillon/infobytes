@@ -1,74 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Star, Quote, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
-const column1 = [
-  {
-    quote: "Working with this team changed our entire retention strategy. They built a high-converting revenue engine.",
-    name: "Jonas Wadel",
-    role: "Founder, E-com Collective",
-    image: "https://randomuser.me/api/portraits/men/32.jpg"
-  },
-  {
-    quote: "They took our messy email list and turned it into an automated profit center. Truly exceptional work.",
-    name: "Thomas Poppa",
-    role: "Marketing Director",
-    image: "https://randomuser.me/api/portraits/men/45.jpg"
-  },
-  {
-    quote: "Our new site is lightning fast. They engineered a web experience that improved conversion by 40%.",
-    name: "Muhammad Afzaal",
-    role: "Tech Lead",
-    image: "https://randomuser.me/api/portraits/men/22.jpg"
-  },
-  {
-    quote: "The UI/UX work was transformative. They identified friction points we didn't even know existed.",
-    name: "Marcus Sterling",
-    role: "Head of Product",
-    image: "https://randomuser.me/api/portraits/men/85.jpg"
-  },
-  {
-    quote: "Clean code, great architecture, and a beautiful front-end. Our app is scaling perfectly.",
-    name: "Michael Park",
-    role: "Tech Entrepreneur",
-    image: "https://randomuser.me/api/portraits/men/11.jpg"
-  },
-];
+interface TestimonialItem {
+    id: number;
+    name: string;
+    business_name: string; // role in UI
+    review: string;
+    stars: number;
+}
 
-const column2 = [
-  {
-    quote: "Simply the best. They mapped out our entire customer journey and implemented flows that feel personal.",
-    name: "Brittany Miller",
-    role: "CEO, Glow Brands",
-    image: "https://randomuser.me/api/portraits/women/44.jpg"
-  },
-  {
-    quote: "They didn't just build a website; they built a digital storefront that sells. Speed, SEO, and style.",
-    name: "Daniel Townes",
-    role: "Startup Founder",
-    image: "https://randomuser.me/api/portraits/men/67.jpg"
-  },
-  {
-    quote: "They have a deep understanding of human-centric design. Our new interface isn't just beautiful; it's functional.",
-    name: "Elena Vance",
-    role: "App Founder",
-    image: "https://randomuser.me/api/portraits/women/33.jpg"
-  },
-  {
-    quote: "The technical precision of our iOS app is outstanding. It follows all of Apple’s latest HIG standards.",
-    name: "David Rossi",
-    role: "Founder, HealthTech",
-    image: "https://randomuser.me/api/portraits/men/54.jpg"
-  },
-  {
-    quote: "From initial consultation to the App Store launch, the journey was perfect. Strategic partners who care.",
-    name: "Alex Turner",
-    role: "Founder, Social Ventures",
-    image: "https://randomuser.me/api/portraits/women/28.jpg"
-  },
-];
-
-const TestimonialCard: React.FC<{ data: typeof column1[0] }> = ({ data }) => (
+const TestimonialCard: React.FC<{ data: TestimonialItem }> = ({ data }) => (
   <div className="bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-brand-purple/30 transition-all duration-300 group hover:shadow-[0_0_30px_rgba(185,109,243,0.1)] relative overflow-hidden">
      {/* Decorative Quote Icon */}
      <Quote className="absolute top-4 right-4 w-12 h-12 text-white/[0.03] group-hover:text-brand-purple/10 transition-colors rotate-180" />
@@ -76,23 +19,54 @@ const TestimonialCard: React.FC<{ data: typeof column1[0] }> = ({ data }) => (
      <div className="flex items-center gap-4 mb-4 relative z-10">
         <div>
            <div className="text-white font-bold text-sm">{data.name}</div>
-           <div className="text-xs text-gray-500">{data.role}</div>
+           <div className="text-xs text-gray-500">{data.business_name}</div>
         </div>
      </div>
      
      <p className="text-gray-400 text-sm leading-relaxed relative z-10 group-hover:text-gray-200 transition-colors">
-       "{data.quote}"
+       "{data.review}"
      </p>
 
      <div className="flex gap-1 mt-4">
-        {[1,2,3,4,5].map(i => (
-           <Star key={i} className="w-3 h-3 text-brand-orange fill-brand-orange" />
+        {[...Array(5)].map((_, i) => (
+           <Star key={i} className={`w-3 h-3 ${i < (data.stars || 5) ? 'text-brand-orange fill-brand-orange' : 'text-gray-700'}`} />
         ))}
      </div>
   </div>
 );
 
 export const VerticalTestimonials: React.FC = () => {
+  const [column1, setColumn1] = useState<TestimonialItem[]>([]);
+  const [column2, setColumn2] = useState<TestimonialItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      const fetchTestimonials = async () => {
+          try {
+              const { data, error } = await supabase
+                  .from('testimonials')
+                  .select('*')
+                  .eq('status', 'Active')
+                  .order('created_at', { ascending: false })
+                  .limit(10); // Get top 10
+
+              if (!error && data) {
+                  // Split into two columns
+                  const half = Math.ceil(data.length / 2);
+                  setColumn1(data.slice(0, half));
+                  setColumn2(data.slice(half));
+              }
+          } catch (err) {
+              console.error("Error fetching testimonials:", err);
+          } finally {
+              setLoading(false);
+          }
+      };
+      fetchTestimonials();
+  }, []);
+
+  if (loading || (column1.length === 0 && column2.length === 0)) return null;
+
   return (
     <section className="py-24 bg-black relative border-t border-white/5 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center">

@@ -1,9 +1,35 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-export const StatsScroll: React.FC = () => {
+interface StatItem {
+    id: number;
+    value: string;
+    label: string;
+    theme: string;
+    x: number;
+    y: number;
+    mx: number;
+    my: number;
+}
+
+interface StatsScrollProps {
+    stats?: StatItem[];
+}
+
+const DEFAULT_STATS = [
+    { id: 1, value: "2016", label: "Founded, 8 Years of experience", theme: "orange", x: -30, y: -25, mx: 0, my: -32 },
+    { id: 2, value: "150+", label: "In product launches", theme: "white", x: -12, y: -35, mx: -5, my: -20 },
+    { id: 3, value: "$1.35B", label: "Startup funding raised", theme: "purple", x: 5, y: -5, mx: 5, my: -8 },
+    { id: 4, value: "13K+", label: "Active startups", theme: "white", x: -25, y: 15, mx: -5, my: 8 },
+    { id: 5, value: "254+", label: "Team Members", theme: "orange", x: 30, y: -15, mx: 5, my: 20 },
+    { id: 6, value: "25K+", label: "Funds and syndicates", theme: "purple", x: 20, y: 25, mx: 0, my: 32 }
+];
+
+export const StatsScroll: React.FC<StatsScrollProps> = ({ stats = DEFAULT_STATS }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+
+  const displayStats = stats.length > 0 ? stats : DEFAULT_STATS;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -20,8 +46,6 @@ export const StatsScroll: React.FC = () => {
       const viewportHeight = window.innerHeight;
       const elementHeight = rect.height;
       
-      // We want the animation to start when the container hits the top (sticky start)
-      // and end when it's scrolled fully (bottom of container hits bottom of viewport ideally, or stickiness ends)
       const scrollDist = elementHeight - viewportHeight;
       const scrolled = -rect.top;
       
@@ -34,61 +58,10 @@ export const StatsScroll: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    handleScroll(); 
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const stats = [
-    { 
-      id: 1, 
-      value: "2016", 
-      label: "Founded, 8 Years of experience", 
-      theme: "orange", 
-      x: -30, y: -25, // Desktop
-      mx: 0, my: -32  // Mobile
-    },
-    { 
-      id: 2, 
-      value: "150+", 
-      label: "In product launches", 
-      theme: "white", 
-      x: -12, y: -35,
-      mx: -5, my: -20
-    },
-    { 
-      id: 3, 
-      value: "$1.35B", 
-      label: "Startup funding raised", 
-      theme: "purple", 
-      x: 5, y: -5,
-      mx: 5, my: -8
-    },
-    { 
-      id: 4, 
-      value: "13K+", 
-      label: "Active startups", 
-      theme: "white", 
-      x: -25, y: 15,
-      mx: -5, my: 8
-    },
-    { 
-      id: 5, 
-      value: "254+", 
-      label: "Team Members", 
-      theme: "orange", 
-      x: 30, y: -15,
-      mx: 5, my: 20
-    },
-    { 
-      id: 6, 
-      value: "25K+", 
-      label: "Funds and syndicates", 
-      theme: "purple", 
-      x: 20, y: 25,
-      mx: 0, my: 32
-    }
-  ];
 
   const getThemeClasses = (theme: string) => {
     switch(theme) {
@@ -126,7 +99,7 @@ export const StatsScroll: React.FC = () => {
         <div className="relative z-20 w-full max-w-[1400px] h-full pointer-events-none">
            {/* Center anchor point for calculations */}
            <div className="absolute top-1/2 left-1/2 w-0 h-0">
-               {stats.map((stat, idx) => {
+               {displayStats.map((stat, idx) => {
                  // Determine final position based on device
                  const targetX = isMobile ? stat.mx : stat.x;
                  const targetY = isMobile ? stat.my : stat.y;
@@ -135,9 +108,7 @@ export const StatsScroll: React.FC = () => {
                  const yPos = targetY * progress;
                  
                  const rotation = (progress * (idx % 2 === 0 ? 5 : -5));
-                 // Start with a small scale (0.5) and grow to 1
                  const scale = 0.5 + (0.5 * progress);
-                 // Fade in faster than the move
                  const opacity = Math.min(progress * 3, 1); 
 
                  return (

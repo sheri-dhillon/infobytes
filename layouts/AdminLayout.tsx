@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -104,9 +105,12 @@ export const AdminLayout: React.FC = () => {
                         <div className="pl-4 space-y-1 animate-slide-up-fade" style={{ animationDuration: '0.2s' }}>
                             <SubNavItem label="Header" href="/admin/dashboard/ui-components/header" active={location.pathname.includes('/header')} />
                             <SubNavItem label="Hero Section" href="/admin/dashboard/ui-components/hero" active={location.pathname.includes('/hero')} />
+                            <SubNavItem label="About Page" href="/admin/dashboard/ui-components/about" active={location.pathname.includes('/about')} />
                             <SubNavItem label="Pricing Plans" href="/admin/dashboard/ui-components/pricing" active={location.pathname.includes('/pricing')} />
                             <SubNavItem label="FAQ Section" href="/admin/dashboard/ui-components/faq" active={location.pathname.includes('/faq')} />
                             <SubNavItem label="Carousels" href="/admin/dashboard/ui-components/carousels" active={location.pathname.includes('/carousels')} />
+                            <SubNavItem label="Industries" href="/admin/dashboard/ui-components/industries" active={location.pathname.includes('/industries')} />
+                            <SubNavItem label="Contact Page" href="/admin/dashboard/ui-components/contact" active={location.pathname.includes('/contact')} />
                             <SubNavItem label="Footer" href="/admin/dashboard/ui-components/footer" active={location.pathname.includes('/footer')} />
                         </div>
                     )}

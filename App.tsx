@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -31,6 +32,9 @@ import { PricingEditor } from './pages/admin/ui/PricingEditor';
 import { FAQEditor } from './pages/admin/ui/FAQEditor';
 import { CarouselsEditor } from './pages/admin/ui/CarouselsEditor';
 import { FooterEditor } from './pages/admin/ui/FooterEditor';
+import { AboutEditor } from './pages/admin/ui/AboutEditor';
+import { IndustriesEditor } from './pages/admin/ui/IndustriesEditor';
+import { ContactEditor } from './pages/admin/ui/ContactEditor';
 
 // Scroll to top component that listens to route changes
 const ScrollToTopOnNavigate = () => {
@@ -77,9 +81,12 @@ function App() {
                 {/* UI Components Routes */}
                 <Route path="ui-components/header" element={<HeaderEditor />} />
                 <Route path="ui-components/hero" element={<HeroEditor />} />
+                <Route path="ui-components/about" element={<AboutEditor />} />
                 <Route path="ui-components/pricing" element={<PricingEditor />} />
                 <Route path="ui-components/faq" element={<FAQEditor />} />
                 <Route path="ui-components/carousels" element={<CarouselsEditor />} />
+                <Route path="ui-components/industries" element={<IndustriesEditor />} />
+                <Route path="ui-components/contact" element={<ContactEditor />} />
                 <Route path="ui-components/footer" element={<FooterEditor />} />
                 <Route path=":section" element={<ContentManager />} />
              </Route>

@@ -2,20 +2,29 @@ import React from 'react';
 import { MousePointer2, TrendingUp, DollarSign, ArrowUpRight, Activity, Percent, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const row1Images = [
+interface CultureScrollProps {
+    images?: string[];
+}
+
+const DEFAULT_IMAGES = [
   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
 ];
 
-const row2Images = [
-  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80",
-];
+export const CultureScroll: React.FC<CultureScrollProps> = ({ images = [] }) => {
+  // Ensure we have enough images to loop nicely, fallback to defaults
+  const displayImages = images.length > 0 ? images : DEFAULT_IMAGES;
+  
+  // Split images for row 1 and row 2 visual variance
+  const row1Images = displayImages.slice(0, Math.ceil(displayImages.length / 2));
+  const row2Images = displayImages.slice(Math.ceil(displayImages.length / 2));
 
-export const CultureScroll: React.FC = () => {
+  // If too few images, repeat them to fill marquee
+  const finalRow1 = row1Images.length < 4 ? [...row1Images, ...row1Images, ...row1Images] : row1Images;
+  const finalRow2 = row2Images.length < 3 ? [...row2Images, ...row2Images, ...row2Images] : row2Images;
+
   return (
     <section className="py-20 bg-black overflow-hidden flex flex-col gap-6 md:gap-8">
       
@@ -23,7 +32,7 @@ export const CultureScroll: React.FC = () => {
       <div className="relative flex overflow-hidden group">
          <div className="flex gap-6 animate-scroll-left min-w-full shrink-0 items-stretch">
             {/* Duplicated set for seamless loop */}
-            {[...row1Images, ...row1Images, ...row1Images].map((img, i) => (
+            {[...finalRow1, ...finalRow1, ...finalRow1].map((img, i) => (
                 <div key={i} className="w-[300px] md:w-[400px] h-[250px] md:h-[320px] rounded-3xl overflow-hidden shrink-0 border border-white/10 relative">
                     <img src={img} alt="Culture" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
@@ -102,15 +111,12 @@ export const CultureScroll: React.FC = () => {
                       </div>
                   </div>
 
-                  {/* Item 3: Image */}
-                  <div className="w-[300px] md:w-[400px] h-[400px] rounded-3xl overflow-hidden shrink-0 border border-white/10 relative">
-                     <img src={row2Images[0]} alt="Team" className="w-full h-full object-cover grayscale group-hover/row2:grayscale-0 transition-all duration-500" />
-                  </div>
-
-                  {/* Item 4: Image */}
-                  <div className="w-[300px] md:w-[400px] h-[400px] rounded-3xl overflow-hidden shrink-0 border border-white/10 relative">
-                     <img src={row2Images[1]} alt="Team" className="w-full h-full object-cover grayscale group-hover/row2:grayscale-0 transition-all duration-500" />
-                  </div>
+                  {/* Item 3 & 4: Images from Row 2 */}
+                  {finalRow2.map((img, i) => (
+                      <div key={i} className="w-[300px] md:w-[400px] h-[400px] rounded-3xl overflow-hidden shrink-0 border border-white/10 relative">
+                         <img src={img} alt="Team" className="w-full h-full object-cover grayscale group-hover/row2:grayscale-0 transition-all duration-500" />
+                      </div>
+                  ))}
 
                </React.Fragment>
              ))}
