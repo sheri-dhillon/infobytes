@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { TableView, ServiceEditor, PostEditor, TestimonialModal, LeadDetailsModal, DeleteConfirmationModal, CategoryManagerModal } from '../../components/admin/AdminComponents';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import { TableView, ServiceEditor, PostEditor, CaseStudyEditor, TestimonialModal, LeadDetailsModal, DeleteConfirmationModal, CategoryManagerModal } from '../../components/admin/AdminComponents';
+import { Loader2, ShieldAlert, RefreshCw } from 'lucide-react';
 
 export const ContentManager: React.FC = () => {
     const { section } = useParams<{ section: string }>();
@@ -15,6 +15,7 @@ export const ContentManager: React.FC = () => {
     
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null); // New error state
     const [viewMode, setViewMode] = useState<'active' | 'archived'>('active');
     
     // Editor States
@@ -22,26 +23,25 @@ export const ContentManager: React.FC = () => {
     const [editingItem, setEditingItem] = useState<any>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [categories, setCategories] = useState<any[]>([]);
+    const [services, setServices] = useState<any[]>([]); // To populate service dropdown for case studies
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; item: any | null }>({ isOpen: false, item: null });
 
     const isBlogger = profile?.role === 'blogger';
     const isManager = profile?.role === 'manager';
-    // Managers can view but not edit (unless it's leads status, etc - simplified here to read-only for table structure)
     const canEdit = !isManager; 
 
-    // Access Control Logic
     const isRestricted = isBlogger && (section !== 'posts');
 
-    // Fetch Data Logic
     const fetchData = useCallback(async () => {
         if (isRestricted || !section) return;
         
         setLoading(true);
+        setError(null);
+
         try {
             let query: any;
             let table = '';
 
-            // Map URL section to DB table
             switch(section) {
                 case 'services': table = 'services'; break;
                 case 'posts': table = 'posts'; break;
@@ -57,7 +57,7 @@ export const ContentManager: React.FC = () => {
                 return; 
             }
 
-            // Fetch categories for posts independently to avoid blocking
+            // Categories fetch (non-blocking)
             if (table === 'posts') {
                 supabase.from('categories').select('*').then(({ data: catData }) => {
                     if (catData) setCategories(catData);
@@ -67,6 +67,15 @@ export const ContentManager: React.FC = () => {
                     .from(table)
                     .select(`*, author:author_id(full_name, avatar_url)`)
                     .order('created_at', { ascending: false });
+            } else if (table === 'case_studies') {
+                // If viewing case studies, fetch services for the dropdown selector
+                supabase.from('services').select('title, id').eq('status', 'Active').then(({ data: serviceData }) => {
+                    if (serviceData) setServices(serviceData);
+                });
+                query = supabase
+                    .from(table)
+                    .select('*')
+                    .order('created_at', { ascending: false });
             } else {
                 query = supabase
                     .from(table)
@@ -74,19 +83,22 @@ export const ContentManager: React.FC = () => {
                     .order('created_at', { ascending: false });
             }
 
-            const { data: result, error } = await query;
+            // Add a safety timeout to the fetch (increased to 60s)
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Request timed out. Please check your connection.')), 60000)
+            );
+
+            const response: any = await Promise.race([query, timeoutPromise]);
             
-            if (error) {
-                console.error(`Error fetching ${table}:`, error);
-                // Optionally show error toast here
+            if (response.error) throw response.error;
+            
+            if (response.data) {
+                setData(response.data);
             }
             
-            if (result) {
-                setData(result);
-            }
-            
-        } catch (err) {
+        } catch (err: any) {
             console.error("Fetch data error:", err);
+            setError(err.message || 'An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
@@ -102,7 +114,6 @@ export const ContentManager: React.FC = () => {
         }
     }, [fetchData, refreshKey, section]);
 
-    // Helpers
     const getColumns = () => {
         switch(section) {
             case 'services': return ['Title', 'Pills', 'Status'];
@@ -126,25 +137,20 @@ export const ContentManager: React.FC = () => {
         }
     };
 
-    // Actions
     const handleSave = async (itemData: any) => {
         if (!canEdit && section !== 'leads') return; 
         
         let table = section === 'casestudies' ? 'case_studies' : section;
         
-        // Prepare payload (start with all data)
         let payload = { ...itemData };
         let id = itemData.id;
 
-        // Clean up common fields
+        // Cleanup before send
         delete payload.id;
         delete payload.author;
         delete payload.fullname;
-        delete payload.created_at; // Don't try to update timestamp
+        delete payload.created_at; 
 
-        // --- SPECIFIC PAYLOAD SANITIZATION ---
-        // This ensures we only send fields that exist in the DB columns
-        
         if (section === 'services') {
             payload = {
                 title: itemData.title,
@@ -153,7 +159,6 @@ export const ContentManager: React.FC = () => {
                 content: itemData.content,
                 image: itemData.image,
                 status: itemData.status,
-                // Ensure pills are stored as a JSON string for the DB
                 pills: Array.isArray(itemData.pills) ? JSON.stringify(itemData.pills) : itemData.pills,
                 seo_title: itemData.seo_title,
                 meta_description: itemData.meta_description
@@ -171,11 +176,25 @@ export const ContentManager: React.FC = () => {
                 views: itemData.views || 0
             };
             if (!id) {
-                payload.author_id = user?.id; // Set author only on create
+                payload.author_id = user?.id; 
             }
+        } else if (section === 'casestudies') {
+            payload = {
+                title: itemData.title,
+                subtitle: itemData.subtitle,
+                slug: itemData.slug,
+                content: itemData.content,
+                status: itemData.status,
+                client_logo: itemData.client_logo,
+                service_category: itemData.service_category, // Service Select
+                before_image: itemData.before_image,
+                after_image: itemData.after_image,
+                image: itemData.after_image, // Auto-set main listing image to the 'after' image
+                seo_title: itemData.seo_title,
+                meta_description: itemData.meta_description,
+                keywords: itemData.keywords
+            };
         }
-
-        console.log('Saving to', table, payload);
 
         let error;
         if (id) {
@@ -191,7 +210,6 @@ export const ContentManager: React.FC = () => {
             setIsEditorOpen(false);
             setEditingItem(null);
         } else {
-            console.error("Supabase Save Error:", error);
             alert("Error saving: " + error.message);
         }
     };
@@ -199,23 +217,14 @@ export const ContentManager: React.FC = () => {
     const confirmDelete = async () => {
         if (!deleteConfirmation.item) return;
         let table = section === 'casestudies' ? 'case_studies' : section;
-        
-        // Check either the item status OR current view mode to determine hard delete
         const isPermanent = deleteConfirmation.item.status === 'Archived' || viewMode === 'archived';
 
         if (isPermanent) {
              const { error } = await supabase.from(table!).delete().eq('id', deleteConfirmation.item.id);
-             if (error) {
-                console.error("Delete error:", error);
-                alert("Failed to delete permanently: " + error.message);
-             }
+             if (error) alert("Failed to delete: " + error.message);
         } else {
-             // Soft Delete (Archive)
              const { error } = await supabase.from(table!).update({ status: 'Archived' }).eq('id', deleteConfirmation.item.id);
-             if (error) {
-                console.error("Archive error:", error);
-                alert("Failed to archive: " + error.message);
-             }
+             if (error) alert("Failed to archive: " + error.message);
         }
         
         await fetchData();
@@ -225,18 +234,11 @@ export const ContentManager: React.FC = () => {
     const handleRestore = async (item: any) => {
         if (!item) return;
         let table = section === 'casestudies' ? 'case_studies' : section;
-        
         const { error } = await supabase.from(table!).update({ status: 'Draft' }).eq('id', item.id);
-        
-        if (error) {
-            console.error("Restore error:", error);
-            alert("Failed to restore: " + error.message);
-        } else {
-            await fetchData();
-        }
+        if (error) alert("Failed to restore: " + error.message);
+        else await fetchData();
     };
 
-    // Access Denied View
     if (isRestricted) {
         return (
             <div className="flex flex-col items-center justify-center h-[50vh] text-center p-6">
@@ -244,20 +246,34 @@ export const ContentManager: React.FC = () => {
                     <ShieldAlert className="w-8 h-8" />
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2">Access Denied</h2>
-                <p className="text-gray-400 max-w-md">Your account role ({profile?.role}) does not have permission to access the <strong>{getTableTitle()}</strong> section.</p>
+                <p className="text-gray-400 max-w-md">Your role ({profile?.role}) cannot access {getTableTitle()}.</p>
             </div>
         );
     }
 
-    // Render Editor
     if (isEditorOpen) {
         if (section === 'services') return <ServiceEditor service={editingItem} onSave={handleSave} onCancel={() => setIsEditorOpen(false)} />;
         if (section === 'posts') return <PostEditor post={editingItem} categories={categories} onSave={handleSave} onCancel={() => setIsEditorOpen(false)} />;
+        if (section === 'casestudies') return <CaseStudyEditor caseStudy={editingItem} services={services} onSave={handleSave} onCancel={() => setIsEditorOpen(false)} />;
     }
 
     if (loading) return <div className="flex h-64 w-full items-center justify-center"><Loader2 className="w-8 h-8 text-brand-purple animate-spin" /></div>;
 
-    // View data transformation for Leads
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 w-full text-center">
+                <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500">
+                    <ShieldAlert className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Failed to load content</h3>
+                <p className="text-gray-400 text-sm mb-6 max-w-md">{error}</p>
+                <button onClick={fetchData} className="px-6 py-2 bg-white text-black rounded-full font-bold text-sm hover:bg-gray-200 transition-colors flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" /> Retry
+                </button>
+            </div>
+        );
+    }
+
     const viewData = section === 'leads' ? getFilteredData().map(l => ({ ...l, fullname: `${l.first_name} ${l.last_name}` })) : getFilteredData();
 
     return (
@@ -268,7 +284,7 @@ export const ContentManager: React.FC = () => {
                 columns={getColumns()}
                 viewMode={viewMode}
                 onToggleView={() => setViewMode(prev => prev === 'active' ? 'archived' : 'active')}
-                canEdit={canEdit || (section === 'posts' && isBlogger)} // Bloggers can edit posts
+                canEdit={canEdit || (section === 'posts' && isBlogger)}
                 onAdd={section !== 'leads' ? () => { setEditingItem(null); setIsEditorOpen(true); } : undefined}
                 onEdit={(item) => { setEditingItem(item); setIsEditorOpen(true); }}
                 onView={section === 'leads' ? (item) => { setEditingItem(item); setIsEditorOpen(true); } : undefined}
@@ -277,7 +293,6 @@ export const ContentManager: React.FC = () => {
                 onManageCategories={section === 'posts' ? () => setIsCategoryModalOpen(true) : undefined}
             />
 
-            {/* Specific Modals */}
             {isEditorOpen && section === 'testimonials' && (
                 <TestimonialModal item={editingItem} onClose={() => setIsEditorOpen(false)} onSave={handleSave} />
             )}

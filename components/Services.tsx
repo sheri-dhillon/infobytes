@@ -55,6 +55,8 @@ export const Services: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchServices = async () => {
         try {
             // Fetch services that are specifically marked as 'Active'
@@ -62,56 +64,67 @@ export const Services: React.FC = () => {
                 .from('services')
                 .select('*')
                 .eq('status', 'Active')
-                .order('created_at', { ascending: true }); // Using created_at for consistent chronological order
+                .order('created_at', { ascending: true }); 
 
             if (error) {
                 console.error('Error fetching services:', error);
                 return;
             }
 
-            console.log("Fetched Services:", data); // Debugging: Check console to see if data is returned
-
-            if (data) {
+            if (data && isMounted) {
                 const mappedServices: ServiceItem[] = data.map((item, index) => {
                     // Cycle through layouts
-                    const layout = pillLayouts[index % pillLayouts.length];
+                    const layout = pillLayouts[index % pillLayouts.length] || [];
                     
-                    // Parse pills safely
-                    let rawPills: string[] = [];
-                    if (Array.isArray(item.pills)) {
-                        rawPills = item.pills;
-                    } else if (typeof item.pills === 'string') {
-                        try { rawPills = JSON.parse(item.pills); } catch(e) {
-                            console.warn("Failed to parse pills JSON", e);
+                    // Parse pills safely with fallback
+                    let rawPills: any[] = [];
+                    try {
+                        if (Array.isArray(item.pills)) {
+                            rawPills = item.pills;
+                        } else if (typeof item.pills === 'string') {
+                            // Try JSON parse first
+                            try {
+                                const parsed = JSON.parse(item.pills);
+                                if (Array.isArray(parsed)) rawPills = parsed;
+                                else rawPills = item.pills.split(','); 
+                            } catch {
+                                // If JSON fails, split by comma
+                                rawPills = item.pills.split(',');
+                            }
                         }
+                    } catch (err) {
+                        console.warn('Error parsing pills for service:', item.title, err);
+                        rawPills = [];
                     }
 
                     // Map pills to layout positions
-                    const pills = rawPills
+                    const pills = (Array.isArray(rawPills) ? rawPills : [])
                         .filter(p => p && typeof p === 'string' && p.trim().length > 0)
                         .map((text, pIdx) => ({
-                            text,
+                            text: text.trim(),
                             ...(layout[pIdx % layout.length] || { top: '50%', left: '50%', rotate: '0deg' })
                         }));
 
                     return {
                         id: `0${index + 1}`,
-                        title: item.title,
-                        slug: item.slug,
-                        description: item.description || '', // Handle null description
+                        title: item.title || 'Untitled Service',
+                        slug: item.slug || '#',
+                        description: item.description || '', 
                         pills
                     };
                 });
                 setServices(mappedServices);
             }
         } catch (error) {
-            console.error('Unexpected error:', error);
+            console.error('Unexpected error in Services component:', error);
         } finally {
-            setLoading(false);
+            if (isMounted) setLoading(false);
         }
     };
 
     fetchServices();
+
+    return () => { isMounted = false; };
   }, []);
 
   return (
@@ -200,7 +213,7 @@ export const Services: React.FC = () => {
            ) : (
                <div className="py-20 text-center text-gray-500 border-t border-white/10 flex flex-col items-center">
                   <p className="mb-2">No active services found.</p>
-                  <p className="text-xs opacity-50">Please ensure services are set to "Active" in the Admin Dashboard and RLS policies are configured.</p>
+                  <p className="text-xs opacity-50">Please ensure services are set to "Active" in the Admin Dashboard.</p>
                </div>
            )}
            <div className="border-t border-white/10" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Archive, Eye, Edit2, Trash2, Plus, Star, Tag, X, User, Upload, Check, Search, Filter, Globe, Info, LayoutTemplate, Monitor, Image as ImageIcon, Loader2, Link as LinkIcon, RefreshCw, ChevronRight, Bold, Italic, List, Code, RotateCcw } from 'lucide-react';
+import { Archive, Eye, Edit2, Trash2, Plus, Star, Tag, X, User, Upload, Check, Search, Filter, Globe, Info, LayoutTemplate, Monitor, Image as ImageIcon, Loader2, Link as LinkIcon, RefreshCw, ChevronRight, Bold, Italic, List, Code, RotateCcw, Box, Layers, ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 // --- Table View ---
@@ -45,7 +45,7 @@ export const TableView: React.FC<TableViewProps> = ({
 
                     {viewMode === 'active' && canEdit && onAdd && (
                         <button onClick={onAdd} className="bg-white text-black px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                            <Plus className="w-4 h-4" /> Add {title.slice(0, -1)}
+                            <Plus className="w-4 h-4" /> Add {title.endsWith('s') ? title.slice(0, -1) : title}
                         </button>
                     )}
                 </div>
@@ -90,7 +90,7 @@ export const TableView: React.FC<TableViewProps> = ({
                                                     {row.status || 'Draft'}
                                                 </span>
                                             );
-                                            if (col === 'Category') content = row.category || '-';
+                                            if (col === 'Category') content = row.category || row.service_category || '-';
                                             if (col === 'Client') content = row.client || '-';
                                             if (col === 'Views') content = <span className="font-mono text-gray-400">{row.views || 0}</span>;
                                             if (col === 'Email') content = row.email || '-';
@@ -251,7 +251,7 @@ const SimpleEditor: React.FC<{ value: string; onChange: (val: string) => void; p
     );
 };
 
-const ImagePicker: React.FC<{ value: string; onChange: (url: string) => void }> = ({ value, onChange }) => {
+const ImagePicker: React.FC<{ value: string; onChange: (url: string) => void; label?: string }> = ({ value, onChange, label = "Upload Image" }) => {
     const [uploading, setUploading] = useState(false);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -277,24 +277,24 @@ const ImagePicker: React.FC<{ value: string; onChange: (url: string) => void }> 
         <div className="relative group w-full">
             {value ? (
                 <div className="relative rounded-xl overflow-hidden border border-white/10 aspect-video bg-[#050505]">
-                    <img src={value} alt="Featured" className="w-full h-full object-cover" />
+                    <img src={value} alt="Uploaded" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         <label className="cursor-pointer px-4 py-2 bg-white text-black rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors flex items-center gap-2">
-                            <RefreshCw className="w-3 h-3" /> Change Image
+                            <RefreshCw className="w-3 h-3" /> Change
                             <input type="file" className="hidden" accept="image/*" onChange={handleUpload} disabled={uploading} />
                         </label>
                         <button onClick={() => onChange('')} className="text-red-400 text-xs font-medium hover:text-red-300 underline">Remove</button>
                     </div>
                 </div>
             ) : (
-                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/10 rounded-xl bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group">
                     {uploading ? (
-                        <Loader2 className="w-8 h-8 text-brand-purple animate-spin mb-2" />
+                        <Loader2 className="w-6 h-6 text-brand-purple animate-spin mb-2" />
                     ) : (
-                        <ImageIcon className="w-8 h-8 text-gray-500 group-hover:text-white mb-2 transition-colors" />
+                        <ImageIcon className="w-6 h-6 text-gray-500 group-hover:text-white mb-2 transition-colors" />
                     )}
                     <span className="text-xs font-bold text-gray-400 group-hover:text-white transition-colors">
-                        {uploading ? 'Uploading...' : 'Upload Featured Image'}
+                        {uploading ? 'Uploading...' : label}
                     </span>
                     <input type="file" className="hidden" accept="image/*" onChange={handleUpload} disabled={uploading} />
                 </label>
@@ -303,7 +303,7 @@ const ImagePicker: React.FC<{ value: string; onChange: (url: string) => void }> 
     );
 };
 
-const YoastSeoPanel: React.FC<{ formData: any, setFormData: (data: any) => void, type: 'post' | 'service' }> = ({ formData, setFormData, type }) => {
+const YoastSeoPanel: React.FC<{ formData: any, setFormData: (data: any) => void, type: 'post' | 'service' | 'case-study' }> = ({ formData, setFormData, type }) => {
     const baseUrl = "https://infobytes.io";
     const previewTitle = formData.seo_title || formData.title || "Untitled Page";
     const previewDesc = formData.meta_description || formData.description || "Please provide a meta description.";
@@ -423,6 +423,177 @@ const SlugInput: React.FC<{ baseUrl: string; slug: string; onChange: (val: strin
         </div>
     </div>
 );
+
+// --- Case Study Editor (NEW) ---
+
+export const CaseStudyEditor: React.FC<{ 
+    caseStudy: any; 
+    services: any[]; 
+    onSave: (data: any) => void; 
+    onCancel: () => void 
+}> = ({ caseStudy, services, onSave, onCancel }) => {
+    
+    const [formData, setFormData] = useState({
+        title: caseStudy?.title || '',
+        subtitle: caseStudy?.subtitle || '', // Small Headline
+        slug: caseStudy?.slug || '',
+        content: caseStudy?.content || '',
+        status: caseStudy?.status || 'Draft',
+        client_logo: caseStudy?.client_logo || '',
+        before_image: caseStudy?.before_image || '',
+        after_image: caseStudy?.after_image || '',
+        image: caseStudy?.image || '', // Main image/thumbnail
+        service_category: caseStudy?.service_category || caseStudy?.category || '',
+        seo_title: caseStudy?.seo_title || '',
+        meta_description: caseStudy?.meta_description || '',
+        keywords: caseStudy?.keywords || '',
+        id: caseStudy?.id
+    });
+
+    // Auto-generate slug
+    useEffect(() => {
+        if (!caseStudy && formData.title && !formData.slug) {
+            setFormData(prev => ({...prev, slug: prev.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}));
+        }
+    }, [formData.title]);
+
+    return (
+        <div className="bg-[#0a0a0a] min-h-screen animate-fade-in pb-20">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/5">
+                <div className="flex items-center gap-4">
+                    <button onClick={onCancel} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <ChevronRight className="w-5 h-5 text-gray-400 rotate-180" />
+                    </button>
+                    <h3 className="text-2xl font-bold text-white">{caseStudy ? 'Edit Case Study' : 'Add New Case Study'}</h3>
+                </div>
+                <div className="flex gap-3">
+                    <button onClick={() => onSave({...formData, status: 'Draft'})} className="px-4 py-2 text-gray-400 hover:text-white font-medium transition-colors text-sm">Save Draft</button>
+                    <button onClick={() => onSave(formData)} className="px-6 py-2.5 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/5">
+                        {caseStudy ? 'Update Case Study' : 'Publish Case Study'}
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                {/* Left Column: Main Content */}
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl">
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Big Headline</label>
+                                <input 
+                                    className="w-full bg-transparent border-none text-4xl font-bold text-white placeholder-gray-600 focus:ring-0 px-0 outline-none" 
+                                    placeholder="Case Study Title" 
+                                    value={formData.title || ''} 
+                                    onChange={e => setFormData({...formData, title: e.target.value})} 
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Small Headline (Subtitle)</label>
+                                <input 
+                                    className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-white text-lg focus:border-white/30 focus:outline-none transition-colors" 
+                                    placeholder="Brief description or result..." 
+                                    value={formData.subtitle || ''} 
+                                    onChange={e => setFormData({...formData, subtitle: e.target.value})} 
+                                />
+                            </div>
+
+                            <SlugInput 
+                                baseUrl="https://infobytes.io/work/" 
+                                slug={formData.slug || ''} 
+                                onChange={(val) => setFormData({...formData, slug: val})} 
+                            />
+
+                            <div className="min-h-[500px] border-t border-white/5 pt-6">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-4">Case Study Details</label>
+                                <SimpleEditor 
+                                    height="600px"
+                                    placeholder="Write the case study details here..."
+                                    value={formData.content || ''} 
+                                    onChange={(val) => setFormData({...formData, content: val})} 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* SEO Section */}
+                    <YoastSeoPanel formData={formData} setFormData={setFormData} type="case-study" />
+                </div>
+
+                {/* Right Column: Sidebar */}
+                <div className="space-y-6 sticky top-24">
+                    
+                    {/* Status */}
+                    <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Publish Settings</h4>
+                        <select 
+                            className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-white/30 outline-none"
+                            value={formData.status || 'Draft'} 
+                            onChange={e => setFormData({...formData, status: e.target.value})}
+                        >
+                            <option value="Draft">Draft</option>
+                            <option value="Active">Active</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+
+                    {/* Service Selection */}
+                    <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider flex items-center gap-2">
+                            <Layers className="w-3 h-3" /> Related Service
+                        </h4>
+                        <select 
+                            className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-white/30 outline-none"
+                            value={formData.service_category || ''} 
+                            onChange={e => setFormData({...formData, service_category: e.target.value})}
+                        >
+                            <option value="">Select a Service...</option>
+                            {services.map((service, idx) => (
+                                <option key={idx} value={service.title}>{service.title}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Client Logo */}
+                    <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider flex items-center gap-2">
+                            <Box className="w-3 h-3" /> Client Logo
+                        </h4>
+                        <ImagePicker 
+                            label="Upload Logo"
+                            value={formData.client_logo || ''} 
+                            onChange={(url) => setFormData({...formData, client_logo: url})} 
+                        />
+                    </div>
+
+                    {/* Before / After Images */}
+                    <div className="bg-[#111] border border-white/10 rounded-xl p-5 shadow-lg space-y-6">
+                        <div>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">Before Image</h4>
+                            <ImagePicker 
+                                label="Upload Before"
+                                value={formData.before_image || ''} 
+                                onChange={(url) => setFormData({...formData, before_image: url})} 
+                            />
+                        </div>
+                        <div className="border-t border-white/5 pt-4">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">After Image</h4>
+                            <ImagePicker 
+                                label="Upload After"
+                                value={formData.after_image || ''} 
+                                onChange={(url) => setFormData({...formData, after_image: url})} 
+                            />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // --- Main Editors ---
 

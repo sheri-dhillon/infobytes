@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Upload, Copy, Trash2, Image as ImageIcon, Loader2, Check } from 'lucide-react';
+import { Upload, Copy, Trash2, Image as ImageIcon, Loader2, Check, RefreshCw, AlertTriangle } from 'lucide-react';
 
 export const FileManager: React.FC = () => {
     const [files, setFiles] = useState<any[]>([]);
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -14,18 +15,22 @@ export const FileManager: React.FC = () => {
 
     const fetchFiles = async () => {
         setLoading(true);
-        const { data, error } = await supabase.storage.from('media').list('uploads', {
-            limit: 100,
-            offset: 0,
-            sortBy: { column: 'created_at', order: 'desc' },
-        });
+        setError(null);
+        try {
+            const { data, error } = await supabase.storage.from('media').list('uploads', {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'created_at', order: 'desc' },
+            });
 
-        if (error) {
-            console.error('Error fetching files:', error);
-        } else {
+            if (error) throw error;
             setFiles(data || []);
+        } catch (err: any) {
+            console.error('Error fetching files:', err);
+            setError(err.message || 'Failed to load files.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,25 +41,26 @@ export const FileManager: React.FC = () => {
         const fileExt = file.name.split('.').pop();
         const fileName = `uploads/${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
 
-        const { error } = await supabase.storage.from('media').upload(fileName, file);
-
-        if (error) {
-            alert('Error uploading file: ' + error.message);
-        } else {
+        try {
+            const { error } = await supabase.storage.from('media').upload(fileName, file);
+            if (error) throw error;
             await fetchFiles();
+        } catch (err: any) {
+            alert('Error uploading file: ' + err.message);
+        } finally {
+            setUploading(false);
         }
-        setUploading(false);
     };
 
     const handleDelete = async (fileName: string) => {
         if (!window.confirm('Are you sure you want to delete this file?')) return;
 
-        const { error } = await supabase.storage.from('media').remove([`uploads/${fileName}`]);
-        
-        if (error) {
-            alert('Error deleting file: ' + error.message);
-        } else {
+        try {
+            const { error } = await supabase.storage.from('media').remove([`uploads/${fileName}`]);
+            if (error) throw error;
             await fetchFiles();
+        } catch (err: any) {
+            alert('Error deleting file: ' + err.message);
         }
     };
 
@@ -84,6 +90,15 @@ export const FileManager: React.FC = () => {
                 <div className="flex h-64 w-full items-center justify-center">
                     <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
                 </div>
+            ) : error ? (
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-12 text-center flex flex-col items-center justify-center">
+                    <AlertTriangle className="w-8 h-8 text-red-500 mb-4" />
+                    <h3 className="text-white font-bold text-lg mb-2">Error Loading Files</h3>
+                    <p className="text-gray-500 text-sm mb-6">{error}</p>
+                    <button onClick={fetchFiles} className="px-4 py-2 bg-white/10 rounded-full text-white text-sm hover:bg-white/20 flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" /> Retry
+                    </button>
+                </div>
             ) : files.length === 0 ? (
                 <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-12 text-center flex flex-col items-center justify-center">
                     <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
@@ -101,7 +116,6 @@ export const FileManager: React.FC = () => {
                             <div key={file.id} className="group relative bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden aspect-square">
                                 <img src={publicUrl} alt={file.name} className="w-full h-full object-cover" />
                                 
-                                {/* Overlay */}
                                 <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 p-4">
                                     <button 
                                         onClick={() => copyToClipboard(file.name)}

@@ -24,7 +24,20 @@ export const ServiceDetailPage: React.FC = () => {
         if (error) {
           console.error("Error fetching service:", error);
         } else {
-          setService(data);
+          // Parse pills just like in the listing component
+          let parsedPills = [];
+          try {
+              if (Array.isArray(data.pills)) {
+                  parsedPills = data.pills;
+              } else if (typeof data.pills === 'string') {
+                  parsedPills = JSON.parse(data.pills);
+                  if (!Array.isArray(parsedPills)) parsedPills = data.pills.split(',').map(s => s.trim());
+              }
+          } catch (e) {
+              if (typeof data.pills === 'string') parsedPills = data.pills.split(',').map(s => s.trim());
+          }
+
+          setService({ ...data, pills: parsedPills });
           
           // --- SEO Management ---
           if (data) {
@@ -102,7 +115,7 @@ export const ServiceDetailPage: React.FC = () => {
 
           <div className="flex flex-wrap gap-3 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
              {service.pills && Array.isArray(service.pills) && service.pills.map((pill: string, idx: number) => (
-               pill && (
+               pill && typeof pill === 'string' && (
                 <span key={idx} className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm text-gray-300">
                   {pill}
                 </span>
