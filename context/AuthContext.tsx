@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, ReactNode, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
@@ -60,26 +61,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // 1. Get initial session with timeout safety
     const initSession = async () => {
       try {
-        const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("Connection timeout")), 60000)
+        // Set a reasonable timeout (e.g., 5 seconds) to prevent hanging
+        const timeoutDuration = 5000;
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Auth Timeout")), timeoutDuration)
         );
 
-        const { data } = await Promise.race([
+        const result = await Promise.race([
             supabase.auth.getSession(),
-            timeout.then(() => { throw new Error("Timeout") })
+            timeoutPromise
         ]) as any;
 
+        // Safely extract session, handling potential nulls
+        const currentSession = result?.data?.session || null;
+
         if (mounted.current) {
-            setSession(data.session);
-            setUser(data.session?.user ?? null);
-            currentUserIdRef.current = data.session?.user?.id ?? null;
+            setSession(currentSession);
+            setUser(currentSession?.user ?? null);
+            currentUserIdRef.current = currentSession?.user?.id ?? null;
             
-            if (data.session?.user) {
-              await fetchProfile(data.session.user.id);
+            if (currentSession?.user) {
+              await fetchProfile(currentSession.user.id);
             }
         }
       } catch (error: any) {
-        console.error("Session init error:", error);
+        // If timeout or network error, log warning but proceed as unauthenticated
+        if (error.message === "Auth Timeout" || error.message?.includes("network")) {
+            console.warn("Session init timed out or network unavailable. Proceeding as guest.");
+        } else {
+            console.error("Session init error:", error);
+        }
       } finally {
         if (mounted.current) setLoading(false);
       }

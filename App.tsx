@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Header } from './components/Header';
@@ -70,8 +70,11 @@ function App() {
         <ScrollToTopOnNavigate />
         <Routes>
           {/* Admin Routes */}
-          <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="/admin/ibloginpage" element={<LoginPage />} />
           <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
+          
+          {/* Legacy Redirect for old login URL */}
+          <Route path="/admin/login" element={<Navigate to="/admin/ibloginpage" replace />} />
           
           <Route element={<ProtectedRoute />}>
              <Route path="/admin/dashboard" element={<AdminLayout />}>
@@ -102,6 +105,9 @@ function App() {
           <Route path="/testimonials" element={<PublicLayout><TestimonialsPage /></PublicLayout>} />
           <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
           <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
+
+          {/* Catch-all 404 - Redirect to Home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

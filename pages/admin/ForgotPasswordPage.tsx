@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
@@ -37,7 +38,7 @@ export const ForgotPasswordPage: React.FC = () => {
       <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-brand-purple/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 md:p-10 relative z-10 shadow-2xl backdrop-blur-xl">
-        <Link to="/admin/login" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors text-sm">
+        <Link to="/admin/ibloginpage" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors text-sm">
             <ArrowLeft className="w-4 h-4" /> Back to Login
         </Link>
         

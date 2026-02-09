@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,7 +7,7 @@ export const ProtectedRoute: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/admin/ibloginpage" replace />;
   }
 
   return <Outlet />;
