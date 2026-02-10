@@ -31,10 +31,10 @@ export const ServiceDetailPage: React.FC = () => {
                   parsedPills = data.pills;
               } else if (typeof data.pills === 'string') {
                   parsedPills = JSON.parse(data.pills);
-                  if (!Array.isArray(parsedPills)) parsedPills = data.pills.split(',').map(s => s.trim());
+                  if (!Array.isArray(parsedPills)) parsedPills = data.pills.split(',').map((s: string) => s.trim());
               }
           } catch (e) {
-              if (typeof data.pills === 'string') parsedPills = data.pills.split(',').map(s => s.trim());
+              if (typeof data.pills === 'string') parsedPills = data.pills.split(',').map((s: string) => s.trim());
           }
 
           setService({ ...data, pills: parsedPills });
