@@ -1,14 +1,11 @@
 
-import React, { useRef, useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Box, CreditCard, GraduationCap, Heart, Layers, ShoppingBag, Building2, Globe, Cpu, Shield, Loader2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import React, { useRef } from 'react';
+import { ArrowLeft, ArrowRight, Box, CreditCard, GraduationCap, Heart, Layers, ShoppingBag, Building2, Globe, Cpu, Shield } from 'lucide-react';
 
-// Icon Mapping
 const ICON_MAP: Record<string, any> = {
     Box, CreditCard, GraduationCap, Heart, Layers, ShoppingBag, Building2, Globe, Cpu, Shield
 };
 
-// Theme Styles Mapping (Safe for Tailwind JIT)
 const THEME_STYLES: Record<string, { icon: string, bg: string, border: string }> = {
     purple: { icon: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
     yellow: { icon: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
@@ -21,8 +18,7 @@ const THEME_STYLES: Record<string, { icon: string, bg: string, border: string }>
     red:    { icon: 'text-red-400',    bg: 'bg-red-500/10',    border: 'border-red-500/20' },
 };
 
-// Full Default Static Data (Matches Design)
-const DEFAULT_CONFIG = {
+const STATIC_INDUSTRIES = {
     title: "Industries",
     description: "We work across high-impact industries, combining deep domain knowledge with cutting-edge design and AI.",
     items: [
@@ -62,57 +58,29 @@ const DEFAULT_CONFIG = {
         theme: "blue"
       },
       {
-        id: "6",
-        title: "E-commerce",
-        description: "From DTC brands to enterprise platforms, we create seamless shopping experiences that support product discovery and retention.",
-        icon_name: "ShoppingBag",
-        theme: "orange"
+        "id": "6",
+        "title": "E-commerce",
+        "description": "From DTC brands to enterprise platforms, we create seamless shopping experiences that support product discovery and retention.",
+        "icon_name": "ShoppingBag",
+        "theme": "orange"
       },
       {
-        id: "7",
-        title: "Real Estate",
-        description: "Designing digital platforms that bring property and people together. Intuitive search and listings for modern real estate.",
-        icon_name: "Building2",
-        theme: "indigo"
+        "id": "7",
+        "title": "Real Estate",
+        "description": "Designing digital platforms that bring property and people together. Intuitive search and listings for modern real estate.",
+        "icon_name": "Building2",
+        "theme": "indigo"
       }
     ]
 };
 
 export const Industries: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [config, setConfig] = useState<any>(DEFAULT_CONFIG);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchConfig = async () => {
-          try {
-              const { data } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'industries_section')
-                  .single();
-              
-              if (data && data.value) {
-                  // Merge with defaults to ensure structure
-                  setConfig({
-                      ...DEFAULT_CONFIG,
-                      ...data.value,
-                      items: (data.value.items && data.value.items.length > 0) ? data.value.items : DEFAULT_CONFIG.items
-                  });
-              }
-          } catch (err) {
-              console.error("Error fetching industries:", err);
-          } finally {
-              setLoading(false);
-          }
-      };
-      fetchConfig();
-  }, []);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { current } = scrollRef;
-      const scrollAmount = 420; // Width of card + gap
+      const scrollAmount = 420;
       if (direction === 'left') {
         current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
       } else {
@@ -121,9 +89,6 @@ export const Industries: React.FC = () => {
     }
   };
 
-  // We can render immediately with default config if loading to avoid layout shift, 
-  // or show a loader if preferred. Since we have good defaults, we show content.
-  
   return (
     <section className="bg-black py-24 border-t border-white/5 relative overflow-hidden">
       {/* Background Ambience */}
@@ -133,9 +98,9 @@ export const Industries: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">{config.title}</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">{STATIC_INDUSTRIES.title}</h2>
             <p className="text-gray-400 text-lg leading-relaxed">
-              {config.description}
+              {STATIC_INDUSTRIES.description}
             </p>
           </div>
           
@@ -164,14 +129,14 @@ export const Industries: React.FC = () => {
           className="flex gap-6 overflow-x-auto pb-8 snap-x mandatory [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {config.items.map((industry: any, index: number) => {
+          {STATIC_INDUSTRIES.items.map((industry: any, index: number) => {
             const Icon = ICON_MAP[industry.icon_name] || Box;
             const theme = THEME_STYLES[industry.theme] || THEME_STYLES['purple'];
 
             return (
                 <div 
                 key={index}
-                className={`min-w-[340px] md:min-w-[400px] bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 snap-center hover:border-white/20 hover:bg-[#111] transition-all duration-300 group flex flex-col h-full min-h-[320px] ${loading ? 'animate-pulse' : ''}`}
+                className={`min-w-[340px] md:min-w-[400px] bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 snap-center hover:border-white/20 hover:bg-[#111] transition-all duration-300 group flex flex-col h-full min-h-[320px]`}
                 >
                 <div className={`w-14 h-14 rounded-2xl ${theme.bg} border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className={`w-7 h-7 ${theme.icon}`} />
@@ -184,7 +149,6 @@ export const Industries: React.FC = () => {
                 </div>
             );
           })}
-          {/* Spacer to allow scrolling past the last item */}
           <div className="w-1 shrink-0"></div>
         </div>
       </div>

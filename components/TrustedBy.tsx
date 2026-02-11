@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 
-// Default static logos if DB is empty
-const DEFAULT_LOGOS = [
+import React from 'react';
+
+// Default static logos
+const LOGOS = [
   { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/2560px-Shopify_logo_2018.svg.png", alt: "Shopify" },
   { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/WooCommerce_logo.svg/1200px-WooCommerce_logo.svg.png", alt: "WooCommerce" },
   { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png", alt: "React" },
@@ -12,58 +12,10 @@ const DEFAULT_LOGOS = [
 ];
 
 export const TrustedBy: React.FC = () => {
-  const [config, setConfig] = useState({
-      direction: 'left',
-      speed: 'normal',
-      pauseOnHover: true,
-      logos: DEFAULT_LOGOS
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchConfig = async () => {
-          try {
-              const { data } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'client_logos')
-                  .single();
-              
-              if (data && data.value) {
-                  setConfig({
-                      ...config,
-                      ...data.value,
-                      logos: data.value.logos && data.value.logos.length > 0 ? data.value.logos : DEFAULT_LOGOS
-                  });
-              }
-          } catch (err) {
-              console.error("Error fetching logos:", err);
-          } finally {
-              setLoading(false);
-          }
-      };
-      fetchConfig();
-  }, []);
-
-  // Determine Animation Duration based on Speed Setting
-  const getDuration = () => {
-      // Base duration for a reasonable number of logos (e.g. 10). 
-      // We scale it roughly by number of logos to keep speed consistent visually.
-      const baseSpeed = config.logos.length * 5; 
-      switch(config.speed) {
-          case 'fast': return `${Math.max(10, baseSpeed * 0.5)}s`;
-          case 'slow': return `${Math.max(30, baseSpeed * 1.5)}s`;
-          case 'normal': 
-          default: return `${Math.max(20, baseSpeed)}s`;
-      }
-  };
-
   const animationStyle = {
-      animationDuration: getDuration(),
-      animationDirection: config.direction === 'right' ? 'reverse' : 'normal'
+      animationDuration: '30s',
+      animationDirection: 'normal'
   };
-
-  if (loading) return null;
 
   return (
     <section className="py-24 bg-black border-t border-white/5 overflow-hidden">
@@ -81,11 +33,11 @@ export const TrustedBy: React.FC = () => {
          {/* Carousel Row */}
          <div className="flex overflow-hidden group">
            <div 
-             className={`flex gap-8 md:gap-16 min-w-full shrink-0 items-center animate-scroll-left ${config.pauseOnHover ? 'group-hover:[animation-play-state:paused]' : ''}`}
+             className="flex gap-8 md:gap-16 min-w-full shrink-0 items-center animate-scroll-left group-hover:[animation-play-state:paused]"
              style={animationStyle}
            >
              {/* Triple the array to ensure seamless loop */}
-             {[...config.logos, ...config.logos, ...config.logos].map((logo, i) => (
+             {[...LOGOS, ...LOGOS, ...LOGOS].map((logo, i) => (
                <div key={`logo-${i}`} className="flex items-center justify-center min-w-[120px] md:min-w-[160px] opacity-50 hover:opacity-100 transition-opacity duration-300">
                  <img 
                     src={logo.url} 

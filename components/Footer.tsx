@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { Logo } from './Logo';
-import { supabase } from '../lib/supabase';
 
-// Default config matching the provided design
-const DEFAULT_CONFIG = {
+const CONFIG = {
     marquee_text_1: "Let's Make Something Great",
     marquee_text_2: "Together",
     contact_heading: "Got a vision?",
@@ -46,28 +45,6 @@ const DEFAULT_CONFIG = {
 };
 
 export const Footer: React.FC = () => {
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
-
-  useEffect(() => {
-      const fetchConfig = async () => {
-          try {
-              const { data } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'footer')
-                  .single();
-              
-              if (data && data.value) {
-                  // Merge with defaults to prevent crashes if DB has incomplete data
-                  setConfig({ ...DEFAULT_CONFIG, ...data.value });
-              }
-          } catch (err) {
-              console.error("Error fetching footer config:", err);
-          }
-      };
-      fetchConfig();
-  }, []);
-
   return (
     <footer className="bg-[#050505] relative overflow-hidden font-sans pt-0 border-t border-white/5">
       {/* Background Ambience */}
@@ -81,10 +58,10 @@ export const Footer: React.FC = () => {
                  {[1, 2].map((i) => (
                      <React.Fragment key={i}>
                          <span className="text-[10vw] font-black uppercase leading-none text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40 tracking-tighter whitespace-nowrap">
-                             {config.marquee_text_1}
+                             {CONFIG.marquee_text_1}
                          </span>
                          <span className="text-[10vw] font-black uppercase leading-none text-brand-orange font-serif italic tracking-tighter whitespace-nowrap">
-                             {config.marquee_text_2}
+                             {CONFIG.marquee_text_2}
                          </span>
                      </React.Fragment>
                  ))}
@@ -103,20 +80,20 @@ export const Footer: React.FC = () => {
                       <span className="text-[10px] md:text-xs font-bold tracking-widest text-white uppercase">Accepting New Projects</span>
                    </div>
 
-                   <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">{config.contact_heading}</h3>
-                   <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-md">{config.contact_subheading}</p>
+                   <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">{CONFIG.contact_heading}</h3>
+                   <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-md">{CONFIG.contact_subheading}</p>
 
                    <div className="mb-12">
                        <span className="block text-xs font-bold text-brand-orange tracking-widest uppercase mb-4">Inquiry</span>
-                       <a href={`mailto:${config.email}`} className="text-3xl sm:text-5xl md:text-7xl font-bold text-white hover:text-gray-300 transition-colors break-all leading-none decoration-brand-orange/50 underline-offset-8 hover:underline">
-                           {config.email}
+                       <a href={`mailto:${CONFIG.email}`} className="text-3xl sm:text-5xl md:text-7xl font-bold text-white hover:text-gray-300 transition-colors break-all leading-none decoration-brand-orange/50 underline-offset-8 hover:underline">
+                           {CONFIG.email}
                        </a>
                    </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
                      <a 
-                       href={config.booking_link} 
+                       href={CONFIG.booking_link} 
                        target="_blank" 
                        rel="noopener noreferrer"
                        className="px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all hover:scale-105 flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(255,255,255,0.15)]"
@@ -132,7 +109,7 @@ export const Footer: React.FC = () => {
 
             {/* Right Column: Links */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-10 border-t lg:border-t-0 lg:border-l border-white/10 pt-12 lg:pt-0 lg:pl-12">
-                 {config.columns && config.columns.map((col, idx) => (
+                 {CONFIG.columns && CONFIG.columns.map((col, idx) => (
                      <div key={idx}>
                         <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-8 opacity-70">{col.title}</h4>
                         <ul className="flex flex-col gap-4">
@@ -150,7 +127,7 @@ export const Footer: React.FC = () => {
                  <div className="col-span-2 mt-4">
                      <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-6 opacity-70">Follow Us</h4>
                      <div className="flex gap-4 flex-wrap">
-                        {config.social_links.map((social) => (
+                        {CONFIG.social_links.map((social) => (
                           <a 
                             key={social.name}
                             href={social.href} 
@@ -173,7 +150,7 @@ export const Footer: React.FC = () => {
                <Logo className="h-8 w-auto" />
             </Link>
             <div className="text-gray-600 text-sm font-mono">
-               {config.copyright_text}
+               {CONFIG.copyright_text}
             </div>
         </div>
       </div>

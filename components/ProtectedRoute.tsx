@@ -1,14 +1,5 @@
 
+// This file is deprecated and unused in the static version.
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-
-export const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/admin/ibloginpage" replace />;
-  }
-
-  return <Outlet />;
-};
+import { Navigate } from 'react-router-dom';
+export const ProtectedRoute: React.FC = () => <Navigate to="/" />;

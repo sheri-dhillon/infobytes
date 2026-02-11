@@ -1,49 +1,40 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Plus, Minus, ArrowRight, ChevronDown, ChevronUp, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
 
-// Default config if DB is empty
-const DEFAULT_CONFIG = {
+const STATIC_FAQ = {
     title: "Common questions",
     subtitle: "Removing the friction between your vision and execution.",
     icon_style: "plus_minus",
-    items: []
+    items: [
+        {
+            q: "How do you bridge the gap between UI/UX and actual revenue?",
+            a: "We believe beauty must perform. Our UI/UX process uses behavioral data to map user journeys that lead directly to conversions. When paired with our email automation, we create a closed-loop system that captures, converts, and retains customers.",
+            cta: "View Our Case Studies",
+            link: "/work"
+        },
+        {
+            q: "Do you build native iOS apps or cross-platform solutions?",
+            a: "We specialize in high-performance Native iOS development using Swift and SwiftUI. This ensures your app has the fastest possible response times, seamless integration with Apple’s ecosystem, and a premium 'Apple-level' feel.",
+            cta: "See Our App Portfolio",
+            link: "/work"
+        },
+        {
+            q: "What is the typical timeline for a full Design-to-Launch project?",
+            a: "A custom high-end project typically spans 8 to 12 weeks. This includes deep-dive strategy, UI/UX prototyping, full-stack development, and rigorous QA. We work in agile 'sprints' so you see tangible progress every two weeks.",
+            cta: "Request a Timeline",
+            link: "/contact"
+        }
+    ]
 };
 
 export const FAQ: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [config, setConfig] = useState<any>(DEFAULT_CONFIG);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchConfig = async () => {
-          try {
-              const { data } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'faq_section')
-                  .single();
-              
-              if (data && data.value) {
-                  setConfig({
-                      ...DEFAULT_CONFIG,
-                      ...data.value,
-                      items: data.value.items || []
-                  });
-              }
-          } catch (err) {
-              console.error("Error fetching FAQ config", err);
-          } finally {
-              setLoading(false);
-          }
-      };
-      fetchConfig();
-  }, []);
 
   // Icon Resolver
   const getIcons = (isOpen: boolean) => {
-      switch(config.icon_style) {
+      switch(STATIC_FAQ.icon_style) {
           case 'chevron':
               return isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />;
           case 'arrow':
@@ -54,8 +45,6 @@ export const FAQ: React.FC = () => {
       }
   };
 
-  if (loading || !config.items || config.items.length === 0) return null;
-
   return (
     <section className="py-24 md:py-32 bg-black relative" id="faq">
       <div className="max-w-7xl mx-auto px-6">
@@ -64,21 +53,21 @@ export const FAQ: React.FC = () => {
             FAQ
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-6 tracking-tight text-white">
-            {config.title}
+            {STATIC_FAQ.title}
           </h2>
           <p className="text-gray-400 text-base md:text-lg">
-            {config.subtitle}
+            {STATIC_FAQ.subtitle}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           {/* Left Column: Questions List */}
           <div className="lg:col-span-5 flex flex-col">
-             {config.items.map((item: any, idx: number) => {
+             {STATIC_FAQ.items.map((item: any, idx: number) => {
                const isActive = activeIndex === idx;
                return (
                  <button 
-                   key={item.id || idx}
+                   key={idx}
                    onClick={() => setActiveIndex(idx)}
                    className={`w-full flex items-center justify-between py-6 group text-left transition-all duration-300 relative border-b border-white/5 hover:border-white/20`}
                  >
@@ -111,21 +100,21 @@ export const FAQ: React.FC = () => {
                 {/* Decorative Mesh */}
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-brand-purple/5 to-transparent pointer-events-none"></div>
 
-                {config.items[activeIndex] && (
+                {STATIC_FAQ.items[activeIndex] && (
                     <div className="relative z-10 animate-fade-in key={activeIndex}">
-                        <h3 className="text-2xl font-bold text-white mb-6 leading-tight tracking-wide">{config.items[activeIndex].q}</h3>
+                        <h3 className="text-2xl font-bold text-white mb-6 leading-tight tracking-wide">{STATIC_FAQ.items[activeIndex].q}</h3>
                         <div className="h-px w-12 bg-brand-orange mb-8"></div>
                         <p className="text-lg text-gray-300 leading-relaxed font-light tracking-wide">
-                            {config.items[activeIndex].a}
+                            {STATIC_FAQ.items[activeIndex].a}
                         </p>
                     </div>
                 )}
 
-                {config.items[activeIndex]?.cta && (
+                {STATIC_FAQ.items[activeIndex]?.cta && (
                     <div className="mt-12 relative z-10">
-                    <Link to={config.items[activeIndex].link || '#'}>
+                    <Link to={STATIC_FAQ.items[activeIndex].link || '#'}>
                         <button className="px-8 py-4 rounded-full border border-white/20 text-white font-medium tracking-wide hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-3 group/btn bg-transparent">
-                        {config.items[activeIndex].cta}
+                        {STATIC_FAQ.items[activeIndex].cta}
                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                         </button>
                     </Link>

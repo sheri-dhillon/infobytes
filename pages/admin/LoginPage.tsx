@@ -181,7 +181,7 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* <div className="mt-6 pt-6 border-t border-white/5 text-center">
+        <div className="mt-6 pt-6 border-t border-white/5 text-center">
             <button 
                 onClick={() => {
                     setIsLoginMode(!isLoginMode);
@@ -192,7 +192,7 @@ export const LoginPage: React.FC = () => {
             >
                 {isLoginMode ? 'Create new admin account' : 'Back to Login'}
             </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

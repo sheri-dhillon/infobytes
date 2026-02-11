@@ -1,89 +1,43 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { ArrowLeft, CheckCircle, Calendar, ArrowRight } from 'lucide-react';
-import { PageHero } from '../components/PageHero';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FAQ } from '../components/FAQ';
+
+const SERVICES_DATA: Record<string, any> = {
+    'ui-ux-design': {
+        title: "UI/UX Design",
+        description: "We design user-centric systems for web and mobile that are strategically built to convert.",
+        pills: ["Product Design", "Wireframing", "Prototyping"],
+        content: "<p>Great design is more than just aesthetics; it's about how a user interacts with your product. Our UI/UX design process focuses on creating intuitive, engaging, and accessible interfaces that drive user satisfaction and business growth.</p><h3>Our Process</h3><ul><li><strong>Discovery:</strong> Understanding your business goals and user needs.</li><li><strong>Wireframing:</strong> Creating the blueprint of your product.</li><li><strong>Visual Design:</strong> Crafting the look and feel.</li><li><strong>Prototyping:</strong> Building interactive models for testing.</li></ul>",
+        meta_description: "Expert UI/UX design services aimed at maximizing user engagement."
+    },
+    'web-development': {
+        title: "Web Development",
+        description: "High-performance websites built for scale. From custom React applications to optimized marketing sites.",
+        pills: ["React", "Next.js", "Performance"],
+        content: "<p>We build robust, scalable, and high-performance web applications using modern technologies. Whether it's a simple marketing site or a complex SaaS platform, we ensure clean code and best practices.</p>",
+        meta_description: "Professional web development services."
+    },
+    'mobile-apps': {
+        title: "Mobile Apps",
+        description: "Native iOS and cross-platform solutions that deliver premium user experiences on every device.",
+        pills: ["iOS", "SwiftUI", "React Native"],
+        content: "<p>In a mobile-first world, your app needs to be flawless. We specialize in building native iOS apps with Swift and cross-platform solutions using React Native, ensuring top-tier performance and user experience.</p>",
+        meta_description: "Top-tier mobile app development."
+    },
+    'growth-strategy': {
+        title: "Growth Strategy",
+        description: "Data-driven marketing and retention strategies to help your product reach its full potential.",
+        pills: ["Analytics", "CRO", "Automation"],
+        content: "<p>Growth isn't an accident. We analyze your data, optimize your conversion funnels, and implement marketing automation strategies that drive sustainable growth and customer retention.</p>",
+        meta_description: "Strategic growth services for startups."
+    }
+};
 
 export const ServiceDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [service, setService] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchService = async () => {
-      if (!slug) return;
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('services')
-          .select('*')
-          .eq('slug', slug)
-          .single();
-
-        if (error) {
-          console.error("Error fetching service:", error);
-        } else {
-          // Parse pills just like in the listing component
-          let parsedPills = [];
-          try {
-              if (Array.isArray(data.pills)) {
-                  parsedPills = data.pills;
-              } else if (typeof data.pills === 'string') {
-                  parsedPills = JSON.parse(data.pills);
-                  if (!Array.isArray(parsedPills)) parsedPills = data.pills.split(',').map((s: string) => s.trim());
-              }
-          } catch (e) {
-              if (typeof data.pills === 'string') parsedPills = data.pills.split(',').map((s: string) => s.trim());
-          }
-
-          setService({ ...data, pills: parsedPills });
-          
-          // --- SEO Management ---
-          if (data) {
-              document.title = data.seo_title || data.title + " | InfoBytes";
-              
-              // Update Meta Description
-              let metaDesc = document.querySelector('meta[name="description"]');
-              if (!metaDesc) {
-                  metaDesc = document.createElement('meta');
-                  metaDesc.setAttribute('name', 'description');
-                  document.head.appendChild(metaDesc);
-              }
-              metaDesc.setAttribute('content', data.meta_description || data.description || '');
-
-              // Update Meta Title (OG)
-              let ogTitle = document.querySelector('meta[property="og:title"]');
-              if (!ogTitle) {
-                  ogTitle = document.createElement('meta');
-                  ogTitle.setAttribute('property', 'og:title');
-                  document.head.appendChild(ogTitle);
-              }
-              ogTitle.setAttribute('content', data.seo_title || data.title);
-          }
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchService();
-
-    // Cleanup SEO on unmount
-    return () => {
-        document.title = "InfoBytes - Design. Build. Scale.";
-    };
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-brand-dark flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-brand-purple border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const service = slug ? SERVICES_DATA[slug] : null;
 
   if (!service) {
     return (
@@ -114,12 +68,10 @@ export const ServiceDetailPage: React.FC = () => {
           </p>
 
           <div className="flex flex-wrap gap-3 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
-             {service.pills && Array.isArray(service.pills) && service.pills.map((pill: string, idx: number) => (
-               pill && typeof pill === 'string' && (
-                <span key={idx} className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm text-gray-300">
+             {service.pills && service.pills.map((pill: string, idx: number) => (
+               <span key={idx} className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm text-gray-300">
                   {pill}
-                </span>
-               )
+               </span>
              ))}
           </div>
         </div>
@@ -129,11 +81,7 @@ export const ServiceDetailPage: React.FC = () => {
       <section className="py-20 bg-black border-t border-white/5">
          <div className="max-w-4xl mx-auto px-6">
             <div className="prose prose-invert prose-lg max-w-none">
-                {service.content ? (
-                   <div dangerouslySetInnerHTML={{ __html: service.content }} />
-                ) : (
-                   <p className="text-gray-500 italic">Detailed service description coming soon.</p>
-                )}
+                <div dangerouslySetInnerHTML={{ __html: service.content }} />
             </div>
          </div>
       </section>

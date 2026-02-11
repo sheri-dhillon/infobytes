@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BarChart, Loader2, RefreshCw, AlertTriangle, MessageSquare, FileText, Briefcase, Users, Layers, ArrowUpRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -141,37 +142,40 @@ export const DashboardHome: React.FC = () => {
 
             {/* Stats Grid - Responsive for 5 items */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-                {statBoxes.map((stat, idx) => (
-                    <Link 
-                        to={stat.link}
-                        key={idx} 
-                        className={`group relative bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50 overflow-hidden ${stat.border}`}
-                        style={{ animationDelay: `${idx * 100}ms` }}
-                    >
-                        {/* Background Glow */}
-                        <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} blur-3xl rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-500 -mr-10 -mt-10 pointer-events-none`}></div>
+                {statBoxes.map((stat, idx) => {
+                    const Icon = stat.icon;
+                    return (
+                        <Link 
+                            to={stat.link}
+                            key={idx} 
+                            className={`group relative bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50 overflow-hidden ${stat.border}`}
+                            style={{ animationDelay: `${idx * 100}ms` }}
+                        >
+                            {/* Background Glow */}
+                            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} blur-3xl rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-500 -mr-10 -mt-10 pointer-events-none`}></div>
 
-                        <div className="relative z-10 flex flex-col justify-between h-full min-h-[120px]">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className={`w-10 h-10 rounded-full ${stat.bg} flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors`}>
-                                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                            <div className="relative z-10 flex flex-col justify-between h-full min-h-[120px]">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className={`w-10 h-10 rounded-full ${stat.bg} flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors`}>
+                                        <Icon className={`w-5 h-5 ${stat.color}`} />
+                                    </div>
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity -mr-2">
+                                        <ArrowUpRight className="w-4 h-4 text-gray-500" />
+                                    </div>
                                 </div>
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity -mr-2">
-                                    <ArrowUpRight className="w-4 h-4 text-gray-500" />
+                                
+                                <div>
+                                    {loading ? (
+                                        <div className="h-8 w-16 bg-white/10 rounded animate-pulse mb-1"></div>
+                                    ) : (
+                                        <div className="text-3xl font-bold text-white mb-1 tracking-tight">{stat.value}</div>
+                                    )}
+                                    <div className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-300 transition-colors">{stat.title}</div>
                                 </div>
                             </div>
-                            
-                            <div>
-                                {loading ? (
-                                    <div className="h-8 w-16 bg-white/10 rounded animate-pulse mb-1"></div>
-                                ) : (
-                                    <div className="text-3xl font-bold text-white mb-1 tracking-tight">{stat.value}</div>
-                                )}
-                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-300 transition-colors">{stat.title}</div>
-                            </div>
-                        </div>
-                    </Link>
-                ))}
+                        </Link>
+                    );
+                })}
             </div>
             
             {/* Charts Placeholder */}

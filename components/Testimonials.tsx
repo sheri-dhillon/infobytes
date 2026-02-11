@@ -1,46 +1,30 @@
-import React, { useRef, useEffect, useState } from 'react';
+
+import React, { useRef } from 'react';
 import { Star, ArrowLeft, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface TestimonialItem {
     id: number;
     name: string;
-    business_name: string; // role in UI
+    business_name: string;
     service_name: string;
     review: string;
     stars: number;
 }
 
+const STATIC_TESTIMONIALS: TestimonialItem[] = [
+    { id: 1, name: 'Jonas Wadel', business_name: 'Founder, E-com Collective', service_name: 'Email Marketing', review: "Working with this team changed our entire retention strategy. They didn't just set up email flows; they built a high-converting revenue engine.", stars: 5 },
+    { id: 2, name: 'Thomas Poppa', business_name: 'Marketing Director', service_name: 'Automation', review: "The communication was exceptional. They took our messy email list and turned it into an automated profit center.", stars: 5 },
+    { id: 3, name: 'Muhammad Afzaal', business_name: 'Tech Lead', service_name: 'Web Dev', review: "Our new site is lightning fast and looks incredible. They engineered a web experience that improved our conversion rate by 40%.", stars: 5 },
+    { id: 4, name: 'Marcus Sterling', business_name: 'Head of Product', service_name: 'UI/UX Design', review: "The UI/UX work was transformative. They identified friction points we didn't even know existed and redesigned our user flow.", stars: 5 },
+    { id: 5, name: 'Michael Park', business_name: 'Tech Entrepreneur', service_name: 'iOS App', review: "Clean code, great architecture, and a beautiful front-end. Our app is scaling perfectly, and user feedback is 100% positive.", stars: 5 }
+];
+
 export const Testimonials: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchTestimonials = async () => {
-          try {
-              const { data, error } = await supabase
-                  .from('testimonials')
-                  .select('*')
-                  .eq('status', 'Active')
-                  .order('created_at', { ascending: false }); // Newest first
-
-              if (!error && data) {
-                  setTestimonials(data);
-              }
-          } catch (err) {
-              console.error("Error loading testimonials:", err);
-          } finally {
-              setLoading(false);
-          }
-      };
-
-      fetchTestimonials();
-  }, []);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400; // Increased scroll amount for larger cards
+      const scrollAmount = 400; 
       const currentScroll = scrollContainerRef.current.scrollLeft;
       const targetScroll = direction === 'left' 
         ? currentScroll - scrollAmount 
@@ -52,9 +36,6 @@ export const Testimonials: React.FC = () => {
       });
     }
   };
-
-  if (loading) return null; // Or a loading skeleton if preferred
-  if (testimonials.length === 0) return null;
 
   return (
     <section className="py-20 md:py-24 bg-black relative overflow-hidden">
@@ -117,7 +98,7 @@ export const Testimonials: React.FC = () => {
                 className="flex gap-6 overflow-x-auto pb-4 snap-x [&::-webkit-scrollbar]:hidden"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {testimonials.map((t, i) => (
+                {STATIC_TESTIMONIALS.map((t, i) => (
                   <div 
                     key={t.id || i} 
                     className="min-w-[300px] md:min-w-[380px] lg:min-w-[420px] bg-[#0a0a0a] border border-white/10 p-6 md:p-8 rounded-3xl snap-center group hover:border-white/20 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[360px]"

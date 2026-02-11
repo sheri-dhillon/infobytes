@@ -1,6 +1,9 @@
 
 User-agent: *
 Disallow: /admin/
+Disallow: /admin/ibloginpage
+Disallow: /admin/dashboard
+Disallow: /admin/forgot-password
 Allow: /
 
 Sitemap: https://www.infobytes.io/sitemap.xml

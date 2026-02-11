@@ -1,19 +1,29 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import { Star, Quote, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
 
 interface TestimonialItem {
     id: number;
     name: string;
-    business_name: string; // role in UI
+    business_name: string;
     review: string;
     stars: number;
 }
 
+const STATIC_DATA: TestimonialItem[] = [
+    { id: 1, name: "David Rossi", business_name: "Founder, HealthTech", review: "The technical precision of our iOS app is outstanding. It’s fast, stable, and follows all of Apple’s latest HIG standards.", stars: 5 },
+    { id: 2, name: "Lisa Kensington", business_name: "Product Manager", review: "Working with this team on our native iOS app was the best decision we made. The technical execution was flawless.", stars: 5 },
+    { id: 3, name: "Michael Park", business_name: "Tech Entrepreneur", review: "Clean code, great architecture, and a beautiful front-end. Our app is scaling perfectly, and user feedback is 100% positive.", stars: 5 },
+    { id: 4, name: "Karen Wu", business_name: "Director of Innovation", review: "They delivered our iOS project ahead of schedule and with zero bugs. Their ability to solve complex technical problems is impressive.", stars: 5 },
+    { id: 5, name: "Alex Turner", business_name: "Founder, Social Ventures", review: "From initial consultation to the App Store launch, the journey was perfect. They are strategic partners who care.", stars: 5 },
+    { id: 6, name: "Jonas Wadel", business_name: "E-com Collective", review: "Working with this team changed our entire retention strategy. They built a high-converting revenue engine.", stars: 5 },
+    { id: 7, name: "Thomas Poppa", business_name: "Marketing Director", review: "The communication was exceptional. They took our messy email list and turned it into an automated profit center.", stars: 5 },
+    { id: 8, name: "Muhammad Afzaal", business_name: "Tech Lead", review: "Our new site is lightning fast. They engineered a web experience that improved conversion by 40%.", stars: 5 }
+];
+
 const TestimonialCard: React.FC<{ data: TestimonialItem }> = ({ data }) => (
   <div className="bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-brand-purple/30 transition-all duration-300 group hover:shadow-[0_0_30px_rgba(185,109,243,0.1)] relative overflow-hidden">
-     {/* Decorative Quote Icon */}
      <Quote className="absolute top-4 right-4 w-12 h-12 text-white/[0.03] group-hover:text-brand-purple/10 transition-colors rotate-180" />
      
      <div className="flex items-center gap-4 mb-4 relative z-10">
@@ -36,36 +46,9 @@ const TestimonialCard: React.FC<{ data: TestimonialItem }> = ({ data }) => (
 );
 
 export const VerticalTestimonials: React.FC = () => {
-  const [column1, setColumn1] = useState<TestimonialItem[]>([]);
-  const [column2, setColumn2] = useState<TestimonialItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchTestimonials = async () => {
-          try {
-              const { data, error } = await supabase
-                  .from('testimonials')
-                  .select('*')
-                  .eq('status', 'Active')
-                  .order('created_at', { ascending: false })
-                  .limit(10); // Get top 10
-
-              if (!error && data) {
-                  // Split into two columns
-                  const half = Math.ceil(data.length / 2);
-                  setColumn1(data.slice(0, half));
-                  setColumn2(data.slice(half));
-              }
-          } catch (err) {
-              console.error("Error fetching testimonials:", err);
-          } finally {
-              setLoading(false);
-          }
-      };
-      fetchTestimonials();
-  }, []);
-
-  if (loading || (column1.length === 0 && column2.length === 0)) return null;
+  const half = Math.ceil(STATIC_DATA.length / 2);
+  const column1 = STATIC_DATA.slice(0, half);
+  const column2 = STATIC_DATA.slice(half);
 
   return (
     <section className="py-24 bg-black relative border-t border-white/5 overflow-hidden">
@@ -118,7 +101,6 @@ export const VerticalTestimonials: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
                 {/* Column 1: Scrolls Up */}
                 <div className="flex flex-col gap-6 animate-scroll-up">
-                    {/* Triple the data to ensure seamless loop without gaps */}
                     {[...column1, ...column1, ...column1].map((item, idx) => (
                         <TestimonialCard key={`c1-${idx}`} data={item} />
                     ))}

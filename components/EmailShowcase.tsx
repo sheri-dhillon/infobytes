@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 
-// Default mock data if DB is empty or loading
-const DEFAULT_TEMPLATES = [
+import React from 'react';
+
+const STATIC_EMAILS = [
   { url: "https://cdn.dribbble.com/users/2364329/screenshots/15697240/media/790b9f029323382760775d7963d09a47.png", alt: "Fashion Newsletter" },
   { url: "https://cdn.dribbble.com/users/3532588/screenshots/19222383/media/4c06f3630f9a72b220300df87630733d.png", alt: "Tech Promo" },
   { url: "https://cdn.dribbble.com/users/6034870/screenshots/16658097/media/e24e2c94970030224676644464096009.png", alt: "E-commerce Sale" },
@@ -10,56 +9,10 @@ const DEFAULT_TEMPLATES = [
 ];
 
 export const EmailShowcase: React.FC = () => {
-  const [config, setConfig] = useState({
-      direction: 'right',
-      speed: 'slow',
-      pauseOnHover: true,
-      items: DEFAULT_TEMPLATES
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchConfig = async () => {
-          try {
-              const { data } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'email_templates')
-                  .single();
-              
-              if (data && data.value) {
-                  setConfig({
-                      ...config,
-                      ...data.value,
-                      items: (data.value.images || data.value.items || []).length > 0 ? (data.value.images || data.value.items) : DEFAULT_TEMPLATES
-                  });
-              }
-          } catch (err) {
-              console.error("Error fetching email templates:", err);
-          } finally {
-              setLoading(false);
-          }
-      };
-      fetchConfig();
-  }, []);
-
-  // Calculate Animation Duration
-  const getDuration = () => {
-      const baseSpeed = config.items.length * 15; // Slower base speed for large images
-      switch(config.speed) {
-          case 'fast': return `${Math.max(20, baseSpeed * 0.5)}s`;
-          case 'slow': return `${Math.max(60, baseSpeed * 1.5)}s`;
-          case 'normal': 
-          default: return `${Math.max(40, baseSpeed)}s`;
-      }
-  };
-
   const animationStyle = {
-      animationDuration: getDuration(),
-      animationDirection: config.direction === 'right' ? 'reverse' : 'normal'
+      animationDuration: '60s',
+      animationDirection: 'normal'
   };
-
-  if (loading && config.items.length === 0) return null;
 
   return (
     <section className="py-24 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
@@ -83,11 +36,11 @@ export const EmailShowcase: React.FC = () => {
          {/* Carousel Row */}
          <div className="flex overflow-hidden group">
            <div 
-             className={`flex gap-8 md:gap-12 min-w-full shrink-0 items-center animate-scroll-left ${config.pauseOnHover ? 'group-hover:[animation-play-state:paused]' : ''}`}
+             className="flex gap-8 md:gap-12 min-w-full shrink-0 items-center animate-scroll-left group-hover:[animation-play-state:paused]"
              style={animationStyle}
            >
              {/* Triple the array to ensure seamless loop */}
-             {[...config.items, ...config.items, ...config.items].map((item, i) => (
+             {[...STATIC_EMAILS, ...STATIC_EMAILS, ...STATIC_EMAILS].map((item, i) => (
                <div 
                  key={`email-${i}`} 
                  className="w-[280px] md:w-[350px] aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-[#111] hover:border-white/30 transition-all duration-300 relative group/item shadow-xl"

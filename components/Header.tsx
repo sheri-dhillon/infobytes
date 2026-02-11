@@ -3,15 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Phone, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
-import { supabase } from '../lib/supabase';
 
-// Default config matches original hardcoded values
-const DEFAULT_CONFIG = {
-    logo_url: '', // Falls back to Logo component default
-    logo_alt: 'InfoBytes Agency', // Default alt text
+// Static Configuration
+const CONFIG = {
+    logo_url: '', 
+    logo_alt: 'InfoBytes Agency', 
     cta_text: 'Book a 30 mins call',
     cta_link: 'https://calendly.com/shehryar-infobytes/30min',
-    availability_status: 'available', // Default status
+    availability_status: 'available', 
     menu_items: [
         { label: 'Home', href: '/' },
         { label: 'About', href: '/about' },
@@ -26,32 +25,6 @@ export const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
-
-  // Fetch dynamic configuration
-  useEffect(() => {
-      const fetchHeaderConfig = async () => {
-          try {
-              const { data } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'header')
-                  .single();
-              
-              if (data && data.value) {
-                  // Merge with defaults to ensure safety
-                  setConfig({
-                      ...DEFAULT_CONFIG,
-                      ...data.value,
-                      menu_items: data.value.menu_items || DEFAULT_CONFIG.menu_items
-                  });
-              }
-          } catch (error) {
-              console.error('Error loading header config', error);
-          }
-      };
-      fetchHeaderConfig();
-  }, []);
 
   // Prevent scrolling when menu is open
   useEffect(() => {
@@ -96,7 +69,7 @@ export const Header: React.FC = () => {
       }
   };
 
-  const statusDisplay = getStatusDisplay(config.availability_status || 'available');
+  const statusDisplay = getStatusDisplay(CONFIG.availability_status || 'available');
 
   return (
     <>
@@ -111,7 +84,7 @@ export const Header: React.FC = () => {
           
           {/* Left: Contact Pill (Dynamic CTA) */}
           <a 
-            href={config.cta_link} 
+            href={CONFIG.cta_link} 
             target="_blank" 
             rel="noopener noreferrer" 
             className={`hidden md:flex pointer-events-auto items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-500 hover:scale-105 cursor-pointer group shadow-lg ${
@@ -122,7 +95,7 @@ export const Header: React.FC = () => {
                 <Phone className={`fill-current transition-all duration-500 ${isScrolled ? 'w-4 h-4' : 'w-6 h-6'}`} />
              </div>
              <div className="flex flex-col">
-                <span className={`font-bold text-white leading-tight transition-all duration-500 ${isScrolled ? 'text-sm' : 'text-base'}`}>{config.cta_text}</span>
+                <span className={`font-bold text-white leading-tight transition-all duration-500 ${isScrolled ? 'text-sm' : 'text-base'}`}>{CONFIG.cta_text}</span>
                 <div className={`flex items-center gap-2 transition-all duration-500 ${isScrolled ? 'mt-0' : 'mt-1'}`}>
                    <span className={`w-2 h-2 rounded-full ${statusDisplay.color} animate-pulse`}></span>
                    <span className={`text-gray-400 font-medium transition-all duration-500 ${isScrolled ? 'text-xs' : 'text-sm'}`}>{statusDisplay.text}</span>
@@ -133,8 +106,8 @@ export const Header: React.FC = () => {
           {/* Mobile Logo */}
           <div className={`md:hidden pointer-events-auto transition-opacity duration-300 text-white ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
-                {config.logo_url ? (
-                    <img src={config.logo_url} alt={config.logo_alt || "InfoBytes Logo"} className="h-8 w-auto object-contain" />
+                {CONFIG.logo_url ? (
+                    <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className="h-8 w-auto object-contain" />
                 ) : (
                     <Logo className="h-8 w-auto" />
                 )}
@@ -144,8 +117,8 @@ export const Header: React.FC = () => {
           {/* Center: Desktop Logo */}
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out text-white ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
-                {config.logo_url ? (
-                    <img src={config.logo_url} alt={config.logo_alt || "InfoBytes Logo"} className={`w-auto object-contain transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
+                {CONFIG.logo_url ? (
+                    <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className={`w-auto object-contain transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
                 ) : (
                     <Logo className={`w-auto transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
                 )}
@@ -154,14 +127,7 @@ export const Header: React.FC = () => {
 
           {/* Right: Actions Group */}
           <div className={`flex items-center gap-3 pointer-events-auto z-50 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-             {/* Login Button */}
-             {/* <Link 
-                to="/admin/ibloginpage"
-                className={`hidden md:flex items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white font-medium transition-all duration-500 backdrop-blur-md hover:border-white/30 ${isScrolled ? 'px-5 py-2 text-xs' : 'px-6 py-3 text-sm'}`}
-             >
-                Login
-             </Link> */}
-
+             
              {/* Menu Toggle */}
              <button 
                 onClick={() => setIsOpen(!isOpen)}
@@ -195,7 +161,7 @@ export const Header: React.FC = () => {
            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-purple/5 blur-[120px] rounded-full pointer-events-none"></div>
 
            <nav className="flex flex-col items-center gap-6 md:gap-8 text-center p-4 relative z-10">
-             {config.menu_items.map((item, index) => (
+             {CONFIG.menu_items.map((item, index) => (
                <Link 
                  key={index} 
                  to={item.href} 
@@ -206,15 +172,6 @@ export const Header: React.FC = () => {
                  {item.label}
                </Link>
              ))}
-             {/* Mobile Menu Login Link */}
-             <Link 
-               to="/admin/ibloginpage" 
-               onClick={() => setIsOpen(false)} 
-               className="md:hidden mt-4 px-8 py-3 rounded-full border border-white/10 bg-white/5 text-white font-medium opacity-0 animate-slide-up-fade"
-               style={{ animationDelay: `${100 + config.menu_items.length * 100}ms` }}
-             >
-               Login to Admin
-             </Link>
            </nav>
         </div>
       )}

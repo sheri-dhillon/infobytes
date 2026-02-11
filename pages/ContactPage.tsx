@@ -1,83 +1,50 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '../components/ui/Button';
 import { Mail, Phone, MapPin, ArrowRight, ChevronDown, Plus, Minus, Loader2, CheckCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
-interface FormField {
-    id: string;
-    key: string; // DB column or 'custom'
-    label: string;
-    type: 'text' | 'email' | 'tel' | 'textarea' | 'select';
-    width: 'half' | 'full';
-    required: boolean;
-    placeholder?: string;
-    options?: string[]; // For select inputs
-}
-
-interface ContactConfig {
+const STATIC_CONTACT_CONFIG = {
     hero: {
-        title: string;
-        subtitle: string;
-    };
+        title: "We'd love to \nhear from you.",
+        subtitle: "Whether you're building a brand, designing a product, or scaling a system."
+    },
     info: {
-        heading: string;
-        subheading: string;
-        email: string;
-        phone: string;
-        address: string;
-        booking_link: string;
-    };
-    form_fields: FormField[];
-}
+        heading: "LET'S CHAT",
+        subheading: "Let's bring your vision to life.",
+        email: "hello@infobytes.io",
+        phone: "+1 (555) 000-0000",
+        address: "123 Design Street, Creative City, NY 10012",
+        booking_link: "https://calendly.com/shehryar-infobytes/30min"
+    },
+    form_fields: [
+      { id: "1", key: "first_name", label: "First Name", type: "text", width: "half", required: true, placeholder: "John" },
+      { id: "2", key: "last_name", label: "Last Name", type: "text", width: "half", required: true, placeholder: "Doe" },
+      { id: "3", key: "email", label: "Email", type: "email", width: "full", required: true, placeholder: "john@example.com" },
+      { id: "4", key: "company_name", label: "Company Name", type: "text", width: "half", required: false, placeholder: "Acme Inc." },
+      { id: "5", key: "mobile_number", label: "Mobile Number", type: "tel", width: "half", required: false, placeholder: "+1 (555) 000-0000" },
+      { id: "6", key: "project_budget", label: "Project Budget", type: "select", width: "full", required: false, options: ["Less than $1,000", "$1,000 - $2,000", "$2,000 - $3,000", "$3,000+"] },
+      { id: "7", key: "source", label: "How did you hear about us?", type: "select", width: "full", required: false, options: ["Google", "LinkedIn", "Referral", "Other"] },
+      { id: "8", key: "project_details", label: "Project Details", type: "textarea", width: "full", required: true, placeholder: "Tell us about your project..." }
+    ]
+};
+
+const STATIC_FAQS = [
+    { q: "How do you bridge the gap between UI/UX and actual revenue?", a: "We believe beauty must perform. Our UI/UX process uses behavioral data to map user journeys that lead directly to conversions." },
+    { q: "Do you build native iOS apps or cross-platform solutions?", a: "We specialize in high-performance Native iOS development using Swift and SwiftUI." },
+    { q: "What is the typical timeline for a full Design-to-Launch project?", a: "A custom high-end project typically spans 8 to 12 weeks." }
+];
 
 export const ContactPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [config, setConfig] = useState<ContactConfig | null>(null);
-  const [faqs, setFaqs] = useState<any[]>([]);
-  const [loadingConfig, setLoadingConfig] = useState(true);
   
   // Dynamic Form State
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
 
   // Magnetic button logic
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const footerSectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-      const fetchData = async () => {
-          try {
-              // 1. Fetch Contact Page Config
-              const { data: pageData } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'contact_page')
-                  .single();
-              
-              if (pageData) setConfig(pageData.value);
-
-              // 2. Fetch FAQs (Global Data)
-              const { data: faqData } = await supabase
-                  .from('site_settings')
-                  .select('value')
-                  .eq('key', 'faq_section')
-                  .single();
-              
-              if (faqData?.value?.items) {
-                  setFaqs(faqData.value.items);
-              }
-
-          } catch (err) {
-              console.error(err);
-          } finally {
-              setLoadingConfig(false);
-          }
-      };
-      fetchData();
-  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!footerSectionRef.current) return;
@@ -99,71 +66,25 @@ export const ContactPage: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus('idle');
-    setErrorMessage('');
 
-    try {
-        if (!config) throw new Error("Configuration missing");
-
-        // Map dynamic form data to Supabase 'leads' table columns
-        const dbPayload: any = {
-            first_name: formData['first_name'] || '',
-            last_name: formData['last_name'] || '',
-            email: formData['email'] || '',
-            company_name: formData['company_name'] || '',
-            mobile_number: formData['mobile_number'] || '',
-            project_budget: formData['project_budget'] || '',
-            source: formData['source'] || '',
-            status: 'New'
-        };
-
-        // If there are extra fields not in the standard columns, append them to project_details
-        const standardKeys = ['first_name', 'last_name', 'email', 'company_name', 'mobile_number', 'project_budget', 'source', 'project_details'];
-        let customDetails = formData['project_details'] || '';
-
-        // Iterate through submitted data to find non-standard fields
-        Object.keys(formData).forEach(key => {
-            if (!standardKeys.includes(key)) {
-                const label = config.form_fields.find(f => f.key === key)?.label || key;
-                customDetails += `\n\n[${label}]: ${formData[key]}`;
-            }
-        });
-
-        dbPayload.project_details = customDetails.trim();
-
-        const { error } = await supabase.from('leads').insert([dbPayload]);
-
-        if (error) throw error;
-
+    // Simulate Network Request
+    setTimeout(() => {
+        setIsSubmitting(false);
         setSubmitStatus('success');
         setFormData({});
-    } catch (err: any) {
-        console.error('Error submitting form:', err);
-        setSubmitStatus('error');
-        setErrorMessage(err.message || 'Something went wrong. Please try again.');
-    } finally {
-        setIsSubmitting(false);
-    }
+        console.log("Form Submitted:", formData);
+    }, 1500);
   };
-
-  if (loadingConfig) {
-      return (
-          <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
-          </div>
-      );
-  }
-
-  if (!config) return null;
 
   return (
     <>
       {/* Dynamic Hero Section */}
       <section className="pt-52 pb-20 md:pt-72 md:pb-32 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
           <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.1] tracking-tight mb-6 animate-slide-up-fade whitespace-pre-line">
-            {config.hero.title}
+            {STATIC_CONTACT_CONFIG.hero.title}
           </h1>
           <p className="text-gray-400 text-lg md:text-xl animate-slide-up-fade" style={{ animationDelay: '150ms' }}>
-            {config.hero.subtitle}
+            {STATIC_CONTACT_CONFIG.hero.subtitle}
           </p>
       </section>
       
@@ -175,8 +96,8 @@ export const ContactPage: React.FC = () => {
             <div className="lg:col-span-5 space-y-16">
               
               <div>
-                 <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 uppercase leading-none tracking-tight">{config.info.heading}</h2>
-                 <p className="text-gray-400 text-lg mb-8">{config.info.subheading}</p>
+                 <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 uppercase leading-none tracking-tight">{STATIC_CONTACT_CONFIG.info.heading}</h2>
+                 <p className="text-gray-400 text-lg mb-8">{STATIC_CONTACT_CONFIG.info.subheading}</p>
                  
                  {/* Booking Card */}
                  <div className="bg-[#111] rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all group relative overflow-hidden">
@@ -190,7 +111,7 @@ export const ContactPage: React.FC = () => {
                     </h3>
                     
                     <a 
-                      href={config.info.booking_link} 
+                      href={STATIC_CONTACT_CONFIG.info.booking_link} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-3 text-white font-medium hover:gap-5 transition-all group/link"
@@ -208,25 +129,25 @@ export const ContactPage: React.FC = () => {
                 <div>
                    <h3 className="text-xl font-bold text-white mb-6">Contact Details</h3>
                    <div className="space-y-6">
-                      <a href={`mailto:${config.info.email}`} className="flex items-center gap-4 group">
+                      <a href={`mailto:${STATIC_CONTACT_CONFIG.info.email}`} className="flex items-center gap-4 group">
                         <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
                           <Mail className="w-4 h-4" />
                         </div>
-                        <span className="text-gray-300 group-hover:text-white transition-colors">{config.info.email}</span>
+                        <span className="text-gray-300 group-hover:text-white transition-colors">{STATIC_CONTACT_CONFIG.info.email}</span>
                       </a>
                       
-                      <a href={`tel:${config.info.phone}`} className="flex items-center gap-4 group">
+                      <a href={`tel:${STATIC_CONTACT_CONFIG.info.phone}`} className="flex items-center gap-4 group">
                         <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
                           <Phone className="w-4 h-4" />
                         </div>
-                        <span className="text-gray-300 group-hover:text-white transition-colors">{config.info.phone}</span>
+                        <span className="text-gray-300 group-hover:text-white transition-colors">{STATIC_CONTACT_CONFIG.info.phone}</span>
                       </a>
 
                       <div className="flex items-center gap-4 group">
                         <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-black transition-all border border-white/10 shrink-0">
                           <MapPin className="w-4 h-4" />
                         </div>
-                        <span className="text-gray-300 group-hover:text-white transition-colors">{config.info.address}</span>
+                        <span className="text-gray-300 group-hover:text-white transition-colors">{STATIC_CONTACT_CONFIG.info.address}</span>
                       </div>
                    </div>
                 </div>
@@ -267,7 +188,7 @@ export const ContactPage: React.FC = () => {
                   ) : (
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid md:grid-cols-2 gap-6">
-                            {config.form_fields.map((field, idx) => (
+                            {STATIC_CONTACT_CONFIG.form_fields.map((field: any, idx: number) => (
                                 <div 
                                     key={field.id || idx} 
                                     className={`space-y-2 ${field.width === 'full' ? 'md:col-span-2' : 'md:col-span-1'}`}
@@ -286,7 +207,7 @@ export const ContactPage: React.FC = () => {
                                                 className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-white/30 focus:outline-none transition-colors appearance-none cursor-pointer"
                                             >
                                                 <option value="" disabled>Select an option</option>
-                                                {field.options?.map((opt, i) => (
+                                                {field.options?.map((opt: string, i: number) => (
                                                     <option key={i} value={opt}>{opt}</option>
                                                 ))}
                                             </select>
@@ -316,10 +237,6 @@ export const ContactPage: React.FC = () => {
                                 </div>
                             ))}
                         </div>
-
-                        {submitStatus === 'error' && (
-                            <p className="text-red-400 text-sm animate-fade-in">{errorMessage}</p>
-                        )}
 
                         <Button 
                             disabled={isSubmitting}
@@ -383,18 +300,17 @@ export const ContactPage: React.FC = () => {
              style={{ transform: `translate3d(${mousePos.x}px, ${mousePos.y}px, 0)` }}
         >
              <a 
-               href={`mailto:${config.info.email}`} 
+               href={`mailto:${STATIC_CONTACT_CONFIG.info.email}`} 
                className="flex flex-col items-center justify-center w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-r from-brand-orange to-brand-purple text-white shadow-[0_0_60px_rgba(255,107,74,0.4)] hover:shadow-[0_0_100px_rgba(185,109,243,0.6)] hover:scale-105 transition-all duration-300 group text-center p-8"
              >
                 <span className="text-xl md:text-2xl font-bold uppercase tracking-wider mb-2">Get In Touch</span>
-                <span className="text-sm md:text-base opacity-80 group-hover:opacity-100 transition-opacity">{config.info.email}</span>
+                <span className="text-sm md:text-base opacity-80 group-hover:opacity-100 transition-opacity">{STATIC_CONTACT_CONFIG.info.email}</span>
              </a>
         </div>
       </section>
 
       {/* Dynamic FAQ Section with Accordion Style */}
-      {faqs.length > 0 && (
-        <section className="py-24 bg-[#0a0a0a] border-t border-white/5 relative">
+      <section className="py-24 bg-[#0a0a0a] border-t border-white/5 relative">
             <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-12 gap-12 lg:gap-24">
                 
@@ -408,7 +324,7 @@ export const ContactPage: React.FC = () => {
                     <p className="text-gray-400 text-lg mb-8 leading-relaxed">
                     Everything you need to know about our process, pricing, and services. Can't find what you're looking for?
                     </p>
-                    <a href={`mailto:${config.info.email}`} className="inline-flex items-center gap-2 text-white font-semibold hover:text-brand-orange transition-colors group">
+                    <a href={`mailto:${STATIC_CONTACT_CONFIG.info.email}`} className="inline-flex items-center gap-2 text-white font-semibold hover:text-brand-orange transition-colors group">
                         Email our team <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </a>
                 </div>
@@ -417,7 +333,7 @@ export const ContactPage: React.FC = () => {
                 {/* Accordion / Right Side */}
                 <div className="lg:col-span-8">
                 <div className="divide-y divide-white/10">
-                    {faqs.map((faq, idx) => (
+                    {STATIC_FAQS.map((faq, idx) => (
                     <div key={idx} className="py-6 first:pt-0 last:pb-0">
                         <button 
                         onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
@@ -447,7 +363,6 @@ export const ContactPage: React.FC = () => {
             </div>
             </div>
         </section>
-      )}
     </>
   );
 };
