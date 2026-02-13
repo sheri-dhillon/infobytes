@@ -147,7 +147,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="mt-24 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-white">
             <Link to="/" className="block">
-               <Logo className="h-8 w-auto" />
+              <Logo className="h-9 md:h-10 w-auto max-w-[220px]" />
             </Link>
             <div className="text-gray-600 text-sm font-mono">
                {CONFIG.copyright_text}

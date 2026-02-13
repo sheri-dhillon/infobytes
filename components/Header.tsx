@@ -107,9 +107,9 @@ export const Header: React.FC = () => {
           <div className={`md:hidden pointer-events-auto transition-opacity duration-300 text-white ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
                 {CONFIG.logo_url ? (
-                    <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className="h-8 w-auto object-contain" />
+                <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className="h-9 w-auto max-w-[160px] object-contain" />
                 ) : (
-                    <Logo className="h-8 w-auto" />
+                <Logo className="h-9 w-auto max-w-[160px]" />
                 )}
              </Link>
           </div>
@@ -118,9 +118,9 @@ export const Header: React.FC = () => {
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out text-white ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
                 {CONFIG.logo_url ? (
-                    <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className={`w-auto object-contain transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
+                <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className={`w-auto max-w-[240px] object-contain transition-all duration-500 ${isScrolled ? 'h-9' : 'h-12'}`} />
                 ) : (
-                    <Logo className={`w-auto transition-all duration-500 ${isScrolled ? 'h-8' : 'h-12'}`} />
+                <Logo className={`w-auto max-w-[240px] transition-all duration-500 ${isScrolled ? 'h-9' : 'h-12'}`} />
                 )}
              </Link>
           </div>
