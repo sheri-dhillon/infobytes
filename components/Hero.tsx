@@ -40,19 +40,19 @@ export const Hero: React.FC = () => {
           {/* Main Typography */}
           <div className="flex flex-col relative z-20">
             {/* Part 1: Smaller, Serif, Italic */}
-            <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] xl:text-[6.5rem] leading-[0.95] font-serif italic text-white mb-3 md:ml-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
+            <h1 className="text-[clamp(2.25rem,4.2vw,5.25rem)] leading-[0.95] font-serif italic text-white mb-3 md:ml-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
                {CONFIG.headline_part1}
             </h1>
             {/* Part 2: Huge, Sans, Bold, Caps */}
             {CONFIG.headline_part2 ? (
-              <h2 className="text-[10.5vw] sm:text-[9vw] md:text-[5.75rem] lg:text-[6.75rem] xl:text-[8rem] leading-[0.9] md:leading-[0.85] font-black tracking-tighter text-white mix-blend-overlay opacity-90 animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
+              <h2 className="text-[clamp(3.25rem,7.5vw,7.75rem)] leading-[0.9] font-black tracking-tighter text-white mix-blend-overlay opacity-90 animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
                 {CONFIG.headline_part2}
               </h2>
             ) : null}
           </div>
 
           {/* Floating CTA Button */}
-          <div className="flex justify-start md:justify-end md:mr-0 lg:mr-24 mt-8 md:-mt-8 lg:-mt-16 relative z-30 animate-fade-in" style={{ animationDelay: '600ms' }}>
+           <div className="flex justify-start md:justify-end lg:pr-24 mt-8 md:mt-10 lg:mt-12 relative z-30 animate-fade-in" style={{ animationDelay: '600ms' }}>
              <Link to={CONFIG.cta_link} className="group relative px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-full flex items-center gap-3 md:gap-4 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,107,74,0.3)] hover:shadow-[0_0_40px_rgba(185,109,243,0.4)]">
                 <span className="font-bold text-sm md:text-base lg:text-lg">{CONFIG.cta_text}</span>
                 <div className="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-45">
