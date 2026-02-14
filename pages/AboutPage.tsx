@@ -2,6 +2,7 @@
 import React from 'react';
 import { MousePointer2, Plus, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { HeroHeading } from '../components/ui/HeroHeading';
 import { CultureScroll } from '../components/CultureScroll';
 import { WorkProcess } from '../components/WorkProcess';
 import { StatsScroll } from '../components/StatsScroll';
@@ -59,10 +60,11 @@ export const AboutPage: React.FC = () => {
                 <span className="text-xs font-bold tracking-wide text-gray-300 uppercase">{STATIC_CONFIG.hero.pill}</span>
              </div>
              
-             <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight animate-slide-up-fade">
-                {STATIC_CONFIG.hero.title_line1} <br />
-                {STATIC_CONFIG.hero.title_line2}
-             </h1>
+                   <HeroHeading
+                      pre={STATIC_CONFIG.hero.title_line1}
+                      main={STATIC_CONFIG.hero.title_line2}
+                      className="mb-6 animate-slide-up-fade"
+                   />
              
              <p className="text-gray-400 text-lg md:text-xl max-w-lg mb-12 leading-relaxed animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
                 {STATIC_CONFIG.hero.description}

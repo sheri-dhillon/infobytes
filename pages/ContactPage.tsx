@@ -7,8 +7,8 @@ import { FAQ_CONTENT, buildFaqPageJsonLd } from '../components/FAQ';
 
 const STATIC_CONTACT_CONFIG = {
     hero: {
-        title: "We'd love to \nhear from you.",
-        subtitle: "Whether you're building a brand, designing a product, or scaling a system."
+        title: "Start your journey to predictable revenue.",
+        subtitle: "Whether you’re looking to migrate to Klaviyo, optimize your Omnisend flows, or audit your entire retention lifecycle, our experts are ready to build your engine."
     },
     info: {
         heading: "LET'S CHAT",
@@ -24,11 +24,48 @@ const STATIC_CONTACT_CONFIG = {
       { id: "3", key: "email", label: "Email", type: "email", width: "full", required: true, placeholder: "john@example.com" },
       { id: "4", key: "company_name", label: "Company Name", type: "text", width: "half", required: false, placeholder: "Acme Inc." },
       { id: "5", key: "mobile_number", label: "Mobile Number", type: "tel", width: "half", required: false, placeholder: "+1 (555) 000-0000" },
-      { id: "6", key: "project_budget", label: "Project Budget", type: "select", width: "full", required: false, options: ["Less than $1,000", "$1,000 - $2,000", "$2,000 - $3,000", "$3,000+"] },
-      { id: "7", key: "source", label: "How did you hear about us?", type: "select", width: "full", required: false, options: ["Google", "LinkedIn", "Referral", "Other"] },
-      { id: "8", key: "project_details", label: "Project Details", type: "textarea", width: "full", required: true, placeholder: "Tell us about your project..." }
+      {
+        id: "6",
+        key: "project_goal",
+        label: "Project Goal",
+        type: "select",
+        width: "full",
+        required: true,
+        options: [
+          "Klaviyo Setup/Migration",
+          "Omnisend Strategy",
+          "Full Lifecycle Automation",
+          "Email & SMS Audit"
+        ]
+      },
+      {
+        id: "7",
+        key: "monthly_store_revenue",
+        label: "Monthly Store Revenue",
+        type: "select",
+        width: "half",
+        required: true,
+        options: ["Under $20k", "$20k - $100k", "$100k+"]
+      },
+      {
+        id: "8",
+        key: "current_platform",
+        label: "Current Platform",
+        type: "select",
+        width: "half",
+        required: true,
+        options: ["Klaviyo", "Omnisend", "Mailchimp", "Other"]
+      },
+      { id: "9", key: "project_details", label: "Project Details", type: "textarea", width: "full", required: true, placeholder: "Tell us about your retention goals, current setup, and what you'd like us to audit..." }
     ]
 };
+
+const TRUST_BRANDS = [
+  { name: 'Fritz und Frei' },
+  { name: 'GeniusPack' },
+  { name: 'ObjectsHQ' },
+  { name: 'Zyron Tech' }
+];
 
 export const ContactPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -74,13 +111,45 @@ export const ContactPage: React.FC = () => {
 
   return (
     <>
+      <Seo
+        jsonLdId="infobytes-contactpage-schema"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'ContactPage',
+          name: 'Contact INFOBYTES - Schedule Your Revenue Audit',
+          description:
+            'Contact the INFOBYTES team to discuss your Klaviyo or Omnisend retention strategy and schedule a free revenue audit.',
+          url: 'https://infobytes.io/contact',
+          mainEntity: {
+            '@type': 'Organization',
+            name: 'INFOBYTES',
+            contactPoint: {
+              '@type': 'ContactPoint',
+              email: STATIC_CONTACT_CONFIG.info.email,
+              contactType: 'sales',
+              availableLanguage: 'English'
+            }
+          }
+        }}
+      />
       <Seo jsonLdId="infobytes-contact-faq-schema" jsonLd={buildFaqPageJsonLd()} />
       {/* Dynamic Hero Section */}
-      <section className="pt-52 pb-20 md:pt-72 md:pb-32 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
-          <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.1] tracking-tight mb-6 animate-slide-up-fade whitespace-pre-line">
-            {STATIC_CONTACT_CONFIG.hero.title}
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl animate-slide-up-fade" style={{ animationDelay: '150ms' }}>
+      <section className="pt-40 pb-16 md:pt-56 md:pb-24 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
+          <div className="w-full max-w-[56rem] lg:max-w-[62rem] mx-auto relative z-20 text-center">
+            <h1
+              className="text-[clamp(2.1rem,4vw,4.8rem)] leading-[0.95] font-serif italic text-white mb-3 animate-slide-up-fade"
+              style={{ animationDelay: '0ms' }}
+            >
+              Start your journey to
+            </h1>
+            <h2
+              className="text-[clamp(3.1rem,6.8vw,6.9rem)] leading-[0.92] md:leading-[0.9] font-black tracking-tighter text-white mix-blend-overlay opacity-90 animate-slide-up-fade"
+              style={{ animationDelay: '100ms' }}
+            >
+              predictable revenue.
+            </h2>
+          </div>
+          <p className="mt-6 md:mt-8 text-gray-400 text-lg md:text-xl animate-slide-up-fade" style={{ animationDelay: '150ms' }}>
             {STATIC_CONTACT_CONFIG.hero.subtitle}
           </p>
       </section>
@@ -102,10 +171,14 @@ export const ContactPage: React.FC = () => {
                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&q=80" alt="Avatar" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
                     
-                    <h3 className="text-4xl font-bold text-white leading-none mb-12 uppercase tracking-tight">
-                       BOOK A <br/>
-                       QUICK CALL
-                    </h3>
+                    <div className="mb-10">
+                      <h3 className="text-[clamp(1.6rem,3vw,2.4rem)] leading-[0.95] font-serif italic text-white mb-2 tracking-tight">
+                        Book Your Free
+                      </h3>
+                      <h4 className="text-[clamp(2.1rem,4vw,3.2rem)] leading-[0.9] font-black tracking-tighter text-white mix-blend-overlay opacity-90">
+                        Revenue Audit
+                      </h4>
+                    </div>
                     
                     <a 
                       href={STATIC_CONTACT_CONFIG.info.booking_link} 
@@ -149,16 +222,6 @@ export const ContactPage: React.FC = () => {
                    </div>
                 </div>
 
-                <div>
-                   <h3 className="text-xl font-bold text-white mb-6">Follow Us</h3>
-                   <div className="flex gap-4 flex-wrap">
-                      {['facebook-f', 'instagram', 'linkedin-in', 'x-twitter', 'dribbble', 'behance'].map((social) => (
-                        <a key={social} href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-all hover:scale-110">
-                           <i className={`fa-brands fa-${social}`}></i>
-                        </a>
-                      ))}
-                   </div>
-                </div>
               </div>
 
             </div>
@@ -166,7 +229,7 @@ export const ContactPage: React.FC = () => {
             {/* Right Column: Dynamic Form */}
             <div className="lg:col-span-7">
                <div className="bg-[#111] p-8 md:p-12 rounded-[2.5rem] border border-white/10 sticky top-32">
-                  <h3 className="text-2xl font-bold text-white mb-8">Send us a message</h3>
+                <h3 className="text-2xl font-bold text-white mb-8">Schedule Your Revenue Audit</h3>
                   
                   {submitStatus === 'success' ? (
                       <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-8 text-center animate-fade-in">
@@ -249,6 +312,25 @@ export const ContactPage: React.FC = () => {
                                 </>
                             )}
                         </Button>
+
+                        {/* Trust Bar */}
+                        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+                          <div className="text-sm font-semibold text-white">
+                            You're in good company. Join 150+ brands scaling with INFOBYTES.
+                          </div>
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            {TRUST_BRANDS.map((brand) => (
+                              <div
+                                key={brand.name}
+                                className="px-3 py-1.5 rounded-full border border-white/10 bg-black/30 text-xs font-bold tracking-widest uppercase text-gray-400"
+                                aria-label={brand.name}
+                                title={brand.name}
+                              >
+                                {brand.name}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                     </form>
                   )}
                </div>

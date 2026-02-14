@@ -1,48 +1,47 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ArrowUpRight, Monitor, Smartphone, PenTool, BarChart, Code2, Layout, Layers, Search, Mail, Cpu, Zap, Palette, Share2, Box, Fingerprint } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const STATIC_SERVICES = [
   {
     id: "01",
-    title: "UI/UX Design",
-    slug: "ui-ux-design",
-    description: "Intuitive interfaces that drive engagement. We design user-centric systems for web and mobile that are strategically built to convert.",
-    pills: ["Website Design", "Product Design", "Wireframing"],
-    image: "https://lh3.googleusercontent.com/pw/AP1GczPfhSAfQqZ1DrHsKDS-orBlGKSCsMymYAP_QnOMRtExlH5K2t99l5zrFPrJKVgRDBztXIElsKGagi3z4KePoLfDZsNY-SFHS6qdLmeo12jRdN-r119GAWOM0Z8bcIhMFoG00lYQRnYq-W3uaYBpG9ZF=w1367-h911-s-no-gm",
-    icons: [{ icon: PenTool, color: "text-purple-400" }, { icon: Layout, color: "text-pink-400" }, { icon: Layers, color: "text-blue-400" }],
-    accent: "text-purple-400",
+    title: "Email Automation Engines",
+    slug: "email-automation-engines",
+    description:
+      "We move beyond newsletters to build sophisticated, data-driven engines that nurture leads and maximize revenue on autopilot, ensuring the right message hits at the right time.",
+    pills: ["Klaviyo Flows", "Abandoned Cart Recovery", "Behavioral Triggers", "Hyper-Segmentation"],
+    image: "https://images.unsplash.com/photo-1557200134-90327ee9fafa?auto=format&fit=crop&w=1200&q=80",
+    accent: "text-brand-orange",
   },
   {
     id: "02",
-    title: "Web Development",
-    slug: "web-development",
-    description: "High-performance websites built for scale. From custom React applications to optimized marketing sites.",
-    pills: ["React", "Next.js", "Performance", "SEO Ready"],
-    image: "https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=1000&q=80",
-    icons: [{ icon: Monitor, color: "text-emerald-400" }, { icon: Code2, color: "text-cyan-400" }, { icon: Zap, color: "text-yellow-400" }],
-    accent: "text-emerald-400",
+    title: "SMS & Mobile Messaging",
+    slug: "sms-mobile-messaging",
+    description:
+      "Cut through the noise with personalized, compliant text message campaigns. We drive immediate action and deeply connect with your mobile-first customers where they are most active.",
+    pills: ["Omnisend SMS", "98% Open Rates", "TCPA Compliant", "Instant ROI"],
+    image: "https://images.unsplash.com/photo-1556244573-c3686c0f0f9c?auto=format&fit=crop&w=1200&q=80",
+    accent: "text-brand-purple",
   },
   {
     id: "03",
-    title: "Mobile Apps",
-    slug: "mobile-apps",
-    description: "Native iOS and cross-platform solutions that deliver premium user experiences on every device.",
-    pills: ["iOS", "SwiftUI", "React Native", "App Store"],
-    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1000&q=80",
-    icons: [{ icon: Smartphone, color: "text-orange-400" }, { icon: Fingerprint, color: "text-red-400" }, { icon: Cpu, color: "text-indigo-400" }],
-    accent: "text-orange-400",
+    title: "Platform Migration & Audit",
+    slug: "platform-migration-audit",
+    description:
+      "Seamlessly move to a top-tier retention platform without losing historical data. We audit, configure, and optimize your technical infrastructure for maximum inbox placement.",
+    pills: ["Klaviyo Expert", "Omnisend Partner", "Deliverability Fix", "Data Integrity"],
+    image: "https://images.unsplash.com/photo-1551808525-51a94da548ce?auto=format&fit=crop&w=1200&q=80",
+    accent: "text-brand-orange",
   },
   {
     id: "04",
-    title: "Growth Strategy",
-    slug: "growth-strategy",
-    description: "Data-driven marketing and retention strategies to help your product reach its full potential.",
-    pills: ["Analytics", "Email Marketing", "CRO", "Automation"],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80",
-    icons: [{ icon: BarChart, color: "text-blue-400" }, { icon: Mail, color: "text-green-400" }, { icon: Search, color: "text-purple-400" }],
-    accent: "text-blue-400",
+    title: "Lifecycle Strategy & CRO",
+    slug: "lifecycle-strategy-cro",
+    description:
+      "A holistic approach to increasing Customer Lifetime Value. We analyze behavioral data to plug leaky funnel buckets and continuously optimize every touchpoint in the customer journey.",
+    pills: ["Customer LTV", "A/B Testing", "Journey Mapping", "Zero-Party Data"],
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+    accent: "text-brand-purple",
   }
 ];
 
@@ -55,13 +54,13 @@ export const ServicesList: React.FC = () => {
        <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="mb-20 pt-24 text-center max-w-3xl mx-auto">
              <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs font-bold tracking-widest uppercase mb-6 text-brand-orange">
-                Full-Service Agency
+               OUR EXPERTISE
              </div>
              <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1]">
-                Capabilities that <br/> <span className="text-gray-500">drive results.</span>
+               Turning one-time buyers <br /> <span className="text-gray-500">into lifetime value.</span>
              </h2>
              <p className="text-gray-400 text-lg leading-relaxed">
-                We combine strategic thinking with expert craftsmanship to deliver digital products that look great and perform even better.
+               A four-part retention stack built to increase repeat purchases, improve deliverability, and grow LTV through lifecycle automation.
              </p>
           </div>
 
@@ -130,12 +129,17 @@ const StickyCard: React.FC<{ index: number; total: number; service: any }> = ({ 
     >
        <div 
          ref={cardRef}
-         className="relative w-full bg-[#0a0a0a] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl transition-all duration-100 ease-linear origin-top group"
+         className="relative w-full bg-[#0a0a0a] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl transition-all duration-100 ease-linear origin-top group hover:border-white/15"
          style={{
             height: '450px', 
             willChange: 'transform, filter'
          }}
        >
+          <Link
+            to={service.slug ? `/services/${service.slug}` : '/contact'}
+            className="absolute inset-0 z-30"
+            aria-label={service.slug ? `View ${service.title}` : 'Contact INFOBYTES'}
+          />
           <div className="flex flex-col md:flex-row h-full">
               
               {/* Left Content Area - Solid Background */}
@@ -144,14 +148,6 @@ const StickyCard: React.FC<{ index: number; total: number; service: any }> = ({ 
                       <div className="flex items-center justify-between mb-6">
                           <div className={`text-xs font-bold tracking-widest uppercase ${service.accent} bg-white/5 px-3 py-1 rounded-full border border-white/5`}>
                               {service.id} — Service
-                          </div>
-                          {/* Icons - Styled based on merged props */}
-                          <div className="flex -space-x-2">
-                              {service.icons && service.icons.map((item: any, i: number) => (
-                                  <div key={i} className={`w-9 h-9 rounded-full bg-[#111] border border-white/10 flex items-center justify-center relative z-[${10-i}] shadow-lg`}>
-                                      <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
-                                  </div>
-                              ))}
                           </div>
                       </div>
 
@@ -172,18 +168,6 @@ const StickyCard: React.FC<{ index: number; total: number; service: any }> = ({ 
                               )
                           ))}
                       </div>
-                  </div>
-
-                  <div className="pt-2">
-                      <Link 
-                        to={service.slug ? `/services/${service.slug}` : '/contact'} 
-                        className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-full font-bold text-sm tracking-wide transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,107,74,0.3)] hover:shadow-[0_0_30px_rgba(185,109,243,0.4)]"
-                      >
-                          {service.slug ? 'View Details' : 'Start Project'}
-                          <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-45">
-                             <ArrowUpRight className="w-3 h-3 text-black" />
-                          </div>
-                      </Link>
                   </div>
               </div>
 

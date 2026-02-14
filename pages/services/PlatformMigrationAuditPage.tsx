@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Seo } from '../../components/Seo';
+import { HeroHeading } from '../../components/ui/HeroHeading';
 
 export const PlatformMigrationAuditPage: React.FC = () => {
   return (
@@ -37,9 +38,7 @@ export const PlatformMigrationAuditPage: React.FC = () => {
             Back to Services
           </Link>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-slide-up-fade leading-tight">
-            Platform Migration &amp; Audit
-          </h1>
+          <HeroHeading main={<>Platform Migration &amp; Audit</>} className="mb-6 animate-slide-up-fade" />
 
           <p
             className="text-xl md:text-2xl text-gray-400 max-w-3xl leading-relaxed animate-slide-up-fade"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, ArrowRight, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { HeroHeading } from '../components/ui/HeroHeading';
 
 // --- Data: 15 Projects (3 per category) ---
 const categories = ["All", "Web Development", "App Development", "UI/UX Design", "Branding", "AI Solutions"];
@@ -184,10 +185,15 @@ export const WorkPage: React.FC = () => {
                   <span className="text-xs font-bold text-white tracking-widest uppercase">Portfolio 2024-2025</span>
                </div>
                
-               <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-bold text-white mb-8 tracking-tight leading-[0.95] animate-slide-up-fade">
-                  Building the <br/>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-purple">impossible.</span>
-               </h1>
+               <HeroHeading
+                 pre={<>Building the</>}
+                 main={
+                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-purple">
+                     impossible.
+                   </span>
+                 }
+                 className="mb-8 animate-slide-up-fade"
+               />
 
                <p className="text-xl text-gray-400 max-w-2xl leading-relaxed animate-slide-up-fade" style={{ animationDelay: '150ms' }}>
                   A curated selection of projects where we bridged the gap between complex technology and human-centric design.

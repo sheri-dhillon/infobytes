@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Seo } from '../components/Seo';
 import { FAQ, buildFaqPageJsonLd } from '../components/FAQ';
+import { HeroHeading } from '../components/ui/HeroHeading';
 
 const SERVICES_DATA: Record<string, any> = {
    'email-automation-engines': {
@@ -61,9 +62,7 @@ export const ServiceDetailPage: React.FC = () => {
              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Services
           </Link>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-slide-up-fade leading-tight">
-            {service.title}
-          </h1>
+               <HeroHeading main={service.title} className="mb-6 animate-slide-up-fade" />
           
           <p className="text-xl md:text-2xl text-gray-400 max-w-3xl leading-relaxed animate-slide-up-fade mb-10" style={{ animationDelay: '100ms' }}>
             {service.description}
