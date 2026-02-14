@@ -8,7 +8,7 @@ import { Logo } from './Logo';
 const CONFIG = {
     logo_url: '', 
     logo_alt: 'InfoBytes Agency', 
-    cta_text: 'Book a 30 mins call',
+  cta_text: 'Book Your Revenue Audit',
     cta_link: 'https://calendly.com/shehryar-infobytes/30min',
     availability_status: 'available', 
     menu_items: [
@@ -65,7 +65,7 @@ export const Header: React.FC = () => {
           case 'not_available':
               return { color: 'bg-red-500', text: 'Fully booked' };
           default:
-              return { color: 'bg-green-500', text: 'Available now' };
+          return { color: 'bg-green-500', text: 'Spots Available' };
       }
   };
 
@@ -107,9 +107,9 @@ export const Header: React.FC = () => {
           <div className={`md:hidden pointer-events-auto transition-opacity duration-300 text-white ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
                 {CONFIG.logo_url ? (
-                <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className="h-9 w-auto max-w-[160px] object-contain" />
+               <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className="h-[54px] w-auto max-w-[240px] object-contain" />
                 ) : (
-                <Logo className="h-9 w-auto max-w-[160px]" />
+               <Logo className="h-[54px] w-auto max-w-[240px]" />
                 )}
              </Link>
           </div>
@@ -118,9 +118,9 @@ export const Header: React.FC = () => {
           <div className={`hidden md:block absolute left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-500 ease-in-out text-white ${isScrolled ? 'top-1/2 -translate-y-1/2' : 'top-1/2 -translate-y-1/2'} ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
              <Link to="/" className="block">
                 {CONFIG.logo_url ? (
-                <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className={`w-auto max-w-[240px] object-contain transition-all duration-500 ${isScrolled ? 'h-9' : 'h-12'}`} />
+               <img src={CONFIG.logo_url} alt={CONFIG.logo_alt || "InfoBytes Logo"} className={`w-auto max-w-[360px] object-contain transition-all duration-500 ${isScrolled ? 'h-[54px]' : 'h-[72px]'}`} />
                 ) : (
-                <Logo className={`w-auto max-w-[240px] transition-all duration-500 ${isScrolled ? 'h-9' : 'h-12'}`} />
+               <Logo className={`w-auto max-w-[360px] transition-all duration-500 ${isScrolled ? 'h-[54px]' : 'h-[72px]'}`} />
                 )}
              </Link>
           </div>

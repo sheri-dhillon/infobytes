@@ -4,10 +4,10 @@ import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CONFIG = {
-    pills: ['Marketing', 'UI/UX Design', 'Strategy', 'Development'],
-    headline_part1: 'Design. Develop.',
-    headline_part2: '& SCALE.',
-    cta_text: "Let's Talk",
+  pills: ['Email Marketing', 'SMS Automation', 'Klaviyo Experts', 'Omnisend Partners'],
+  headline_part1: 'The Revenue-First',
+  headline_part2: 'Email & SMS Agency for eCommerce.',
+  cta_text: 'Audit My Retention Potential ↗',
     cta_link: '/contact'
 };
 
@@ -22,10 +22,9 @@ export const Hero: React.FC = () => {
       <div className="absolute bottom-0 left-0 w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] bg-purple-900/20 blur-[100px] md:blur-[150px] rounded-full pointer-events-none" />
 
       {/* Main Content Container */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-8 flex flex-col flex-grow justify-center pt-24 md:pt-0">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-8 flex flex-col flex-grow justify-end pb-10 md:pb-16 pt-24 md:pt-28">
         
-        {/* Wrapper to ensure vertical center even if flex-grow behaves oddly on some browsers */}
-        <div className="flex flex-col justify-center h-full md:h-auto">
+        <div className="flex flex-col justify-end">
 
           {/* Floating Pills */}
           <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-10 animate-slide-up-fade justify-start">
@@ -41,13 +40,15 @@ export const Hero: React.FC = () => {
           {/* Main Typography */}
           <div className="flex flex-col relative z-20">
             {/* Part 1: Smaller, Serif, Italic */}
-            <h1 className="text-[2.75rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] xl:text-[6.5rem] leading-[0.95] font-serif italic text-white mb-2 md:ml-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
+            <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] xl:text-[6.5rem] leading-[0.95] font-serif italic text-white mb-3 md:ml-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
                {CONFIG.headline_part1}
             </h1>
             {/* Part 2: Huge, Sans, Bold, Caps */}
-            <h2 className="text-[15vw] sm:text-[12vw] md:text-[9rem] lg:text-[10rem] xl:text-[12rem] leading-[0.85] md:leading-[0.8] font-black tracking-tighter text-white uppercase mix-blend-overlay opacity-90 animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
-               {CONFIG.headline_part2}
-            </h2>
+            {CONFIG.headline_part2 ? (
+              <h2 className="text-[10.5vw] sm:text-[9vw] md:text-[5.75rem] lg:text-[6.75rem] xl:text-[8rem] leading-[0.9] md:leading-[0.85] font-black tracking-tighter text-white mix-blend-overlay opacity-90 animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
+                {CONFIG.headline_part2}
+              </h2>
+            ) : null}
           </div>
 
           {/* Floating CTA Button */}
