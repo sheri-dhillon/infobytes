@@ -4,29 +4,100 @@ import { Plus, Minus, ArrowRight, ChevronDown, ChevronUp, ArrowDown } from 'luci
 import { Link } from 'react-router-dom';
 
 const STATIC_FAQ = {
-    title: "Common questions",
-    subtitle: "Removing the friction between your vision and execution.",
-    icon_style: "plus_minus",
-    items: [
-        {
-            q: "How do you bridge the gap between UI/UX and actual revenue?",
-            a: "We believe beauty must perform. Our UI/UX process uses behavioral data to map user journeys that lead directly to conversions. When paired with our email automation, we create a closed-loop system that captures, converts, and retains customers.",
-            cta: "View Our Case Studies",
-            link: "/work"
-        },
-        {
-            q: "Do you build native iOS apps or cross-platform solutions?",
-            a: "We specialize in high-performance Native iOS development using Swift and SwiftUI. This ensures your app has the fastest possible response times, seamless integration with Apple’s ecosystem, and a premium 'Apple-level' feel.",
-            cta: "See Our App Portfolio",
-            link: "/work"
-        },
-        {
-            q: "What is the typical timeline for a full Design-to-Launch project?",
-            a: "A custom high-end project typically spans 8 to 12 weeks. This includes deep-dive strategy, UI/UX prototyping, full-stack development, and rigorous QA. We work in agile 'sprints' so you see tangible progress every two weeks.",
-            cta: "Request a Timeline",
-            link: "/contact"
-        }
-    ]
+  title: "Everything you need to know about scaling retention.",
+  subtitle: "Clear answers for brands ready to transition from basic newsletters to high-performance revenue engines.",
+  icon_style: "plus_minus",
+  items: [
+    {
+      q: "What is the role of a retention marketing agency compared to a growth agency?",
+            a: (
+              <>
+                While growth agencies focus on top-of-funnel acquisition (Ads/SEO), a retention marketing agency like INFOBYTES focuses on maximizing the value of the customers you already have. We specialize in{' '}
+                <Link
+                  to="/services/email-automation-engines"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  email marketing automation
+                </Link>{' '}
+                and{' '}
+                <Link
+                  to="/services/sms-mobile-messaging"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  SMS strategies
+                </Link>{' '}
+                that increase Customer Lifetime Value (CLV) and reduce your dependency on expensive ad spend.
+              </>
+            )
+    },
+    {
+      q: "Why do you specialize specifically in Klaviyo and Omnisend?",
+            a: (
+              <>
+                We believe in mastery over mediocrity. As a certified{' '}
+                <Link
+                  to="/services/platform-migration-audit"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  Klaviyo expert
+                </Link>{' '}
+                and{' '}
+                <Link
+                  to="/services/platform-migration-audit"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  Omnisend partner
+                </Link>{' '}
+                team, we have deep technical knowledge of these platforms' unique data science capabilities. This allows us to build more complex segments and higher-converting flows than generalist agencies that try to support every platform.
+              </>
+            )
+    },
+    {
+      q: "How much revenue should my eCommerce store generate from email and SMS?",
+            a: (
+              <>
+                For a healthy, scaling brand, email and SMS marketing should account for 30% to 45% of total store revenue. If your current retention channels are contributing less than 20%, you are likely leaving significant revenue on the table due to unoptimized flows or poor list hygiene.
+              </>
+            )
+    },
+    {
+      q: "Does INFOBYTES handle both strategy and implementation?",
+            a: (
+              <>
+                Yes. We are a full-service partner. Our team handles everything from high-level{' '}
+                <Link
+                  to="/services/lifecycle-strategy-cro"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  lifecycle strategy
+                </Link>{' '}
+                and{' '}
+                <Link
+                  to="/services/lifecycle-strategy-cro"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  journey mapping
+                </Link>{' '}
+                to the technical build-out of flows, custom template design, and ongoing A/B testing. We provide the expertise so your team can focus on product and operations.
+              </>
+            )
+    },
+    {
+      q: "How long does it take to see a measurable ROI from your services?",
+            a: (
+              <>
+                Most clients see an immediate lift in engagement within the first 30 days. However, a full retention engine—including advanced behavioral triggers and fully optimized{' '}
+                <Link
+                  to="/services/sms-mobile-messaging"
+                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+                >
+                  SMS synchronization
+                </Link>{' '}
+                —typically reaches peak performance within 60 to 90 days as we gather enough data to refine our A/B tests.
+              </>
+            )
+    }
+  ]
 };
 
 export const FAQ: React.FC = () => {
@@ -50,7 +121,7 @@ export const FAQ: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-20 md:text-center max-w-3xl mx-auto">
           <div className="text-[10px] md:text-xs font-bold tracking-widest text-brand-text uppercase mb-6 border border-white/10 bg-white/5 rounded-full px-4 py-1.5 inline-block backdrop-blur-sm">
-            FAQ
+            COMMON QUESTIONS
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-6 tracking-tight text-white">
             {STATIC_FAQ.title}
@@ -110,16 +181,6 @@ export const FAQ: React.FC = () => {
                     </div>
                 )}
 
-                {STATIC_FAQ.items[activeIndex]?.cta && (
-                    <div className="mt-12 relative z-10">
-                    <Link to={STATIC_FAQ.items[activeIndex].link || '#'}>
-                        <button className="px-8 py-4 rounded-full border border-white/20 text-white font-medium tracking-wide hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-3 group/btn bg-transparent">
-                        {STATIC_FAQ.items[activeIndex].cta}
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                        </button>
-                    </Link>
-                    </div>
-                )}
              </div>
           </div>
         </div>

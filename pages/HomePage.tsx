@@ -80,6 +80,60 @@ export const HomePage: React.FC = () => {
           }
         }}
       />
+      <Seo
+        jsonLdId="infobytes-home-faq-schema"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What is the role of a retention marketing agency compared to a growth agency?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text:
+                  'While growth agencies focus on top-of-funnel acquisition (Ads/SEO), a retention marketing agency like INFOBYTES focuses on maximizing the value of the customers you already have. We specialize in email marketing automation and SMS strategies that increase Customer Lifetime Value (CLV) and reduce your dependency on expensive ad spend.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Why do you specialize specifically in Klaviyo and Omnisend?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text:
+                  "We believe in mastery over mediocrity. As a certified Klaviyo expert and Omnisend partner team, we have deep technical knowledge of these platforms' unique data science capabilities. This allows us to build more complex segments and higher-converting flows than generalist agencies that try to support every platform."
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'How much revenue should my eCommerce store generate from email and SMS?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text:
+                  'For a healthy, scaling brand, email and SMS marketing should account for 30% to 45% of total store revenue. If your current retention channels are contributing less than 20%, you are likely leaving significant revenue on the table due to unoptimized flows or poor list hygiene.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Does INFOBYTES handle both strategy and implementation?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text:
+                  'Yes. We are a full-service partner. Our team handles everything from high-level lifecycle strategy and journey mapping to the technical build-out of flows, custom template design, and ongoing A/B testing. We provide the expertise so your team can focus on product and operations.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'How long does it take to see a measurable ROI from your services?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text:
+                  'Most clients see an immediate lift in engagement within the first 30 days. However, a full retention engine—including advanced behavioral triggers and fully optimized SMS synchronization—typically reaches peak performance within 60 to 90 days as we gather enough data to refine our A/B tests.'
+              }
+            }
+          ]
+        }}
+      />
       <Hero />
       <About />
       <Services />

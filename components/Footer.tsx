@@ -1,47 +1,65 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
 import { Logo } from './Logo';
 
 const CONFIG = {
-    marquee_text_1: "Let's Make Something Great",
-    marquee_text_2: "Together",
-    contact_heading: "Got a vision?",
-    contact_subheading: "Let's architect your digital legacy with precision and style.",
+    marquee_text_1: "LET’S SCALE",
+    marquee_text_2: "YOUR REVENUE",
+    contact_heading: "LET’S SCALE YOUR REVENUE.",
+    contact_subheading: "Stop losing profit to high acquisition costs. Let’s architect a retention engine that turns your database into a predictable revenue stream.",
     email: "hello@infobytes.io",
     booking_link: "https://calendly.com/shehryar-infobytes/30min",
-    copyright_text: "© 2026 InfoBytes Agency. All rights reserved.",
+    copyright_text: "© 2026 INFOBYTES Agency. All rights reserved.",
     social_links: [
-        { name: 'Facebook', icon: 'fa-brands fa-facebook-f', href: '#' },
-        { name: 'Instagram', icon: 'fa-brands fa-instagram', href: '#' },
-        { name: 'LinkedIn', icon: 'fa-brands fa-linkedin-in', href: '#' },
-        { name: 'Twitter', icon: 'fa-brands fa-x-twitter', href: '#' },
-        { name: 'Behance', icon: 'fa-brands fa-behance', href: '#' },
-        { name: 'Dribbble', icon: 'fa-brands fa-dribbble', href: '#' },
+        { name: 'LinkedIn', icon: 'fa-brands fa-linkedin-in', href: 'https://linkedin.com/company/infobytes' },
+        { name: 'Instagram', icon: 'fa-brands fa-instagram', href: 'https://instagram.com/infobytes.io' },
+        { name: 'Twitter', icon: 'fa-brands fa-x-twitter', href: 'https://twitter.com/infobytes' }
     ],
     columns: [
       {
         title: "Expertise",
         links: [
-           { label: "UI/UX Design Strategy", href: "/services" },
-           { label: "Native iOS Development", href: "/services" },
-           { label: "Web Development", href: "/services" },
-           { label: "Email Marketing", href: "/services" },
-           { label: "Growth Strategy", href: "/services" }
+           { label: "Email Marketing Automation", href: "/services/email-automation-engines" },
+           { label: "SMS & Mobile Strategy", href: "/services/sms-mobile-messaging" },
+           { label: "Klaviyo Expert Setup", href: "/services/platform-migration-audit" },
+           { label: "Omnisend Migration", href: "/services/platform-migration-audit" },
+           { label: "Lifecycle Retention Audit", href: "/services/lifecycle-strategy-cro" }
         ]
       },
       {
         title: "Agency",
         links: [
-           { label: "About Us", href: "/about" },
-           { label: "Client Success", href: "/work" },
+           { label: "Our Story", href: "/about" },
+           { label: "Client Results (Case Studies)", href: "/work" },
            { label: "Pricing Plans", href: "/pricing" },
-           { label: "Contact", href: "/contact" },
-           { label: "Privacy Policy", href: "/privacy" }
+           { label: "Contact Us", href: "/contact" },
+           { label: "Privacy Policy", href: "/privacy-policy" }
         ]
       }
     ]
+};
+
+const MARKETING_AGENCY_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'MarketingAgency',
+  name: 'INFOBYTES',
+  alternateName: 'INFOBYTES Retention Agency',
+  url: 'https://infobytes.io',
+  logo: 'https://infobytes.io/logo.png',
+  sameAs: [
+    'https://linkedin.com/company/infobytes',
+    'https://instagram.com/infobytes.io',
+    'https://twitter.com/infobytes'
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    email: 'hello@infobytes.io',
+    contactType: 'customer service'
+  },
+  areaServed: 'Global',
+  description:
+    'Specialized eCommerce marketing agency focusing on high-ROI email and SMS automation through Klaviyo and Omnisend.'
 };
 
 export const Footer: React.FC = () => {
@@ -77,10 +95,10 @@ export const Footer: React.FC = () => {
                 <div>
                    <div className="inline-flex items-center gap-2 mb-10 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm w-fit">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                      <span className="text-[10px] md:text-xs font-bold tracking-widest text-white uppercase">Accepting New Projects</span>
+                     <span className="text-[10px] md:text-xs font-bold tracking-widest text-white uppercase">ACCEPTING NEW BRANDS</span>
                    </div>
 
-                   <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">{CONFIG.contact_heading}</h3>
+                   <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">{CONFIG.contact_heading}</h2>
                    <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-md">{CONFIG.contact_subheading}</p>
 
                    <div className="mb-12">
@@ -96,13 +114,12 @@ export const Footer: React.FC = () => {
                        href={CONFIG.booking_link} 
                        target="_blank" 
                        rel="noopener noreferrer"
-                       className="px-8 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all hover:scale-105 flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+                      className="px-8 py-4 min-h-[48px] rounded-full bg-white text-black font-bold text-lg hover:bg-gray-200 transition-all hover:scale-105 flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(255,255,255,0.15)]"
                      >
-                        Schedule Discovery Call
-                        <ArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
+                      Schedule My Revenue Audit ↗
                      </a>
-                     <Link to="/pricing" className="px-8 py-4 rounded-full border border-white/10 text-white font-medium hover:bg-white/5 transition-all hover:border-white/30 text-lg flex items-center justify-center">
-                        View Pricing
+                    <Link to="/work" className="px-8 py-4 min-h-[48px] rounded-full border border-white/10 text-white font-medium hover:bg-white/5 transition-all hover:border-white/30 text-lg flex items-center justify-center">
+                      View Our Results
                      </Link>
                 </div>
             </div>
@@ -146,14 +163,26 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="mt-24 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-white">
-            <Link to="/" className="block">
-              <Logo className="h-9 md:h-10 w-auto max-w-[220px]" />
-            </Link>
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <Link to="/" className="block">
+                <Logo className="h-9 md:h-10 w-auto max-w-[220px]" />
+              </Link>
+              <div className="text-xs md:text-sm text-gray-500">
+                Specialized eCommerce Retention Marketing.
+              </div>
+            </div>
             <div className="text-gray-600 text-sm font-mono">
                {CONFIG.copyright_text}
             </div>
         </div>
       </div>
+
+      {/* Site-wide Organization Schema */}
+      <script
+        type="application/ld+json"
+        id="infobytes-marketingagency-schema"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(MARKETING_AGENCY_SCHEMA) }}
+      />
     </footer>
   );
 };
