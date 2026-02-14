@@ -2,6 +2,8 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '../components/ui/Button';
 import { Mail, Phone, MapPin, ArrowRight, ChevronDown, Plus, Minus, Loader2, CheckCircle } from 'lucide-react';
+import { Seo } from '../components/Seo';
+import { FAQ_CONTENT, buildFaqPageJsonLd } from '../components/FAQ';
 
 const STATIC_CONTACT_CONFIG = {
     hero: {
@@ -27,12 +29,6 @@ const STATIC_CONTACT_CONFIG = {
       { id: "8", key: "project_details", label: "Project Details", type: "textarea", width: "full", required: true, placeholder: "Tell us about your project..." }
     ]
 };
-
-const STATIC_FAQS = [
-    { q: "How do you bridge the gap between UI/UX and actual revenue?", a: "We believe beauty must perform. Our UI/UX process uses behavioral data to map user journeys that lead directly to conversions." },
-    { q: "Do you build native iOS apps or cross-platform solutions?", a: "We specialize in high-performance Native iOS development using Swift and SwiftUI." },
-    { q: "What is the typical timeline for a full Design-to-Launch project?", a: "A custom high-end project typically spans 8 to 12 weeks." }
-];
 
 export const ContactPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -78,6 +74,7 @@ export const ContactPage: React.FC = () => {
 
   return (
     <>
+      <Seo jsonLdId="infobytes-contact-faq-schema" jsonLd={buildFaqPageJsonLd()} />
       {/* Dynamic Hero Section */}
       <section className="pt-52 pb-20 md:pt-72 md:pb-32 px-6 bg-[#050505] flex flex-col items-center justify-center text-center min-h-[60vh]">
           <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.1] tracking-tight mb-6 animate-slide-up-fade whitespace-pre-line">
@@ -333,7 +330,7 @@ export const ContactPage: React.FC = () => {
                 {/* Accordion / Right Side */}
                 <div className="lg:col-span-8">
                 <div className="divide-y divide-white/10">
-                    {STATIC_FAQS.map((faq, idx) => (
+                    {FAQ_CONTENT.items.map((faq, idx) => (
                     <div key={idx} className="py-6 first:pt-0 last:pb-0">
                         <button 
                         onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
@@ -351,7 +348,7 @@ export const ContactPage: React.FC = () => {
                         >
                             <div className="overflow-hidden">
                             <p className="text-gray-400 leading-relaxed pr-12 pb-2">
-                                {faq.a}
+                              {faq.a}
                             </p>
                             </div>
                         </div>

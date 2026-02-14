@@ -12,7 +12,6 @@ import { ServicesPage } from './pages/ServicesPage';
 import { ServiceDetailPage } from './pages/ServiceDetailPage';
 import { WorkPage } from './pages/WorkPage';
 import { ContactPage } from './pages/ContactPage';
-import { TestimonialsPage } from './pages/TestimonialsPage';
 import { PricingPage } from './pages/PricingPage';
 import { BlogPage } from './pages/BlogPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
@@ -96,7 +95,6 @@ function App() {
             <Route path="/services/:slug" element={<PublicLayout><ServiceDetailPage /></PublicLayout>} />
             <Route path="/work" element={<PublicLayout><WorkPage /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
-            <Route path="/testimonials" element={<PublicLayout><TestimonialsPage /></PublicLayout>} />
             <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
             <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
             <Route path="/privacy-policy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />

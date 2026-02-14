@@ -3,109 +3,167 @@ import React, { useState } from 'react';
 import { Plus, Minus, ArrowRight, ChevronDown, ChevronUp, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const STATIC_FAQ = {
-  title: "Everything you need to know about scaling retention.",
-  subtitle: "Clear answers for brands ready to transition from basic newsletters to high-performance revenue engines.",
-  icon_style: "plus_minus",
+export type FaqJsonLd = {
+  '@context': 'https://schema.org' | 'https://schema.org/';
+  '@type': 'FAQPage';
+  mainEntity: Array<{
+    '@type': 'Question';
+    name: string;
+    acceptedAnswer: {
+      '@type': 'Answer';
+      text: string;
+    };
+  }>;
+};
+
+export type FaqItem = {
+  q: string;
+  a: React.ReactNode;
+  aText: string;
+};
+
+export const FAQ_CONTENT: {
+  title: string;
+  subtitle: string;
+  iconStyle: 'plus_minus' | 'chevron' | 'arrow';
+  items: FaqItem[];
+} = {
+  title: 'Everything you need to know about scaling retention.',
+  subtitle:
+    'Clear answers for brands ready to transition from basic newsletters to high-performance revenue engines.',
+  iconStyle: 'plus_minus',
   items: [
     {
-      q: "What is the role of a retention marketing agency compared to a growth agency?",
-            a: (
-              <>
-                While growth agencies focus on top-of-funnel acquisition (Ads/SEO), a retention marketing agency like INFOBYTES focuses on maximizing the value of the customers you already have. We specialize in{' '}
-                <Link
-                  to="/services/email-automation-engines"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  email marketing automation
-                </Link>{' '}
-                and{' '}
-                <Link
-                  to="/services/sms-mobile-messaging"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  SMS strategies
-                </Link>{' '}
-                that increase Customer Lifetime Value (CLV) and reduce your dependency on expensive ad spend.
-              </>
-            )
+      q: 'What is the role of a retention marketing agency compared to a growth agency?',
+      aText:
+        'While growth agencies focus on top-of-funnel acquisition (Ads/SEO), a retention marketing agency like INFOBYTES focuses on maximizing the value of the customers you already have. We specialize in email marketing automation and SMS strategies that increase Customer Lifetime Value (CLV) and reduce your dependency on expensive ad spend.',
+      a: (
+        <>
+          While growth agencies focus on top-of-funnel acquisition (Ads/SEO), a retention marketing agency like
+          INFOBYTES focuses on maximizing the value of the customers you already have. We specialize in{' '}
+          <Link
+            to="/services/email-automation-engines"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            email marketing automation
+          </Link>{' '}
+          and{' '}
+          <Link
+            to="/services/sms-mobile-messaging"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            SMS strategies
+          </Link>{' '}
+          that increase Customer Lifetime Value (CLV) and reduce your dependency on expensive ad spend.
+        </>
+      )
     },
     {
-      q: "Why do you specialize specifically in Klaviyo and Omnisend?",
-            a: (
-              <>
-                We believe in mastery over mediocrity. As a certified{' '}
-                <Link
-                  to="/services/platform-migration-audit"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  Klaviyo expert
-                </Link>{' '}
-                and{' '}
-                <Link
-                  to="/services/platform-migration-audit"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  Omnisend partner
-                </Link>{' '}
-                team, we have deep technical knowledge of these platforms' unique data science capabilities. This allows us to build more complex segments and higher-converting flows than generalist agencies that try to support every platform.
-              </>
-            )
+      q: 'Why do you specialize specifically in Klaviyo and Omnisend?',
+      aText:
+        "We believe in mastery over mediocrity. As a certified Klaviyo expert and Omnisend partner team, we have deep technical knowledge of these platforms' unique data science capabilities. This allows us to build more complex segments and higher-converting flows than generalist agencies that try to support every platform.",
+      a: (
+        <>
+          We believe in mastery over mediocrity. As a certified{' '}
+          <Link
+            to="/services/platform-migration-audit"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            Klaviyo expert
+          </Link>{' '}
+          and{' '}
+          <Link
+            to="/services/platform-migration-audit"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            Omnisend partner
+          </Link>{' '}
+          team, we have deep technical knowledge of these platforms' unique data science capabilities. This allows
+          us to build more complex segments and higher-converting flows than generalist agencies that try to
+          support every platform.
+        </>
+      )
     },
     {
-      q: "How much revenue should my eCommerce store generate from email and SMS?",
-            a: (
-              <>
-                For a healthy, scaling brand, email and SMS marketing should account for 30% to 45% of total store revenue. If your current retention channels are contributing less than 20%, you are likely leaving significant revenue on the table due to unoptimized flows or poor list hygiene.
-              </>
-            )
+      q: 'How much revenue should my eCommerce store generate from email and SMS?',
+      aText:
+        'For a healthy, scaling brand, email and SMS marketing should account for 30% to 45% of total store revenue. If your current retention channels are contributing less than 20%, you are likely leaving significant revenue on the table due to unoptimized flows or poor list hygiene.',
+      a: (
+        <>
+          For a healthy, scaling brand, email and SMS marketing should account for 30% to 45% of total store
+          revenue. If your current retention channels are contributing less than 20%, you are likely leaving
+          significant revenue on the table due to unoptimized flows or poor list hygiene.
+        </>
+      )
     },
     {
-      q: "Does INFOBYTES handle both strategy and implementation?",
-            a: (
-              <>
-                Yes. We are a full-service partner. Our team handles everything from high-level{' '}
-                <Link
-                  to="/services/lifecycle-strategy-cro"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  lifecycle strategy
-                </Link>{' '}
-                and{' '}
-                <Link
-                  to="/services/lifecycle-strategy-cro"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  journey mapping
-                </Link>{' '}
-                to the technical build-out of flows, custom template design, and ongoing A/B testing. We provide the expertise so your team can focus on product and operations.
-              </>
-            )
+      q: 'Does INFOBYTES handle both strategy and implementation?',
+      aText:
+        'Yes. We are a full-service partner. Our team handles everything from high-level lifecycle strategy and journey mapping to the technical build-out of flows, custom template design, and ongoing A/B testing. We provide the expertise so your team can focus on product and operations.',
+      a: (
+        <>
+          Yes. We are a full-service partner. Our team handles everything from high-level{' '}
+          <Link
+            to="/services/lifecycle-strategy-cro"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            lifecycle strategy
+          </Link>{' '}
+          and{' '}
+          <Link
+            to="/services/lifecycle-strategy-cro"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            journey mapping
+          </Link>{' '}
+          to the technical build-out of flows, custom template design, and ongoing A/B testing. We provide the
+          expertise so your team can focus on product and operations.
+        </>
+      )
     },
     {
-      q: "How long does it take to see a measurable ROI from your services?",
-            a: (
-              <>
-                Most clients see an immediate lift in engagement within the first 30 days. However, a full retention engine—including advanced behavioral triggers and fully optimized{' '}
-                <Link
-                  to="/services/sms-mobile-messaging"
-                  className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
-                >
-                  SMS synchronization
-                </Link>{' '}
-                —typically reaches peak performance within 60 to 90 days as we gather enough data to refine our A/B tests.
-              </>
-            )
+      q: 'How long does it take to see a measurable ROI from your services?',
+      aText:
+        'Most clients see an immediate lift in engagement within the first 30 days. However, a full retention engine—including advanced behavioral triggers and fully optimized SMS synchronization—typically reaches peak performance within 60 to 90 days as we gather enough data to refine our A/B tests.',
+      a: (
+        <>
+          Most clients see an immediate lift in engagement within the first 30 days. However, a full retention
+          engine—including advanced behavioral triggers and fully optimized{' '}
+          <Link
+            to="/services/sms-mobile-messaging"
+            className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white/60 transition-colors"
+          >
+            SMS synchronization
+          </Link>{' '}
+          —typically reaches peak performance within 60 to 90 days as we gather enough data to refine our A/B
+          tests.
+        </>
+      )
     }
   ]
 };
+
+export function buildFaqPageJsonLd(): FaqJsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_CONTENT.items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.aText
+      }
+    }))
+  };
+}
 
 export const FAQ: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
   // Icon Resolver
   const getIcons = (isOpen: boolean) => {
-      switch(STATIC_FAQ.icon_style) {
+      switch(FAQ_CONTENT.iconStyle) {
           case 'chevron':
               return isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />;
           case 'arrow':
@@ -124,17 +182,17 @@ export const FAQ: React.FC = () => {
             COMMON QUESTIONS
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-6 tracking-tight text-white">
-            {STATIC_FAQ.title}
+            {FAQ_CONTENT.title}
           </h2>
           <p className="text-gray-400 text-base md:text-lg">
-            {STATIC_FAQ.subtitle}
+            {FAQ_CONTENT.subtitle}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           {/* Left Column: Questions List */}
           <div className="lg:col-span-5 flex flex-col">
-             {STATIC_FAQ.items.map((item: any, idx: number) => {
+             {FAQ_CONTENT.items.map((item, idx) => {
                const isActive = activeIndex === idx;
                return (
                  <button 
@@ -171,12 +229,12 @@ export const FAQ: React.FC = () => {
                 {/* Decorative Mesh */}
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-brand-purple/5 to-transparent pointer-events-none"></div>
 
-                {STATIC_FAQ.items[activeIndex] && (
+                {FAQ_CONTENT.items[activeIndex] && (
                     <div className="relative z-10 animate-fade-in key={activeIndex}">
-                        <h3 className="text-2xl font-bold text-white mb-6 leading-tight tracking-wide">{STATIC_FAQ.items[activeIndex].q}</h3>
+                    <h3 className="text-2xl font-bold text-white mb-6 leading-tight tracking-wide">{FAQ_CONTENT.items[activeIndex].q}</h3>
                         <div className="h-px w-12 bg-brand-orange mb-8"></div>
                         <p className="text-lg text-gray-300 leading-relaxed font-light tracking-wide">
-                            {STATIC_FAQ.items[activeIndex].a}
+                      {FAQ_CONTENT.items[activeIndex].a}
                         </p>
                     </div>
                 )}

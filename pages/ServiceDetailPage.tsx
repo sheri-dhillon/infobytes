@@ -2,7 +2,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { FAQ } from '../components/FAQ';
+import { Seo } from '../components/Seo';
+import { FAQ, buildFaqPageJsonLd } from '../components/FAQ';
 
 const SERVICES_DATA: Record<string, any> = {
    'email-automation-engines': {
@@ -51,6 +52,7 @@ export const ServiceDetailPage: React.FC = () => {
 
   return (
     <>
+         <Seo jsonLdId="infobytes-service-detail-faq-schema" jsonLd={buildFaqPageJsonLd()} />
       {/* Hero Section */}
       <section className="relative pt-48 pb-20 md:pt-60 md:pb-28 px-6 bg-[#050505] overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-purple/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
