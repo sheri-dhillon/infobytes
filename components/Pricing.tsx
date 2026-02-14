@@ -17,52 +17,54 @@ interface Plan {
 const STATIC_PLANS: Plan[] = [
     {
       id: "1",
-      name: "The Launchpad",
-      tagline: "Design Focus",
-      description: "Best for early-stage brands needing a world-class foundation.",
-      price: "5,000",
+      name: "The Retention Foundation",
+      tagline: "For emerging brands",
+      description: "Emerging brands needing the “Essential 8” automation flows.",
+      price: "349",
       frequency: "month",
       isCustom: false,
       features: [
-        "Premium UI/UX Strategy & Wireframing",
-        "High-Performance Custom Website (Up to 5 Pages)",
-        "Foundational SEO & Speed Optimization",
-        "Brand Style Guide & Component Library",
-        "2 Rounds of High-Fidelity Revisions"
+        "Core Klaviyo/Omnisend Setup & Audit",
+        "The \"Essential 8\" Automated Flows (Abandoned Cart, Welcome, etc.)",
+        "Monthly Deliverability & List Hygiene Audit",
+        "Basic Segment Building (Engaged vs. Unengaged)",
+        "Standard Monthly Performance Reporting"
       ],
       highlight: false
     },
     {
       id: "2",
-      name: "The Accelerator",
-      tagline: "Development & Email Focus",
-      description: "Our most popular plan for scaling eCommerce and Mobile products.",
-      price: "12,500",
+      name: "The Revenue Accelerator",
+      tagline: "Most Popular",
+      description: "Established stores scaling past $1M+ ARR.",
+      price: "549",
       frequency: "month",
       isCustom: false,
       features: [
-        "iOS App Development (Native Swift/SwiftUI)",
-        "Advanced eCommerce Optimization",
-        "Revenue-Generating Email Marketing",
-        "Comprehensive Lead Capture Systems",
-        "Priority Engineering Support & Weekly Sprints"
+        "Full-Cycle Email & SMS Management",
+        "Advanced Behavioral Triggers & Dynamic Content",
+        "Bi-Weekly Campaign Strategy & Deployment (8–10/mo)",
+        "Continuous A/B Testing (Subject Lines, Layouts, Offers)",
+        "Custom Zero-Party Data Collection Strategy",
+        "Priority Specialist Support & Strategy Calls"
       ],
       highlight: true
     },
     {
       id: "3",
-      name: "The Enterprise",
-      tagline: "Scale Focus",
-      description: "A full-cycle partnership for global market dominance.",
+      name: "The Lifecycle Enterprise",
+      tagline: "For enterprise teams",
+      description: "Large-scale brands requiring high-volume omnichannel dominance.",
       price: "",
       frequency: "month",
       isCustom: true,
       features: [
-        "Full-Funnel Email Marketing & Retention",
-        "Cross-Platform Development (iOS + Web + Backend)",
-        "Dedicated Project Manager & Senior Architect",
-        "Quarterly Brand Workshops & Competitor Audits",
-        "Continuous A/B Testing & Lifecycle Optimization"
+        "Full-Funnel Omnichannel Strategy (Email, SMS, Push)",
+        "Advanced Predictive Analytics & LTV Modeling",
+        "Dedicated Account Manager & Senior Retention Architect",
+        "Quarterly In-Depth Competitor & Market Audits",
+        "Custom Technical Integrations & API Support",
+        "Daily Optimization & Real-Time Reporting Dashboard"
       ],
       highlight: false
     }
@@ -77,13 +79,13 @@ export const Pricing: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center mb-20 md:mb-24 max-w-4xl mx-auto">
           <div className="text-[10px] md:text-xs font-bold tracking-widest text-brand-text uppercase mb-6 border border-white/10 bg-white/5 rounded-full px-4 py-1.5 inline-block backdrop-blur-sm">
-             Pricing Strategy
+             PRICING STRATEGY
           </div>
           <h2 className="text-4xl md:text-6xl font-semibold text-white mb-6 tracking-tight">
             Investment in <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">Unstoppable Growth.</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            Transparent pricing designed for brands ready to transition from "business as usual" to digital market leaders. No hidden fees, just pure performance.
+            Transparent, ROI-focused pricing for brands ready to stop losing customers and start scaling predictable revenue. No hidden fees—just pure performance.
           </p>
         </div>
 
@@ -125,7 +127,7 @@ const CardContent: React.FC<{ plan: Plan }> = ({ plan }) => (
     <div className="mb-10 pb-8 border-b border-white/5">
         {plan.isCustom ? (
             <div className="text-3xl md:text-4xl font-bold text-white tracking-tight py-1">
-                Custom Quote
+          Custom Quote <span className="text-gray-500 font-semibold text-base md:text-lg">(Starting at $699/mo)</span>
             </div>
         ) : (
             <div className="flex items-baseline gap-1">
