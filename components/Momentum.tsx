@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Momentum: React.FC = () => {
@@ -39,21 +38,21 @@ export const Momentum: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange"></span>
                 </span>
-                <span className="text-[10px] md:text-xs font-bold tracking-widest text-gray-400 uppercase">Global Result</span>
+               <span className="text-[10px] md:text-xs font-bold tracking-widest text-gray-400 uppercase">GLOBAL RESULTS</span>
              </div>
              
              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-[1.05] mb-8 tracking-tight">
-               We don't offer services.<br />
-               We <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-purple">move metrics.</span>
+              We don't offer services.<br />
+              We <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-purple">scale revenue.</span>
              </h2>
 
              <p className="text-gray-400 text-lg leading-relaxed mb-8 max-w-lg">
-                In a crowded digital landscape, "beautiful" is the baseline. We focus on the bottom line. By unifying seamless <strong className="text-white font-semibold">iOS experiences</strong> with high-retention <strong className="text-white font-semibold">email automation</strong>, we create a compounding growth loop that turns your digital footprint into your most profitable asset.
+               In a crowded eCommerce landscape, "beautiful design" is just the baseline. We focus on the bottom line. By unifying high-converting <strong className="text-white font-semibold">Klaviyo flows</strong> with precision <strong className="text-white font-semibold">SMS marketing automation</strong>, we create a compounding growth loop. This turns your existing customer base into your store’s most profitable asset.
              </p>
 
              <div className="flex flex-wrap gap-4">
                <Link to="/contact" className="px-6 py-3 md:px-8 md:py-4 rounded-full bg-gradient-to-r from-brand-orange to-brand-purple text-white font-bold text-base md:text-lg hover:scale-105 transition-all flex items-center gap-2 shadow-[0_0_30px_rgba(255,107,74,0.3)]">
-                 Let's Talk <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5" />
+                 Get My Growth Projections ↗
                </Link>
              </div>
           </div>
@@ -68,6 +67,12 @@ export const Momentum: React.FC = () => {
                 <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")` }}></div>
 
                 <div className="relative z-10 flex flex-col h-full justify-end">
+
+                   <div className="text-center">
+                     <div className={`text-6xl font-bold text-brand-orange drop-shadow-[0_0_15px_rgba(255,107,74,0.6)] transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                       172%
+                     </div>
+                   </div>
                    
                    {/* Chart Container */}
                    <div className="relative mb-6 mt-6 px-2 md:px-4">
@@ -86,7 +91,6 @@ export const Momentum: React.FC = () => {
                                 
                                 {/* Bar 1: Other Agencies */}
                                 <div className="flex flex-col items-center justify-end w-32 group">
-                                     <div className={`text-2xl font-bold text-gray-500 mb-4 transition-all duration-700 delay-[1000ms] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>56%</div>
                                      <div 
                                         className="w-24 md:w-28 bg-white/10 rounded-t-sm relative transition-all duration-[2000ms] ease-out origin-bottom group-hover:bg-white/20" 
                                         style={{ height: isVisible ? '65px' : '0px' }}
@@ -95,7 +99,6 @@ export const Momentum: React.FC = () => {
 
                                 {/* Bar 2: Infobytes */}
                                 <div className="flex flex-col items-center justify-end w-40">
-                                     <div className={`text-6xl font-bold text-brand-orange mb-4 drop-shadow-[0_0_15px_rgba(255,107,74,0.6)] transition-all duration-700 delay-[1500ms] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>172%</div>
                                      <div 
                                         className="w-32 md:w-36 bg-gradient-to-t from-brand-orange to-brand-purple rounded-t-xl relative shadow-[0_0_40px_rgba(255,107,74,0.4)] transition-all duration-[2000ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-200 origin-bottom" 
                                         style={{ height: isVisible ? '190px' : '0px' }}
@@ -110,17 +113,17 @@ export const Momentum: React.FC = () => {
                        {/* Labels */}
                        <div className="flex justify-center gap-16 md:gap-32 mt-6">
                            <div className="w-32 text-center">
-                               <div className="text-sm text-gray-400 font-medium leading-tight">Other<br/>Agencies</div>
+                             <div className="text-sm text-gray-400 font-medium leading-tight">Standard Agencies<br/>(Focus on Volume)</div>
                            </div>
                            <div className="w-40 text-center">
-                               <div className="text-3xl md:text-4xl text-white font-bold tracking-tight">Infobytes</div>
+                             <div className="text-sm md:text-base text-white font-bold tracking-tight">INFOBYTES<br/>(Focus on Retention)</div>
                            </div>
                        </div>
                    </div>
 
                    {/* Footer Text */}
                    <p className="text-sm text-gray-400 leading-relaxed text-center border-t border-white/10 pt-6">
-                      Brands that integrate our full-cycle design and email automation systems see an average <span className="text-white font-bold">172% increase</span> in Customer Lifetime Value (CLV) within the first 90 days.
+                     Brands that integrate our lifecycle marketing and email automation systems see an average 172% increase in Retention Revenue within the first 90 days of partnership.
                    </p>
 
                 </div>

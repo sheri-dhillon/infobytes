@@ -33,32 +33,32 @@ const pillLayouts = [
 
 const STATIC_SERVICES = [
     {
-        id: "01",
-        title: "UI/UX Design",
-        slug: "ui-ux-design",
-        description: "Intuitive interfaces that drive engagement. We design user-centric systems for web and mobile that are strategically built to convert.",
-        pills: ["Product Design", "Wireframing", "Prototyping", "User Research"]
+    id: "01",
+    title: "01. Email Automation Engines",
+    slug: "email-automation-engines",
+    description: "We move beyond newsletters to build sophisticated, data-driven engines that nurture leads and maximize revenue on autopilot, ensuring the right message hits at the right time.",
+    pills: ["Klaviyo Flows", "Abandoned Cart Recovery", "Behavioral Triggers", "Hyper-Segmentation"]
     },
     {
         id: "02",
-        title: "Web Development",
-        slug: "web-development",
-        description: "High-performance websites built for scale. From custom React applications to optimized marketing sites.",
-        pills: ["React", "Next.js", "Performance", "SEO Ready"]
+    title: "02. SMS & Mobile Messaging",
+    slug: "sms-mobile-messaging",
+    description: "Cut through the noise with personalized, compliant text message campaigns. We drive immediate action and deeply connect with your mobile-first customers where they are most active.",
+    pills: ["Omnisend SMS", "98% Open Rates", "TCPA Compliant", "Instant ROI"]
     },
     {
         id: "03",
-        title: "Mobile Apps",
-        slug: "mobile-apps",
-        description: "Native iOS and cross-platform solutions that deliver premium user experiences on every device.",
-        pills: ["iOS", "SwiftUI", "React Native", "App Store"]
+    title: "03. Platform Migration & Audit",
+    slug: "platform-migration-audit",
+    description: "Seamlessly move to a top-tier retention platform without losing historical data. We audit, configure, and optimize your technical infrastructure for maximum inbox placement.",
+    pills: ["Klaviyo Expert", "Omnisend Partner", "Deliverability Fix", "Data Integrity"]
     },
     {
         id: "04",
-        title: "Growth Strategy",
-        slug: "growth-strategy",
-        description: "Data-driven marketing and retention strategies to help your product reach its full potential.",
-        pills: ["Analytics", "Email Marketing", "CRO", "Automation"]
+    title: "04. Lifecycle Strategy & CRO",
+    slug: "lifecycle-strategy-cro",
+    description: "A holistic approach to increasing Customer Lifetime Value. We analyze behavioral data to plug leaky funnel buckets and continuously optimize every touchpoint in the customer journey.",
+    pills: ["Customer LTV", "A/B Testing", "Journey Mapping", "Zero-Party Data"]
     }
 ];
 
@@ -82,11 +82,15 @@ export const Services: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-16 md:mb-24">
           <div className="inline-block px-4 py-1.5 md:px-6 md:py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs font-bold tracking-widest uppercase mb-6 md:mb-8 text-white">
-            Our Services
+            OUR EXPERTISE
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-white leading-[1.1] tracking-tight">
-            From idea to <span className="font-serif italic text-gray-400">execution</span><br />
-            we've got you covered
+          <h2 className="leading-[0.95] tracking-tight text-white">
+            <span className="block text-[clamp(2.0rem,3.6vw,4.0rem)] font-serif italic mb-2">
+              Turning one-time buyers
+            </span>
+            <span className="block text-[clamp(2.6rem,5.2vw,5.6rem)] font-black tracking-tighter mix-blend-overlay opacity-90">
+              into lifetime value.
+            </span>
           </h2>
         </div>
 
@@ -102,7 +106,7 @@ export const Services: React.FC = () => {
                 <div className="absolute inset-0 bg-white/5 transition-opacity duration-300 -z-10 opacity-0 group-hover:opacity-100" />
 
                 {/* Floating Pills Overlay */}
-                <div className="absolute inset-0 pointer-events-none hidden md:block">
+                <div className="absolute inset-0 pointer-events-none hidden md:block z-20">
                      {service.pills.map((pill, pIdx) => (
                         <div 
                             key={pIdx}
@@ -124,10 +128,7 @@ export const Services: React.FC = () => {
                 </div>
 
                 <div className="flex items-baseline gap-6 md:gap-12 lg:gap-16 mb-6 md:mb-0 max-w-full md:max-w-[70%] relative z-10">
-                  <span className="text-xs md:text-sm font-mono text-gray-500 font-medium shrink-0">
-                    {service.id}
-                  </span>
-                  <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-medium text-white group-hover:translate-x-4 transition-transform duration-300 leading-tight">
+                  <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-medium text-white group-hover:translate-x-4 transition-transform duration-300 leading-tight">
                     {service.title}
                   </h3>
                 </div>

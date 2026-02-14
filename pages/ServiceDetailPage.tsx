@@ -5,34 +5,34 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { FAQ } from '../components/FAQ';
 
 const SERVICES_DATA: Record<string, any> = {
-    'ui-ux-design': {
-        title: "UI/UX Design",
-        description: "We design user-centric systems for web and mobile that are strategically built to convert.",
-        pills: ["Product Design", "Wireframing", "Prototyping"],
-        content: "<p>Great design is more than just aesthetics; it's about how a user interacts with your product. Our UI/UX design process focuses on creating intuitive, engaging, and accessible interfaces that drive user satisfaction and business growth.</p><h3>Our Process</h3><ul><li><strong>Discovery:</strong> Understanding your business goals and user needs.</li><li><strong>Wireframing:</strong> Creating the blueprint of your product.</li><li><strong>Visual Design:</strong> Crafting the look and feel.</li><li><strong>Prototyping:</strong> Building interactive models for testing.</li></ul>",
-        meta_description: "Expert UI/UX design services aimed at maximizing user engagement."
-    },
-    'web-development': {
-        title: "Web Development",
-        description: "High-performance websites built for scale. From custom React applications to optimized marketing sites.",
-        pills: ["React", "Next.js", "Performance"],
-        content: "<p>We build robust, scalable, and high-performance web applications using modern technologies. Whether it's a simple marketing site or a complex SaaS platform, we ensure clean code and best practices.</p>",
-        meta_description: "Professional web development services."
-    },
-    'mobile-apps': {
-        title: "Mobile Apps",
-        description: "Native iOS and cross-platform solutions that deliver premium user experiences on every device.",
-        pills: ["iOS", "SwiftUI", "React Native"],
-        content: "<p>In a mobile-first world, your app needs to be flawless. We specialize in building native iOS apps with Swift and cross-platform solutions using React Native, ensuring top-tier performance and user experience.</p>",
-        meta_description: "Top-tier mobile app development."
-    },
-    'growth-strategy': {
-        title: "Growth Strategy",
-        description: "Data-driven marketing and retention strategies to help your product reach its full potential.",
-        pills: ["Analytics", "CRO", "Automation"],
-        content: "<p>Growth isn't an accident. We analyze your data, optimize your conversion funnels, and implement marketing automation strategies that drive sustainable growth and customer retention.</p>",
-        meta_description: "Strategic growth services for startups."
-    }
+   'email-automation-engines': {
+      title: "Email Automation Engines",
+      description: "We move beyond newsletters to build sophisticated, data-driven engines that nurture leads and maximize revenue on autopilot, ensuring the right message hits at the right time.",
+      pills: ["Klaviyo Flows", "Abandoned Cart Recovery", "Behavioral Triggers", "Hyper-Segmentation"],
+      content: "<p>Email marketing automation should behave like a revenue system—not a broadcast channel. We design and implement flow architecture that responds to customer intent, triggers at the right moments, and compounds results over time.</p><h3>What we build</h3><ul><li><strong>Lifecycle flow systems:</strong> Welcome, abandon, browse, post-purchase, winback, and more.</li><li><strong>Segmentation that scales:</strong> Hyper-segmentation driven by real behavior.</li><li><strong>Testing & iteration:</strong> Continuous A/B testing on timing, creative, and offers.</li></ul><p>Ideal for brands that want consistent, predictable retention revenue—without relying on constant campaigns.</p>",
+      meta_description: "Email automation engines built with behavioral triggers, segmentation, and revenue-first Klaviyo flows."
+   },
+   'sms-mobile-messaging': {
+      title: "SMS & Mobile Messaging",
+      description: "Cut through the noise with personalized, compliant text message campaigns. We drive immediate action and deeply connect with your mobile-first customers where they are most active.",
+      pills: ["Omnisend SMS", "98% Open Rates", "TCPA Compliant", "Instant ROI"],
+      content: "<p>SMS messaging is where speed wins. We design mobile-first automation and campaigns that feel personal, drive immediate action, and stay compliant—so your list becomes an asset, not a risk.</p><h3>How we approach SMS</h3><ul><li><strong>Compliance-first setup:</strong> TCPA-aware flows, consent capture, and smart throttling.</li><li><strong>Automation sequences:</strong> Abandonment, back-in-stock, post-purchase, and repeat-buyer nudges.</li><li><strong>Revenue clarity:</strong> Attribution that ties SMS directly to ROI.</li></ul><p>Perfect for brands ready to increase repeat purchases with a mobile channel that customers actually read.</p>",
+      meta_description: "High-ROI SMS & mobile messaging with compliance-first automation and Omnisend expertise."
+   },
+   'platform-migration-audit': {
+      title: "Platform Migration & Audit",
+      description: "Seamlessly move to a top-tier retention platform without losing historical data. We audit, configure, and optimize your technical infrastructure for maximum inbox placement.",
+      pills: ["Klaviyo Expert", "Omnisend Partner", "Deliverability Fix", "Data Integrity"],
+      content: "<p>Migrations can quietly break retention if data and deliverability aren’t handled correctly. We move your account with a structured, audit-led process—preserving history, validating events, and fixing inbox placement issues along the way.</p><h3>Migration deliverables</h3><ul><li><strong>Data integrity validation:</strong> Event tracking, list hygiene, and historical import checks.</li><li><strong>Deliverability audit:</strong> DNS records, sender setup, and domain alignment.</li><li><strong>Platform configuration:</strong> Klaviyo or Omnisend setup that’s ready for scale.</li></ul><p>The goal: a clean, reliable foundation that supports automation performance from day one.</p>",
+      meta_description: "Klaviyo/Omnisend migration and retention platform audits with deliverability fixes and data integrity checks."
+   },
+   'lifecycle-strategy-cro': {
+      title: "Lifecycle Strategy & CRO",
+      description: "A holistic approach to increasing Customer Lifetime Value. We analyze behavioral data to plug leaky funnel buckets and continuously optimize every touchpoint in the customer journey.",
+      pills: ["Customer LTV", "A/B Testing", "Journey Mapping", "Zero-Party Data"],
+      content: "<p>Retention is a system. We combine journey mapping, CRO, and lifecycle strategy to increase Customer LTV—identifying friction points, improving conversion moments, and turning more first-time shoppers into repeat buyers.</p><h3>Optimization focus areas</h3><ul><li><strong>Journey mapping:</strong> From first visit through repeat purchase behavior.</li><li><strong>A/B testing:</strong> Offers, messaging, timing, and creative across touchpoints.</li><li><strong>Data enrichment:</strong> Using zero-party data to personalize and increase relevance.</li></ul><p>Built for brands that want compounding improvements—not one-off tweaks.</p>",
+      meta_description: "Lifecycle strategy and CRO focused on increasing Customer LTV through journey mapping, testing, and personalization."
+   }
 };
 
 export const ServiceDetailPage: React.FC = () => {

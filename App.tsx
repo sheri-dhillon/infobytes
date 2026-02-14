@@ -16,6 +16,12 @@ import { TestimonialsPage } from './pages/TestimonialsPage';
 import { PricingPage } from './pages/PricingPage';
 import { BlogPage } from './pages/BlogPage';
 
+// Service Pages (Stubs)
+import { EmailAutomationEnginesPage } from './pages/services/EmailAutomationEnginesPage';
+import { SMSMobileMessagingPage } from './pages/services/SMSMobileMessagingPage';
+import { PlatformMigrationAuditPage } from './pages/services/PlatformMigrationAuditPage';
+import { LifecycleStrategyCROPage } from './pages/services/LifecycleStrategyCROPage';
+
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
   children?: ReactNode;
@@ -82,6 +88,10 @@ function App() {
             <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
             <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
             <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
+            <Route path="/services/email-automation-engines" element={<PublicLayout><EmailAutomationEnginesPage /></PublicLayout>} />
+            <Route path="/services/sms-mobile-messaging" element={<PublicLayout><SMSMobileMessagingPage /></PublicLayout>} />
+            <Route path="/services/platform-migration-audit" element={<PublicLayout><PlatformMigrationAuditPage /></PublicLayout>} />
+            <Route path="/services/lifecycle-strategy-cro" element={<PublicLayout><LifecycleStrategyCROPage /></PublicLayout>} />
             <Route path="/services/:slug" element={<PublicLayout><ServiceDetailPage /></PublicLayout>} />
             <Route path="/work" element={<PublicLayout><WorkPage /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
