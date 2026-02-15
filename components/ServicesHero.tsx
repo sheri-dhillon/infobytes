@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDownRight, ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HeroHeading } from './ui/HeroHeading';
 
@@ -69,12 +69,15 @@ export const ServicesHero: React.FC = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
-               <Link to="/contact" className="px-8 py-4 bg-white text-black rounded-full font-bold text-sm hover:bg-gray-200 transition-all flex items-center gap-2 group">
-                 Start Your Audit <ArrowDownRight className="w-4 h-4 group-hover:rotate-[-45deg] transition-transform" />
+               <Link
+                 to="/contact"
+                 className="group relative px-5 py-2.5 md:px-7 md:py-3.5 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-full flex items-center gap-3 md:gap-4 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,107,74,0.3)] hover:shadow-[0_0_40px_rgba(185,109,243,0.4)]"
+               >
+                 <span className="font-bold text-sm md:text-base">Start Your Audit</span>
+                 <div className="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-45">
+                   <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-black" />
+                 </div>
                </Link>
-               <a href="#retention-roadmap" className="px-8 py-4 border border-white/10 text-white rounded-full font-bold text-sm hover:bg-white/5 transition-all">
-                 The Process
-               </a>
             </div>
           </div>
 

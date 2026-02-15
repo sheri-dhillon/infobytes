@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { HeroHeading } from './ui/HeroHeading';
 
 const STATIC_SERVICES = [
   {
@@ -10,7 +11,7 @@ const STATIC_SERVICES = [
     description:
       "We move beyond newsletters to build sophisticated, data-driven engines that nurture leads and maximize revenue on autopilot, ensuring the right message hits at the right time.",
     pills: ["Klaviyo Flows", "Abandoned Cart Recovery", "Behavioral Triggers", "Hyper-Segmentation"],
-    image: "https://images.unsplash.com/photo-1557200134-90327ee9fafa?auto=format&fit=crop&w=1200&q=80",
+    image: "/email automation engines.png",
     accent: "text-brand-orange",
   },
   {
@@ -20,7 +21,7 @@ const STATIC_SERVICES = [
     description:
       "Cut through the noise with personalized, compliant text message campaigns. We drive immediate action and deeply connect with your mobile-first customers where they are most active.",
     pills: ["Omnisend SMS", "98% Open Rates", "TCPA Compliant", "Instant ROI"],
-    image: "https://images.unsplash.com/photo-1556244573-c3686c0f0f9c?auto=format&fit=crop&w=1200&q=80",
+    image: "/sms and mobile messaging.png",
     accent: "text-brand-purple",
   },
   {
@@ -30,7 +31,7 @@ const STATIC_SERVICES = [
     description:
       "Seamlessly move to a top-tier retention platform without losing historical data. We audit, configure, and optimize your technical infrastructure for maximum inbox placement.",
     pills: ["Klaviyo Expert", "Omnisend Partner", "Deliverability Fix", "Data Integrity"],
-    image: "https://images.unsplash.com/photo-1551808525-51a94da548ce?auto=format&fit=crop&w=1200&q=80",
+    image: "/platform migration.png",
     accent: "text-brand-orange",
   },
   {
@@ -40,7 +41,7 @@ const STATIC_SERVICES = [
     description:
       "A holistic approach to increasing Customer Lifetime Value. We analyze behavioral data to plug leaky funnel buckets and continuously optimize every touchpoint in the customer journey.",
     pills: ["Customer LTV", "A/B Testing", "Journey Mapping", "Zero-Party Data"],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+    image: "/CRO customer lifecycle.png",
     accent: "text-brand-purple",
   }
 ];
@@ -56,11 +57,14 @@ export const ServicesList: React.FC = () => {
              <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs font-bold tracking-widest uppercase mb-6 text-brand-orange">
                OUR EXPERTISE
              </div>
-             <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1]">
-               Turning one-time buyers <br /> <span className="text-gray-500">into lifetime value.</span>
-             </h2>
-             <p className="text-gray-400 text-lg leading-relaxed">
-               A four-part retention stack built to increase repeat purchases, improve deliverability, and grow LTV through lifecycle automation.
+             <HeroHeading
+               pre={<>The Retention Stack</>}
+               main={<>built for compounding growth.</>}
+               align="center"
+               className="mb-6"
+             />
+             <p className="text-gray-400 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
+               We’ve refined a four-part methodology to eliminate churn, maximize customer lifetime value, and turn your existing traffic into a high-yield revenue engine.
              </p>
           </div>
 
@@ -175,7 +179,7 @@ const StickyCard: React.FC<{ index: number; total: number; service: any }> = ({ 
               <div className="flex-1 relative h-full overflow-hidden bg-[#0a0a0a]">
                   {/* Image */}
                   <img 
-                      src={service.image || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80"} 
+                      src={encodeURI(service.image || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80")} 
                       alt={service.title} 
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                   />
