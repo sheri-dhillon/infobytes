@@ -163,9 +163,18 @@ export const ContactPage: React.FC = () => {
       }
 
       if (!response.ok || !data?.ok) {
+        const routingErrorXml =
+          typeof rawBody === 'string' &&
+          rawBody.includes('<Code>InvalidRequest</Code>') &&
+          rawBody.includes("Couldn't route the request");
+
         const fallbackMessage = rawBody?.trim()
           ? rawBody.slice(0, 240)
           : `Request failed with status ${response.status}.`;
+
+        if (routingErrorXml) {
+          throw new Error('Live API is not routed. Deploy backend as a DigitalOcean Web Service (`npm start`) or set `VITE_CONTACT_API_URL` to a working backend endpoint.');
+        }
 
         if (response.status === 404) {
           throw new Error('Contact API route was not found (404). Deploy as a Web Service with `npm start` so `/api/contact` exists.');
