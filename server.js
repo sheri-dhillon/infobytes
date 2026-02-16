@@ -38,14 +38,10 @@ const FIELD_LABELS = {
 
 app.use(express.json({ limit: '1mb' }));
 
-async function verifyTurnstile(token, remoteIp) {
+async function verifyTurnstile(token) {
   const params = new URLSearchParams();
   params.set('secret', TURNSTILE_SECRET_KEY || '');
   params.set('response', token || '');
-
-  if (remoteIp) {
-    params.set('remoteip', remoteIp);
-  }
 
   const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
@@ -119,11 +115,15 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    const turnstileResult = await verifyTurnstile(turnstileToken, req.ip);
+    const turnstileResult = await verifyTurnstile(turnstileToken);
     if (!turnstileResult?.success) {
+      const errorCodes = Array.isArray(turnstileResult?.['error-codes'])
+        ? turnstileResult['error-codes'].join(', ')
+        : 'unknown';
+
       return res.status(400).json({
         ok: false,
-        message: 'Bot verification failed. Please try again.'
+        message: `Bot verification failed. (${errorCodes})`
       });
     }
 

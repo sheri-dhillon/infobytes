@@ -127,6 +127,11 @@ export const ContactPage: React.FC = () => {
     const formPayload = new FormData(formElement);
     const turnstileToken = String(formPayload.get('cf-turnstile-response') || '');
 
+    const payload = STATIC_CONTACT_CONFIG.form_fields.reduce<Record<string, string>>((acc, field: any) => {
+      acc[field.key] = String(formPayload.get(field.key) || '').trim();
+      return acc;
+    }, {});
+
     if (!turnstileToken) {
       setSubmitStatus('error');
       setSubmitMessage('Please complete bot verification before submitting.');
@@ -144,12 +149,17 @@ export const ContactPage: React.FC = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...formData,
+          ...payload,
           turnstileToken
         })
       });
 
-      const data = await response.json();
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
       if (!response.ok || !data?.ok) {
         throw new Error(data?.message || 'Failed to send message.');
@@ -369,6 +379,7 @@ export const ContactPage: React.FC = () => {
                         )}
 
                         <Button 
+                          type="submit"
                             disabled={isSubmitting}
                             className="w-full justify-between group py-4 text-base disabled:opacity-50"
                         >
