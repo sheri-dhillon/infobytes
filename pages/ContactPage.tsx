@@ -67,6 +67,24 @@ const TRUST_BRANDS = [
   { name: 'Zyron Tech' }
 ];
 
+const FORM_STEPS = [
+  {
+    id: 1,
+    title: 'Basic Information',
+    fieldKeys: ['first_name', 'last_name', 'email']
+  },
+  {
+    id: 2,
+    title: 'Business Details',
+    fieldKeys: ['company_name', 'mobile_number', 'project_goal']
+  },
+  {
+    id: 3,
+    title: 'Project Context',
+    fieldKeys: ['monthly_store_revenue', 'current_platform', 'project_details']
+  }
+];
+
 declare global {
   interface Window {
     turnstile?: {
@@ -86,6 +104,8 @@ export const ContactPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
+  const [currentStep, setCurrentStep] = useState(1);
+  const [stepMessage, setStepMessage] = useState('');
 
   // Magnetic button logic
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -118,19 +138,76 @@ export const ContactPage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setStepMessage('');
+  };
+
+  const currentStepConfig = FORM_STEPS[currentStep - 1];
+  const isFinalStep = currentStep === FORM_STEPS.length;
+
+  const visibleFields = STATIC_CONTACT_CONFIG.form_fields.filter((field: any) =>
+    currentStepConfig.fieldKeys.includes(field.key)
+  );
+
+  const validateStep = (stepNumber: number) => {
+    const stepConfig = FORM_STEPS[stepNumber - 1];
+    const requiredStepFields = STATIC_CONTACT_CONFIG.form_fields.filter(
+      (field: any) => stepConfig.fieldKeys.includes(field.key) && field.required
+    );
+
+    const firstMissing = requiredStepFields.find((field: any) => !String(formData[field.key] || '').trim());
+    return firstMissing ? firstMissing.label : null;
+  };
+
+  const handleNextStep = () => {
+    const missingLabel = validateStep(currentStep);
+    if (missingLabel) {
+      setStepMessage(`Please fill ${missingLabel} before continuing.`);
+      return;
+    }
+
+    setStepMessage('');
+    setSubmitStatus('idle');
+    setSubmitMessage('');
+    setCurrentStep((prev) => Math.min(prev + 1, FORM_STEPS.length));
+  };
+
+  const handleBackStep = () => {
+    setStepMessage('');
+    setSubmitStatus('idle');
+    setSubmitMessage('');
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isFinalStep) {
+      return;
+    }
 
     const formElement = e.currentTarget as HTMLFormElement;
     const formPayload = new FormData(formElement);
     const turnstileToken = String(formPayload.get('cf-turnstile-response') || '');
 
     const payload = STATIC_CONTACT_CONFIG.form_fields.reduce<Record<string, string>>((acc, field: any) => {
-      acc[field.key] = String(formPayload.get(field.key) || '').trim();
+      const stateValue = String(formData[field.key] || '').trim();
+      const formValue = String(formPayload.get(field.key) || '').trim();
+      acc[field.key] = formValue || stateValue;
       return acc;
     }, {});
+
+    const missingField = STATIC_CONTACT_CONFIG.form_fields.find(
+      (field: any) => field.required && !String(payload[field.key] || '').trim()
+    );
+
+    if (missingField) {
+      const stepForField = FORM_STEPS.find((step) => step.fieldKeys.includes(missingField.key));
+      if (stepForField) {
+        setCurrentStep(stepForField.id);
+      }
+      setStepMessage(`Please fill ${missingField.label} before submitting.`);
+      return;
+    }
 
     if (!turnstileToken) {
       setSubmitStatus('error');
@@ -186,6 +263,8 @@ export const ContactPage: React.FC = () => {
       setSubmitStatus('success');
       setSubmitMessage(data?.message || 'Message sent successfully.');
       setFormData({});
+      setStepMessage('');
+      setCurrentStep(1);
       window.turnstile?.reset();
     } catch (error) {
       console.error('Contact form submit failed:', error);
@@ -326,7 +405,12 @@ export const ContactPage: React.FC = () => {
                           <h4 className="text-xl font-bold text-white mb-2">Message Sent!</h4>
                           <p className="text-gray-400">{submitMessage || 'Thank you for reaching out. We will get back to you shortly.'}</p>
                           <button 
-                            onClick={() => setSubmitStatus('idle')}
+                            onClick={() => {
+                              setSubmitStatus('idle');
+                              setSubmitMessage('');
+                              setStepMessage('');
+                              setCurrentStep(1);
+                            }}
                             className="mt-6 text-brand-orange hover:text-white font-medium transition-colors"
                           >
                             Send another message
@@ -334,8 +418,21 @@ export const ContactPage: React.FC = () => {
                       </div>
                   ) : (
                       <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="rounded-xl border border-white/10 bg-black/40 px-4 py-3">
+                          <div className="text-xs font-semibold tracking-[0.2em] uppercase text-gray-400">
+                            Step {currentStep} of {FORM_STEPS.length}
+                          </div>
+                          <div className="mt-1 text-sm font-medium text-white">{currentStepConfig.title}</div>
+                          <div className="mt-3 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-white transition-all duration-300"
+                              style={{ width: `${(currentStep / FORM_STEPS.length) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+
                         <div className="grid md:grid-cols-2 gap-6">
-                            {STATIC_CONTACT_CONFIG.form_fields.map((field: any, idx: number) => (
+                            {visibleFields.map((field: any, idx: number) => (
                                 <div 
                                     key={field.id || idx} 
                                     className={`space-y-2 ${field.width === 'full' ? 'md:col-span-2' : 'md:col-span-1'}`}
@@ -385,11 +482,19 @@ export const ContactPage: React.FC = () => {
                             ))}
                         </div>
 
-                        <div
-                          className="cf-turnstile"
-                          data-sitekey={turnstileSiteKey}
-                          data-theme="dark"
-                        ></div>
+                        {isFinalStep && (
+                          <div
+                            className="cf-turnstile"
+                            data-sitekey={turnstileSiteKey}
+                            data-theme="dark"
+                          ></div>
+                        )}
+
+                        {stepMessage && (
+                          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+                            {stepMessage}
+                          </div>
+                        )}
 
                         {submitStatus === 'error' && (
                           <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -397,21 +502,43 @@ export const ContactPage: React.FC = () => {
                           </div>
                         )}
 
-                        <Button 
-                          type="submit"
-                            disabled={isSubmitting}
-                            className="w-full justify-between group py-4 text-base disabled:opacity-50"
-                        >
-                            {isSubmitting ? (
+                        <div className="flex items-center gap-3">
+                          {currentStep > 1 && (
+                            <button
+                              type="button"
+                              onClick={handleBackStep}
+                              className="px-5 py-3 rounded-full border border-white/20 text-white hover:border-white/40 transition-colors"
+                            >
+                              Back
+                            </button>
+                          )}
+
+                          {isFinalStep ? (
+                            <Button
+                              type="submit"
+                              disabled={isSubmitting}
+                              className="flex-1 justify-between group py-4 text-base disabled:opacity-50"
+                            >
+                              {isSubmitting ? (
                                 <span className="flex items-center gap-2">
-                                    <Loader2 className="w-4 h-4 animate-spin" /> Sending...
+                                  <Loader2 className="w-4 h-4 animate-spin" /> Sending...
                                 </span>
-                            ) : (
+                              ) : (
                                 <>
-                                    Send Inquiry <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                  Send Inquiry <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </>
-                            )}
-                        </Button>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              onClick={handleNextStep}
+                              className="flex-1 justify-between group py-4 text-base"
+                            >
+                              Next Step <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+                          )}
+                        </div>
 
                         {/* Trust Bar */}
                         <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
