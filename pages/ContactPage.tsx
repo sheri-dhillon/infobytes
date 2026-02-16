@@ -88,7 +88,9 @@ const FORM_STEPS = [
 declare global {
   interface Window {
     turnstile?: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string;
       reset: (widgetId?: string) => void;
+      remove: (widgetId: string) => void;
     };
   }
 }
@@ -106,10 +108,14 @@ export const ContactPage: React.FC = () => {
   const [submitMessage, setSubmitMessage] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
   const [stepMessage, setStepMessage] = useState('');
+  const currentStepConfig = FORM_STEPS[currentStep - 1];
+  const isFinalStep = currentStep === FORM_STEPS.length;
 
   // Magnetic button logic
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const footerSectionRef = useRef<HTMLElement>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (document.querySelector('script[data-turnstile-script="true"]')) {
@@ -123,6 +129,51 @@ export const ContactPage: React.FC = () => {
     script.setAttribute('data-turnstile-script', 'true');
     document.head.appendChild(script);
   }, []);
+
+  useEffect(() => {
+    if (!isFinalStep) {
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    const intervalId = window.setInterval(() => {
+      const turnstileApi = window.turnstile;
+      const container = turnstileContainerRef.current;
+
+      if (!turnstileApi?.render || !container || turnstileWidgetIdRef.current) {
+        attempts += 1;
+        if (attempts >= maxAttempts) {
+          window.clearInterval(intervalId);
+        }
+        return;
+      }
+
+      container.innerHTML = '';
+      turnstileWidgetIdRef.current = turnstileApi.render(container, {
+        sitekey: turnstileSiteKey,
+        theme: 'dark'
+      });
+      window.clearInterval(intervalId);
+    }, 150);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isFinalStep, turnstileSiteKey]);
+
+  useEffect(() => {
+    if (isFinalStep) {
+      return;
+    }
+
+    const widgetId = turnstileWidgetIdRef.current;
+    if (widgetId && window.turnstile?.remove) {
+      window.turnstile.remove(widgetId);
+      turnstileWidgetIdRef.current = null;
+    }
+  }, [isFinalStep]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!footerSectionRef.current) return;
@@ -140,9 +191,6 @@ export const ContactPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setStepMessage('');
   };
-
-  const currentStepConfig = FORM_STEPS[currentStep - 1];
-  const isFinalStep = currentStep === FORM_STEPS.length;
 
   const visibleFields = STATIC_CONTACT_CONFIG.form_fields.filter((field: any) =>
     currentStepConfig.fieldKeys.includes(field.key)
@@ -265,7 +313,7 @@ export const ContactPage: React.FC = () => {
       setFormData({});
       setStepMessage('');
       setCurrentStep(1);
-      window.turnstile?.reset();
+      window.turnstile?.reset(turnstileWidgetIdRef.current || undefined);
     } catch (error) {
       console.error('Contact form submit failed:', error);
       setSubmitStatus('error');
@@ -484,9 +532,8 @@ export const ContactPage: React.FC = () => {
 
                         {isFinalStep && (
                           <div
-                            className="cf-turnstile"
-                            data-sitekey={turnstileSiteKey}
-                            data-theme="dark"
+                            ref={turnstileContainerRef}
+                            className="min-h-[65px]"
                           ></div>
                         )}
 
