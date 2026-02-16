@@ -154,15 +154,24 @@ export const ContactPage: React.FC = () => {
         })
       });
 
+      const rawBody = await response.text();
       let data: any = null;
       try {
-        data = await response.json();
+        data = rawBody ? JSON.parse(rawBody) : null;
       } catch {
         data = null;
       }
 
       if (!response.ok || !data?.ok) {
-        throw new Error(data?.message || 'Failed to send message.');
+        const fallbackMessage = rawBody?.trim()
+          ? rawBody.slice(0, 240)
+          : `Request failed with status ${response.status}.`;
+
+        if (response.status === 404) {
+          throw new Error('Contact API route was not found (404). Deploy as a Web Service with `npm start` so `/api/contact` exists.');
+        }
+
+        throw new Error(data?.message || fallbackMessage || 'Failed to send message.');
       }
 
       setSubmitStatus('success');
@@ -170,6 +179,7 @@ export const ContactPage: React.FC = () => {
       setFormData({});
       window.turnstile?.reset();
     } catch (error) {
+      console.error('Contact form submit failed:', error);
       setSubmitStatus('error');
       setSubmitMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
     } finally {
