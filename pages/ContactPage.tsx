@@ -97,7 +97,6 @@ declare global {
 
 export const ContactPage: React.FC = () => {
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACd9k8squSr31WmB';
-  const contactApiUrl = import.meta.env.VITE_CONTACT_API_URL || '/api/contact';
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   
@@ -268,48 +267,15 @@ export const ContactPage: React.FC = () => {
     setSubmitMessage('');
 
     try {
-      const response = await fetch(contactApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...payload,
-          turnstileToken
-        })
-      });
+      const formRowsText = STATIC_CONTACT_CONFIG.form_fields
+        .map((field: any) => `${field.label}: ${payload[field.key] || 'N/A'}`)
+        .join('\n');
 
-      const rawBody = await response.text();
-      let data: any = null;
-      try {
-        data = rawBody ? JSON.parse(rawBody) : null;
-      } catch {
-        data = null;
-      }
-
-      if (!response.ok || !data?.ok) {
-        const routingErrorXml =
-          typeof rawBody === 'string' &&
-          rawBody.includes('<Code>InvalidRequest</Code>') &&
-          rawBody.includes("Couldn't route the request");
-
-        const fallbackMessage = rawBody?.trim()
-          ? rawBody.slice(0, 240)
-          : `Request failed with status ${response.status}.`;
-
-        if (routingErrorXml) {
-          throw new Error('Live API is not routed. Deploy backend as a DigitalOcean Web Service (`npm start`) or set `VITE_CONTACT_API_URL` to a working backend endpoint.');
-        }
-
-        if (response.status === 404) {
-          throw new Error('Contact API route was not found (404). Deploy as a Web Service with `npm start` so `/api/contact` exists.');
-        }
-
-        throw new Error(data?.message || fallbackMessage || 'Failed to send message.');
-      }
+      const mailtoUrl = `mailto:shehryar@infobytes.io?subject=${encodeURIComponent('New Brand Inquiry Received')}&body=${encodeURIComponent(formRowsText)}`;
+      window.location.href = mailtoUrl;
 
       setSubmitStatus('success');
-      setSubmitMessage(data?.message || 'Message sent successfully.');
+      setSubmitMessage('Your email client was opened with your inquiry details. Please send the email to complete submission.');
       setFormData({});
       setStepMessage('');
       setCurrentStep(1);
