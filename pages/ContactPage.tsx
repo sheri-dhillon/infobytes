@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '../components/ui/Button';
 import { Mail, Phone, MapPin, ArrowRight, ChevronDown, Plus, Minus, Loader2, CheckCircle } from 'lucide-react';
 import { Seo } from '../components/Seo';
@@ -67,17 +67,42 @@ const TRUST_BRANDS = [
   { name: 'Zyron Tech' }
 ];
 
+declare global {
+  interface Window {
+    turnstile?: {
+      reset: (widgetId?: string) => void;
+    };
+  }
+}
+
 export const ContactPage: React.FC = () => {
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACd9k8squSr31WmB';
+  const contactApiUrl = import.meta.env.VITE_CONTACT_API_URL || '/api/contact';
+
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   
   // Dynamic Form State
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitMessage, setSubmitMessage] = useState('');
 
   // Magnetic button logic
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const footerSectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (document.querySelector('script[data-turnstile-script="true"]')) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.setAttribute('data-turnstile-script', 'true');
+    document.head.appendChild(script);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!footerSectionRef.current) return;
@@ -97,16 +122,49 @@ export const ContactPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formElement = e.currentTarget as HTMLFormElement;
+    const formPayload = new FormData(formElement);
+    const turnstileToken = String(formPayload.get('cf-turnstile-response') || '');
+
+    if (!turnstileToken) {
+      setSubmitStatus('error');
+      setSubmitMessage('Please complete bot verification before submitting.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus('idle');
+    setSubmitMessage('');
 
-    // Simulate Network Request
-    setTimeout(() => {
-        setIsSubmitting(false);
-        setSubmitStatus('success');
-        setFormData({});
-        console.log("Form Submitted:", formData);
-    }, 1500);
+    try {
+      const response = await fetch(contactApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          turnstileToken
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.message || 'Failed to send message.');
+      }
+
+      setSubmitStatus('success');
+      setSubmitMessage(data?.message || 'Message sent successfully.');
+      setFormData({});
+      window.turnstile?.reset();
+    } catch (error) {
+      setSubmitStatus('error');
+      setSubmitMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -237,7 +295,7 @@ export const ContactPage: React.FC = () => {
                               <CheckCircle className="w-8 h-8" />
                           </div>
                           <h4 className="text-xl font-bold text-white mb-2">Message Sent!</h4>
-                          <p className="text-gray-400">Thank you for reaching out. We will get back to you shortly.</p>
+                          <p className="text-gray-400">{submitMessage || 'Thank you for reaching out. We will get back to you shortly.'}</p>
                           <button 
                             onClick={() => setSubmitStatus('idle')}
                             className="mt-6 text-brand-orange hover:text-white font-medium transition-colors"
@@ -297,6 +355,18 @@ export const ContactPage: React.FC = () => {
                                 </div>
                             ))}
                         </div>
+
+                        <div
+                          className="cf-turnstile"
+                          data-sitekey={turnstileSiteKey}
+                          data-theme="dark"
+                        ></div>
+
+                        {submitStatus === 'error' && (
+                          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                            {submitMessage || 'Message could not be sent. Please try again.'}
+                          </div>
+                        )}
 
                         <Button 
                             disabled={isSubmitting}

@@ -4,7 +4,7 @@
 
 # Infobytes Agency Website
 
-Frontend-only React + Vite website.
+React + Vite website with a Node server for contact form delivery and SPA routing fallback.
 
 ## Run Locally
 
@@ -12,20 +12,35 @@ Frontend-only React + Vite website.
 
 
 1. Install dependencies: `npm install`
-2. Start dev server: `npm run dev`
+2. Frontend dev server: `npm run dev`
 3. Production build: `npm run build`
+4. Run production server locally: `npm start`
+
+## Contact Form (Resend + Cloudflare Turnstile)
+
+Set the following environment variables:
+
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL` (must be a verified sender in Resend)
+- `CONTACT_TO_EMAIL` (defaults to `shehryar@infobytes.io`)
+- `TURNSTILE_SECRET_KEY`
+- `VITE_TURNSTILE_SITE_KEY`
+
+Behavior:
+
+- Sends full inquiry details to `shehryar@infobytes.io`
+- Subject: `New Brand Inquiry Received`
+- Sends auto-reply to the submitter
+- Subject: `Thanks for Contacting InfoBytes`
 
 ## Deploy (DigitalOcean App Platform)
 
-### Fix 404 on refresh (React Router)
+### Recommended deployment mode
 
-This app uses client-side routes (e.g. `/services/...`). If your Static Site component is not configured for SPA routing, DigitalOcean will return **404** when you refresh or deep-link to a non-root route.
+Deploy as a **Web Service** (Node) so secret keys stay server-side and SPA route refreshes work automatically.
 
-In the DigitalOcean Control Panel:
+- Build command: `npm run build`
+- Run command: `npm start`
+- HTTP port: set by `PORT` (handled automatically by App Platform)
 
-1. Go to **Apps** → select your app
-2. Open **Settings**
-3. Select your **Static Site** component
-4. Under **Custom Pages**, set **Catchall** to `index.html`
-
-That makes App Platform serve `index.html` for unknown paths, allowing React Router to handle the route client-side.
+The Node server serves `dist/` and falls back to `index.html` for non-API routes, which fixes 404 on page refresh for React Router paths.
