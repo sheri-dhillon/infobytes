@@ -1,0 +1,71 @@
+{
+  "pageHero": {
+    "title": "Pricing",
+    "subtitle": "Transparent, flexible pricing plans designed to scale with your business."
+  },
+  "section": {
+    "tagline": "PRICING STRATEGY",
+    "headlinePrefix": "Investment in",
+    "headlineAccent": "Unstoppable Growth.",
+    "subheadline": "Transparent, ROI-focused pricing for brands ready to stop losing customers and start scaling predictable revenue. No hidden fees—just pure performance.",
+    "ctaLabel": "Get Started"
+  },
+  "plans": [
+    {
+      "id": "1",
+      "name": "The Retention Foundation",
+      "tagline": "For emerging brands",
+      "description": "Emerging brands needing the “Essential 8” automation flows.",
+      "price": "349",
+      "frequency": "month",
+      "isCustom": false,
+      "customStartingAt": "699",
+      "features": [
+        "Core Klaviyo/Omnisend Setup & Audit",
+        "The \"Essential 8\" Automated Flows (Abandoned Cart, Welcome, etc.)",
+        "Monthly Deliverability & List Hygiene Audit",
+        "Basic Segment Building (Engaged vs. Unengaged)",
+        "Standard Monthly Performance Reporting"
+      ],
+      "highlight": false
+    },
+    {
+      "id": "2",
+      "name": "The Revenue Accelerator",
+      "tagline": "Most Popular",
+      "description": "Established stores scaling past $1M+ ARR.",
+      "price": "549",
+      "frequency": "month",
+      "isCustom": false,
+      "customStartingAt": "699",
+      "features": [
+        "Full-Cycle Email & SMS Management",
+        "Advanced Behavioral Triggers & Dynamic Content",
+        "Bi-Weekly Campaign Strategy & Deployment (8–10/mo)",
+        "Continuous A/B Testing (Subject Lines, Layouts, Offers)",
+        "Custom Zero-Party Data Collection Strategy",
+        "Priority Specialist Support & Strategy Calls"
+      ],
+      "highlight": true
+    },
+    {
+      "id": "3",
+      "name": "The Lifecycle Enterprise",
+      "tagline": "For enterprise teams",
+      "description": "Large-scale brands requiring high-volume omnichannel dominance.",
+      "price": "",
+      "frequency": "month",
+      "isCustom": true,
+      "customStartingAt": "699",
+      "features": [
+        "Full-Funnel Omnichannel Strategy (Email, SMS, Push)",
+        "Advanced Predictive Analytics & LTV Modeling",
+        "Dedicated Account Manager & Senior Retention Architect",
+        "Quarterly In-Depth Competitor & Market Audits",
+        "Custom Technical Integrations & API Support",
+        "Daily Optimization & Real-Time Reporting Dashboard"
+      ],
+      "highlight": false
+    }
+  ]
+}

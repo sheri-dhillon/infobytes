@@ -15,6 +15,8 @@ import { ContactPage } from './pages/ContactPage';
 import { PricingPage } from './pages/PricingPage';
 import { BlogPage } from './pages/BlogPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { IndustryLandingPage } from './pages/IndustryLandingPage';
+import { IndustriesPage } from './pages/IndustriesPage';
 
 // Service Pages (Stubs)
 import { EmailAutomationEnginesPage } from './pages/services/EmailAutomationEnginesPage';
@@ -88,6 +90,8 @@ function App() {
             <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
             <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
             <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
+            <Route path="/industries" element={<PublicLayout><IndustriesPage /></PublicLayout>} />
+            <Route path="/industries/:slug" element={<PublicLayout><IndustryLandingPage /></PublicLayout>} />
             <Route path="/services/email-automation-engines" element={<PublicLayout><EmailAutomationEnginesPage /></PublicLayout>} />
             <Route path="/services/sms-mobile-messaging" element={<PublicLayout><SMSMobileMessagingPage /></PublicLayout>} />
             <Route path="/services/platform-migration-audit" element={<PublicLayout><PlatformMigrationAuditPage /></PublicLayout>} />

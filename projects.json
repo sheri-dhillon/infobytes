@@ -1,0 +1,100 @@
+{
+  "section": {
+    "tagline": "CASE STUDIES",
+    "headline": "Results that speak louder than words.",
+    "subheadline": "We don’t just design; we deliver. Browse our deep dives into how we’ve scaled retention and maximized lifetime value for the world’s most ambitious D2C brands.",
+    "desktopCtaLabel": "View All Projects",
+    "mobileCtaLabel": "View All Success Stories"
+  },
+  "categories": [
+    { "label": "All Success Stories", "value": "All" },
+    { "label": "Email Automation", "value": "Email Automation" },
+    { "label": "SMS Strategy", "value": "SMS Strategy" },
+    { "label": "Platform Migrations (Klaviyo/Omnisend)", "value": "Migrations" }
+  ],
+  "projects": [
+    {
+      "resultMetric": "45% Increase in Repeat Purchase Rate.",
+      "brand": "AURA Skin",
+      "category": "Email Automation",
+      "industryTag": "BEAUTY & PERSONAL CARE",
+      "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80",
+      "description": "How we built a replenishment engine for AURA Skin using behavioral Klaviyo triggers and lifecycle segmentation.",
+      "platform": "Klaviyo Automation",
+      "link": "/work"
+    },
+    {
+      "resultMetric": "$240k Recovered in 30 Days.",
+      "brand": "NOVA STREET",
+      "category": "SMS Strategy",
+      "industryTag": "FASHION & APPAREL",
+      "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80",
+      "description": "Optimizing the abandoned checkout sequence with multi-channel SMS and email sync across Klaviyo and Omnisend.",
+      "platform": "Omnichannel SMS + Email",
+      "link": "/work"
+    },
+    {
+      "resultMetric": "30% Reduction in Monthly Churn.",
+      "brand": "VITAL BOX",
+      "category": "Email Automation",
+      "industryTag": "HEALTH & WELLNESS",
+      "image": "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1200&q=80",
+      "description": "A deep dive into subscriber-save flows and personalized educational nurturing designed in Klaviyo.",
+      "platform": "Klaviyo Lifecycle Flows",
+      "link": "/work"
+    },
+    {
+      "resultMetric": "99.2% Data Integrity After Migration.",
+      "brand": "LUMEN PET",
+      "category": "Migrations",
+      "industryTag": "PET CARE",
+      "image": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=80",
+      "description": "Seamless migration from legacy ESP to Omnisend with list hygiene, event mapping, and deliverability hardening.",
+      "platform": "Omnisend Migration",
+      "link": "/work"
+    },
+    {
+      "resultMetric": "22% Lift in Retention Revenue.",
+      "brand": "HEARTH LIVING",
+      "category": "SMS Strategy",
+      "industryTag": "HOME & LIFESTYLE",
+      "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      "description": "Built high-intent SMS moments synced with Klaviyo segments to increase repeat purchase frequency.",
+      "platform": "Klaviyo + SMS Strategy",
+      "link": "/work"
+    },
+    {
+      "resultMetric": "17% Higher Email Marketing ROI.",
+      "brand": "FORGED ATHLETICS",
+      "category": "Migrations",
+      "industryTag": "SPORTS & FITNESS",
+      "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
+      "description": "Re-platformed from Mailchimp to Klaviyo and rebuilt core automations to unlock stronger retention marketing results.",
+      "platform": "Klaviyo Migration",
+      "link": "/work"
+    }
+  ],
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "CreativeWorkSeries",
+    "name": "INFOBYTES eCommerce Case Studies",
+    "description": "Portfolio of high-ROI email and SMS marketing campaigns for D2C brands.",
+    "hasPart": [
+      {
+        "@type": "CreativeWork",
+        "name": "Beauty Brand Replenishment Case Study",
+        "description": "Achieved a 45% increase in repeat orders via Klaviyo automation."
+      },
+      {
+        "@type": "CreativeWork",
+        "name": "Fashion SMS Recovery Case Study",
+        "description": "Recovered $240k in abandoned carts using omnichannel SMS strategy."
+      },
+      {
+        "@type": "CreativeWork",
+        "name": "Health Subscriber Save Case Study",
+        "description": "Reduced monthly churn by 30% with retention-focused lifecycle education flows."
+      }
+    ]
+  }
+}

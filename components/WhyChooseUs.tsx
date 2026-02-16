@@ -3,27 +3,41 @@ import { Zap, Sliders, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 const benefits = [
   {
-    title: "Fast & Reliable Delivery",
-    description: "We prioritize timely completion without compromising quality. Our agile sprint methodology ensures you see tangible progress every two weeks.",
+    title: "Predictable Revenue Scaling",
+    description: "We prioritize outcomes that impact your bottom line. Our agile sprint methodology ensures you see tangible growth in attributed revenue and repeat purchase rates every 14 days.",
     icon: Zap,
     color: "text-brand-orange",
     bg: "bg-brand-orange/10"
   },
   {
-    title: "Tailored to Your Needs",
-    description: "Every solution is customized to fit your unique goals and challenges. We don't rely on cookie-cutter templates; we architect specifically for your growth.",
+    title: "Bespoke Retention Architecture",
+    description: "Every automation is custom-architected for your brand's unique customer lifecycle. We don't use generic templates; we build proprietary logic that drives long-term customer loyalty.",
     icon: Sliders,
     color: "text-brand-purple",
     bg: "bg-brand-purple/10"
   },
   {
-    title: "Enterprise-Grade Security",
-    description: "We build with the future in mind. Our code is clean, documented, and secure, ensuring your digital assets are protected and scalable from day one.",
+    title: "Inbox Dominance & Security",
+    description: "We build with the future in mind. Our technical setup ensures 99% deliverability and SOC2-compliant data security, protecting your digital assets and brand reputation from day one.",
     icon: ShieldCheck,
     color: "text-green-400",
     bg: "bg-green-500/10"
   }
 ];
+
+const WHY_CHOOSE_US_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'eCommerce Retention Marketing',
+  provider: {
+    '@type': 'Organization',
+    name: 'INFOBYTES'
+  },
+  offers: {
+    '@type': 'Offer',
+    description: 'Custom Klaviyo and Omnisend lifecycle automation designed for ROI and predictable scaling.'
+  }
+};
 
 export const WhyChooseUs: React.FC = () => {
   return (
@@ -46,7 +60,7 @@ export const WhyChooseUs: React.FC = () => {
                 
                 <img 
                   src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1000&q=80" 
-                  alt="Team collaborating" 
+                  alt="INFOBYTES retention marketing team discussing Klaviyo strategy and eCommerce growth." 
                   className="w-full h-[500px] md:h-[600px] object-cover opacity-90 transition-transform duration-700 group-hover:scale-105" 
                 />
 
@@ -57,7 +71,7 @@ export const WhyChooseUs: React.FC = () => {
                    </div>
                    <div>
                       <div className="text-white font-bold text-sm">100% Success Rate</div>
-                      <div className="text-gray-300 text-xs mt-1">On deliverability & timelines</div>
+                     <div className="text-gray-300 text-xs mt-1">On ROI & Scale Goals</div>
                    </div>
                 </div>
 
@@ -72,16 +86,15 @@ export const WhyChooseUs: React.FC = () => {
           {/* Right Column: Content */}
           <div className="order-1 lg:order-2">
              <div className="inline-flex items-center gap-2 border border-white/10 bg-white/5 rounded-full px-4 py-1.5 mb-8 backdrop-blur-sm">
-                 <span className="text-xs font-bold tracking-widest text-brand-orange uppercase">Benefit</span>
+                 <span className="text-xs font-bold tracking-widest text-brand-orange uppercase">THE INFOBYTES EDGE</span>
              </div>
 
-             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
-               Why Choose <br />
-               Our Services?
+             <h2 className="text-[1.6rem] md:text-[2.1rem] lg:text-[2.6rem] font-bold text-white mb-6 leading-[1.1] tracking-tight">
+               Why leading brands choose us for growth.
              </h2>
 
              <p className="text-gray-400 text-lg leading-relaxed mb-12 max-w-lg border-l-2 border-white/10 pl-6">
-                Get high-quality results, faster delivery, and tailored solutions that grow with your business. We focus on value, efficiency, and long-term success for every project.
+                We move beyond "vanity metrics." Our framework is built on three pillars that turn email and SMS from simple communication channels into your most profitable revenue streams.
              </p>
 
              <div className="space-y-8">
@@ -105,6 +118,12 @@ export const WhyChooseUs: React.FC = () => {
 
         </div>
       </div>
+
+      <script
+        type="application/ld+json"
+        id="infobytes-why-choose-us-service-schema"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WHY_CHOOSE_US_SCHEMA) }}
+      />
     </section>
   );
 };

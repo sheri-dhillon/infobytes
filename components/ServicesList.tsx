@@ -59,11 +59,13 @@ export const ServicesList: React.FC = () => {
              </div>
              <HeroHeading
                pre={<>The Retention Stack</>}
-               main={<>built for compounding growth.</>}
+               main={<>built for<br />compounding growth.</>}
                align="center"
                className="mb-6"
+               preClassName="text-[clamp(1.8rem,3.6vw,4rem)]"
+               mainClassName="text-[clamp(2.2rem,5vw,5rem)] leading-[0.9]"
              />
-             <p className="text-gray-400 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
+             <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
                We’ve refined a four-part methodology to eliminate churn, maximize customer lifetime value, and turn your existing traffic into a high-yield revenue engine.
              </p>
           </div>

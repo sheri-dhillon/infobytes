@@ -15,6 +15,7 @@ const CONFIG = {
         { label: 'Home', href: '/' },
         { label: 'About', href: '/about' },
         { label: 'Service', href: '/services' },
+      { label: 'Industries', href: '/industries' },
         { label: 'Portfolio', href: '/work' },
         { label: 'Contact', href: '/contact' },
     ]

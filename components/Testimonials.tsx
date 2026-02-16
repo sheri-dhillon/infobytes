@@ -1,6 +1,7 @@
 
 import React, { useRef } from 'react';
 import { Star, ArrowLeft, ArrowRight } from 'lucide-react';
+import reviewsData from '../reviews.json';
 
 interface TestimonialItem {
     id: number;
@@ -11,13 +12,8 @@ interface TestimonialItem {
     stars: number;
 }
 
-const STATIC_TESTIMONIALS: TestimonialItem[] = [
-  { id: 1, name: 'Jonas Wadel', business_name: 'Founder, eCommerce Brand', service_name: 'Klaviyo Expert', review: "Working with this team changed our entire retention strategy. As true Klaviyo experts, they didn’t just set up basic email flows — they built an automation engine that keeps revenue compounding week after week.", stars: 5 },
-  { id: 2, name: 'Thomas Poppa', business_name: 'eCommerce Growth Lead', service_name: 'Email + SMS Automation', review: "The communication was exceptional. They cleaned up our segmentation and turned email + SMS into a structured automation system that actually drives repeat purchases.", stars: 5 },
-  { id: 3, name: 'Muhammad Afzaal', business_name: 'Retention Operations', service_name: 'Email Marketing Automation', review: "They were extremely detail-oriented with our retention setup — from behavioral triggers to flow logic. The end result was a cleaner lifecycle system that performs consistently.", stars: 5 },
-  { id: 4, name: 'Marcus Sterling', business_name: 'Lifecycle & CRO', service_name: 'Retention Strategy', review: "Their lifecycle strategy work was transformative. They mapped the journey, found drop-offs we didn’t see, and helped us tighten the funnel with practical CRO improvements.", stars: 5 },
-  { id: 5, name: 'Michael Park', business_name: 'Founder, DTC eCommerce', service_name: 'Platform Migration & Audit', review: "Clean process, strong technical execution, and great communication. The migration/audit work gave us a solid foundation and improved confidence in deliverability and data integrity.", stars: 5 }
-];
+const STATIC_TESTIMONIALS: TestimonialItem[] = reviewsData.testimonials as TestimonialItem[];
+const HOME_SECTION = reviewsData.sections.home;
 
 export const Testimonials: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -48,11 +44,11 @@ export const Testimonials: React.FC = () => {
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-16 md:mb-20">
            <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase mb-6 text-gray-300">
-            TESTIMONIALS
+            {HOME_SECTION.tagline}
            </div>
            
            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-8 tracking-tight max-w-4xl mx-auto">
-             Fueling the next generation of <span className="font-serif italic text-gray-400">eCommerce Leaders.</span>
+             {HOME_SECTION.headlinePrefix} <span className="font-serif italic text-gray-400">{HOME_SECTION.headlineAccent}</span>
            </h2>
 
            <div className="flex flex-col md:flex-row items-center gap-6">
@@ -65,13 +61,13 @@ export const Testimonials: React.FC = () => {
                   ))}
                 </div>
                 <div className="text-left">
-                   <div className="text-white font-bold text-sm leading-none">Join 200+ eCommerce Brands</div>
-                   <div className="text-xs text-gray-500">Trusted by global founders</div>
+                   <div className="text-white font-bold text-sm leading-none">{HOME_SECTION.communityTitle}</div>
+                   <div className="text-xs text-gray-500">{HOME_SECTION.communitySubtitle}</div>
                 </div>
              </div>
              
              <p className="hidden md:block text-gray-500 text-sm max-w-md text-left leading-tight">
-                We don't just "manage" accounts; we architect revenue systems. See why global founders trust us to scale their retention marketing.
+                 {HOME_SECTION.summary}
              </p>
            </div>
         </div>
@@ -81,9 +77,9 @@ export const Testimonials: React.FC = () => {
            
            {/* Stat Block */}
            <div className="md:w-64 shrink-0 sticky top-32 text-center md:text-left mx-auto md:mx-0">
-              <div className="text-5xl md:text-6xl lg:text-7xl font-serif italic text-white mb-2">32.4%</div>
+              <div className="text-5xl md:text-6xl lg:text-7xl font-serif italic text-white mb-2">{HOME_SECTION.statValue}</div>
               <p className="text-gray-500 text-xs md:text-sm leading-relaxed max-w-[220px] mx-auto md:mx-0">
-                Average Revenue Lift from Email &amp; SMS in 120 Days
+                {HOME_SECTION.statLabel}
               </p>
               
               {/* Decoration Line */}

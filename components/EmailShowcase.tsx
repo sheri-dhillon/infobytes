@@ -18,13 +18,13 @@ export const EmailShowcase: React.FC = () => {
     <section className="py-24 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
         <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase mb-6 text-brand-orange">
-            Our Portfolio
+            DESIGN SHOWCASE
         </div>
-        <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-          High-Converting Email Designs
-        </h3>
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+          Designs that do more than look good.
+        </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            Beautiful, responsive, and effective. We craft email templates that get clicked.
+            A curated showcase of high-yield email layouts built to turn every open into a measurable result. Every pixel is designed to drive revenue and reinforce brand identity across Klaviyo and Omnisend.
         </p>
       </div>
       

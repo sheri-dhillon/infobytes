@@ -31,6 +31,7 @@ const CONFIG = {
         title: "Agency",
         links: [
            { label: "Our Story", href: "/about" },
+            { label: "Industry Focus", href: "/industries" },
            { label: "Client Results (Case Studies)", href: "/work" },
            { label: "Pricing Plans", href: "/pricing" },
            { label: "Contact Us", href: "/contact" },
