@@ -2,9 +2,18 @@
 import React, { useRef } from 'react';
 import { Star, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { useTestimonials, Testimonial } from '../hooks/useTestimonials';
-import reviewsData from '../reviews.json';
 
-const HOME_SECTION = reviewsData.sections.home;
+// Static section content
+const HOME_SECTION = {
+  tagline: "TESTIMONIALS",
+  headlinePrefix: "Fueling the next generation of",
+  headlineAccent: "eCommerce Leaders.",
+  communityTitle: "Join 200+ eCommerce Brands",
+  communitySubtitle: "Trusted by global founders",
+  summary: "We don't just \"manage\" accounts; we architect revenue systems. See why global founders trust us to scale their retention marketing.",
+  statValue: "32.4%",
+  statLabel: "Average Revenue Lift from Email & SMS in 120 Days"
+};
 
 export const Testimonials: React.FC = () => {
   const { testimonials, loading } = useTestimonials();

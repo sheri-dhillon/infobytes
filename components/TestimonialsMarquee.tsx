@@ -1,9 +1,13 @@
 import React from 'react';
 import { Star, Quote, Loader2 } from 'lucide-react';
 import { useTestimonials } from '../hooks/useTestimonials';
-import reviewsData from '../reviews.json';
 
-const MARQUEE_SECTION = reviewsData.sections.marquee;
+// Static section content
+const MARQUEE_SECTION = {
+  tagline: "Client Feedback",
+  headline: "Trusted by Founders",
+  subheadline: "See what our partners have to say about working with us to scale their digital presence."
+};
 
 export const TestimonialsMarquee: React.FC = () => {
   const { testimonials, loading } = useTestimonials();

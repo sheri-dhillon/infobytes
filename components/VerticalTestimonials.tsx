@@ -3,9 +3,19 @@ import React from 'react';
 import { Star, Quote, ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTestimonials, Testimonial } from '../hooks/useTestimonials';
-import reviewsData from '../reviews.json';
 
-const VERTICAL_SECTION = reviewsData.sections.vertical;
+// Static section content
+const VERTICAL_SECTION = {
+  tagline: "Client Success",
+  headlineLine1: "We let our work",
+  headlineAccent: "do the talking.",
+  subheadline: "We partner with ambitious brands to build digital products that scale. But don't just take our word for it—hear from the founders and leaders we've worked with.",
+  stat1Value: "96%",
+  stat1Label: "Retention Rate",
+  stat2Value: "200+",
+  stat2Label: "Projects Shipped",
+  ctaLabel: "View all Case Studies"
+};
 
 const TestimonialCard: React.FC<{ data: Testimonial }> = ({ data }) => (
   <div className="bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-brand-purple/30 transition-all duration-300 group hover:shadow-[0_0_30px_rgba(185,109,243,0.1)] relative overflow-hidden">
