@@ -14,10 +14,10 @@ export interface PricingPlan {
   status: 'active' | 'inactive';
 }
 
-// Airtable Configuration
-const AIRTABLE_BASE_ID = 'app4HU1eGrqtRzFen';
+// Airtable Configuration (using environment variables)
+const AIRTABLE_BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID;
 const AIRTABLE_TABLE_NAME = 'Pricing';
-const AIRTABLE_API_TOKEN = 'patUqPTLJ623v59RU.9e2484e36da59837d5b729a33232952183439ec1bfbd9f19afcc1e362fc7e895';
+const AIRTABLE_API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN;
 
 // Cache for pricing plans to avoid multiple API calls
 let cachedPricingPlans: PricingPlan[] | null = null;
