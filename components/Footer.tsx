@@ -35,6 +35,7 @@ const CONFIG = {
            { label: "Client Results (Case Studies)", href: "/work" },
            { label: "Pricing Plans", href: "/pricing" },
            { label: "Contact Us", href: "/contact" },
+           { label: "Careers", href: "/careers" },
            { label: "Privacy Policy", href: "/privacy-policy" }
         ]
       }

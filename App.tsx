@@ -17,6 +17,7 @@ import { BlogPage } from './pages/BlogPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { IndustryLandingPage } from './pages/IndustryLandingPage';
 import { IndustriesPage } from './pages/IndustriesPage';
+import { CareersPage } from './pages/CareersPage';
 
 // Service Pages (Stubs)
 import { EmailAutomationEnginesPage } from './pages/services/EmailAutomationEnginesPage';
@@ -102,6 +103,7 @@ function App() {
             <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
             <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
             <Route path="/privacy-policy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
+            <Route path="/careers" element={<PublicLayout><CareersPage /></PublicLayout>} />
 
             {/* 404 Redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />

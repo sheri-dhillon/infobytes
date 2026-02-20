@@ -16,12 +16,12 @@ interface StatsScrollProps {
 }
 
 const DEFAULT_STATS = [
-    { id: 1, value: "2016", label: "Founded, 8 Years of experience", theme: "orange", x: -30, y: -25, mx: 0, my: -32 },
-    { id: 2, value: "150+", label: "In product launches", theme: "white", x: -12, y: -35, mx: -5, my: -20 },
-    { id: 3, value: "$1.35B", label: "Startup funding raised", theme: "purple", x: 5, y: -5, mx: 5, my: -8 },
-    { id: 4, value: "13K+", label: "Active startups", theme: "white", x: -25, y: 15, mx: -5, my: 8 },
-    { id: 5, value: "254+", label: "Team Members", theme: "orange", x: 30, y: -15, mx: 5, my: 20 },
-    { id: 6, value: "25K+", label: "Funds and syndicates", theme: "purple", x: 20, y: 25, mx: 0, my: 32 }
+    { id: 1, value: "8+", label: "Years Niche Experience", theme: "orange", x: -30, y: -25, mx: 0, my: -32 },
+    { id: 2, value: "450+", label: "Custom Flows Built", theme: "white", x: -12, y: -35, mx: -5, my: -20 },
+    { id: 3, value: "$120M+", label: "Attributed Revenue", theme: "purple", x: 5, y: -5, mx: 5, my: -8 },
+    { id: 4, value: "250+", label: "Retention Audits", theme: "white", x: -25, y: 15, mx: -5, my: 8 },
+    { id: 5, value: "15+", label: "Core Specialists", theme: "orange", x: 30, y: -15, mx: 5, my: 20 },
+    { id: 6, value: "1.2M+", label: "Emails Optimized", theme: "purple", x: 20, y: 25, mx: 0, my: 32 }
 ];
 
 export const StatsScroll: React.FC<StatsScrollProps> = ({ stats = DEFAULT_STATS }) => {

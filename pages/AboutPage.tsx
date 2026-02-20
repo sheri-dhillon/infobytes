@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MousePointer2, Plus, Linkedin } from 'lucide-react';
+import { ArrowUpRight, Linkedin, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HeroHeading } from '../components/ui/HeroHeading';
 import { CultureScroll } from '../components/CultureScroll';
@@ -10,142 +10,139 @@ import { VerticalTestimonials } from '../components/VerticalTestimonials';
 
 const STATIC_CONFIG = {
     hero: {
-        pill: "Design studio for AI, SaaS & tech startups",
-        title_line1: "Good design",
-        title_line2: "makes life better.",
-        description: "We design delightful experiences that make life simpler and more enjoyable. Our team is a collective of creative minds obsessed with quality.",
-        cta_text: "Book 1:1 Meeting",
+        title_line1: "The human engine behind",
+        title_line2: "your brand's retention.",
+        description: "We are a boutique team of strategists, designers, and engineers obsessed with one thing: attributed revenue. At INFOBYTES, we don't just send emails; we architect full-lifecycle ecosystems that turn customer acquisition into long-term compounding growth.",
+        cta_text: "Meet the Strategists",
         cta_link: "https://calendly.com/shehryar-infobytes/30min",
-        secondary_text: "Got an idea? Let's shape it."
     },
     team: [
-        { name: "Ali-Dah", role: "Design Lead", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&q=80", span: "col-span-1" },
-        { name: "Schuith", role: "Tech Lead", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&q=80", span: "col-span-1" },
-        { name: "Ben", role: "Strategy", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&q=80", span: "col-span-1" },
-        { name: "Ollie", role: "Creative Dir.", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&h=800&fit=crop&q=80", span: "col-span-2 row-span-2" },
-        { name: "You?", role: "Join the Team", image: "", span: "col-span-1", isHiring: true }
+        { name: "Ali-Dah", role: "Lead Lifecycle Designer", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&q=80", linkedin: "https://linkedin.com/in/" },
+        { name: "Schuith", role: "Technical Solutions Architect", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&q=80", linkedin: "https://linkedin.com/in/" },
+        { name: "Ben", role: "Head of Retention Strategy", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&q=80", linkedin: "https://linkedin.com/in/" },
+        { name: "Ollie", role: "Creative Director", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&h=800&fit=crop&q=80", linkedin: "https://linkedin.com/in/" },
     ],
     impact: {
-        label: "We're a product design & AI studio built for real-world impact.",
-        content: "We help teams design smarter, scale faster, and deliver better digital experiences — without the fluff. Clarity, speed, and long-term value. Whether you're building your first MVP or optimizing a complex SaaS, our work wraps around your business goals — not the other way around."
+        label: "We are a high-performance CRM & Retention engine built for eCommerce scale.",
+        content: "We help brands grow smarter, retain longer, and extract more value from every customer — without the fluff. Data, strategy, and attributed revenue. Whether you're scaling a 7-figure D2C brand or optimizing a global enterprise lifecycle, our framework wraps around your growth goals — not the other way around."
     },
     culture_images: [
-      "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&w=800&q=80", // Skincare products premium
+      "https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=800&q=80", // Business strategy meeting
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80", // E-commerce packaging
+      "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=800&q=80", // Woman working on laptop data
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", // Premium product shoe
+      "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800&q=80", // Team at whiteboard
     ],
     stats: [
-      { id: 1, value: "2016", label: "Founded, 8 Years of experience", theme: "orange", x: -30, y: -25, mx: 0, my: -32 },
-      { id: 2, value: "150+", label: "In product launches", theme: "white", x: -12, y: -35, mx: -5, my: -20 },
-      { id: 3, value: "$1.35B", label: "Startup funding raised", theme: "purple", x: 5, y: -5, mx: 5, my: -8 },
-      { id: 4, value: "13K+", label: "Active startups", theme: "white", x: -25, y: 15, mx: -5, my: 8 },
-      { id: 5, value: "254+", label: "Team Members", theme: "orange", x: 30, y: -15, mx: 5, my: 20 },
-      { id: 6, value: "25K+", label: "Funds and syndicates", theme: "purple", x: 20, y: 25, mx: 0, "my": 32 }
+      { id: 1, value: "8+", label: "Years Niche Experience", theme: "orange", x: -30, y: -25, mx: 0, my: -32 },
+      { id: 2, value: "450+", label: "Custom Flows Built", theme: "white", x: -12, y: -35, mx: -5, my: -20 },
+      { id: 3, value: "$120M+", label: "Attributed Revenue", theme: "purple", x: 5, y: -5, mx: 5, my: -8 },
+      { id: 4, value: "250+", label: "Retention Audits", theme: "white", x: -25, y: 15, mx: -5, my: 8 },
+      { id: 5, value: "15+", label: "Core Specialists", theme: "orange", x: 30, y: -15, mx: 5, my: 20 },
+      { id: 6, value: "1.2M+", label: "Emails Optimized", theme: "purple", x: 20, y: 25, mx: 0, my: 32 }
     ]
 };
 
 export const AboutPage: React.FC = () => {
   return (
     <>
-    <div className="bg-black min-h-screen pt-32 pb-20 relative overflow-hidden flex flex-col justify-center">
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-purple/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-orange/5 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
+    {/* Hero Section - Centered Professional Layout */}
+    <section className="relative min-h-[100dvh] w-full flex flex-col bg-brand-dark overflow-hidden">
+      
+      {/* Background Fluid Gradient */}
+      <div className="absolute top-[-10%] right-[-10%] w-[90vw] md:w-[60vw] h-[60vh] md:h-[100vh] bg-gradient-to-bl from-blue-500 via-purple-600 to-transparent opacity-40 blur-[80px] md:blur-[120px] rounded-full pointer-events-none mix-blend-screen animate-pulse duration-[5000ms]" />
+      <div className="absolute bottom-0 left-0 w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] bg-purple-900/20 blur-[100px] md:blur-[150px] rounded-full pointer-events-none" />
 
-       <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
-          {/* Left Content */}
-          <div className="flex flex-col items-start lg:pr-6 sticky top-32">
-             <div className="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1.5 mb-8 bg-white/5 backdrop-blur-sm animate-fade-in">
-                <Plus className="w-3 h-3 text-brand-orange" />
-                <span className="text-xs font-bold tracking-wide text-gray-300 uppercase">{STATIC_CONFIG.hero.pill}</span>
-             </div>
-             
-                   <HeroHeading
-                      pre={STATIC_CONFIG.hero.title_line1}
-                      main={STATIC_CONFIG.hero.title_line2}
-                      className="mb-6 animate-slide-up-fade"
-                   />
-             
-             <p className="text-gray-400 text-lg md:text-xl max-w-lg mb-12 leading-relaxed animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
-                {STATIC_CONFIG.hero.description}
-             </p>
-             
-             <div className="flex flex-col sm:flex-row items-center gap-8 animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
-                <a 
-                  href={STATIC_CONFIG.hero.cta_link} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="px-8 py-4 bg-white text-black rounded-full font-bold text-base hover:bg-gray-200 transition-transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                >
-                   {STATIC_CONFIG.hero.cta_text}
-                </a>
+      {/* Main Content */}
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-8 flex flex-col flex-grow justify-center pt-40 md:pt-52 pb-16">
+
+        {/* Hero Heading - Centered */}
+        <div className="w-full max-w-[56rem] lg:max-w-[62rem] mx-auto text-center">
+          <HeroHeading
+            pre={STATIC_CONFIG.hero.title_line1}
+            main={STATIC_CONFIG.hero.title_line2}
+            align="center"
+            className="mb-6 animate-slide-up-fade"
+          />
+        </div>
+
+        {/* Description */}
+        <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto text-center mb-10 leading-relaxed animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
+          {STATIC_CONFIG.hero.description}
+        </p>
+
+        {/* CTA Button - Matching Home Page Style */}
+        <div className="w-full flex justify-center mb-16 md:mb-20 relative z-30 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <a
+            href={STATIC_CONFIG.hero.cta_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative px-5 py-2.5 md:px-7 md:py-3.5 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-full flex items-center gap-3 md:gap-4 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,107,74,0.3)] hover:shadow-[0_0_40px_rgba(185,109,243,0.4)]"
+          >
+            <span className="font-bold text-sm md:text-base">{STATIC_CONFIG.hero.cta_text}</span>
+            <div className="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full flex items-center justify-center transition-transform group-hover:rotate-45">
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-black" />
+            </div>
+          </a>
+        </div>
+
+        {/* Team Grid - Clean Horizontal Layout */}
+        <div className="w-full max-w-5xl mx-auto animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-5">
+            {STATIC_CONFIG.team.map((member: any, idx: number) => (
+              <div 
+                key={idx} 
+                className="relative group overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-[#1a1a1a] aspect-[3/4]"
+              >
+                <img 
+                  src={member.image} 
+                  alt={member.name} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0 opacity-90 group-hover:opacity-100" 
+                />
                 
-                <div className="flex items-center gap-3 text-white group cursor-pointer">
-                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-orange transition-colors border border-white/5">
-                      <MousePointer2 className="w-5 h-5" />
-                   </div>
-                   <span className="font-medium text-sm md:text-base">{STATIC_CONFIG.hero.secondary_text}</span>
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+                {/* Name & Role */}
+                <div className="absolute bottom-4 left-4 z-20">
+                  <h3 className="text-white font-bold text-sm md:text-base">{member.name}</h3>
+                  <p className="text-gray-400 text-xs md:text-sm">{member.role}</p>
                 </div>
-             </div>
-          </div>
 
-          {/* Right Grid - The Gallery */}
-          <div className="grid grid-cols-3 gap-3 auto-rows-min animate-fade-in" style={{ animationDelay: '300ms' }}>
-             {STATIC_CONFIG.team.map((member: any, idx: number) => (
-                member.isHiring ? (
-                  // Hiring Card
-                  <Link 
-                    key={idx}
-                    to="/contact"
-                    className={`relative group overflow-hidden rounded-3xl border border-white/10 bg-[#111] ${member.span} aspect-square flex flex-col items-center justify-center hover:bg-[#161616] transition-colors cursor-pointer`}
+                {/* LinkedIn Icon - Bottom Right on Hover */}
+                {member.linkedin && (
+                  <a 
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-4 right-4 w-9 h-9 bg-white rounded-full flex items-center justify-center translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:scale-110 shadow-lg z-30"
                   >
-                     <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform group-hover:border-brand-orange">
-                        <Plus className="w-5 h-5 text-gray-400 group-hover:text-brand-orange transition-colors" />
-                     </div>
-                     <span className="text-white font-bold text-sm">Join Us</span>
-                     <span className="text-gray-500 text-xs mt-1">We are hiring</span>
-                  </Link>
-                ) : (
-                  // Team Member Card
-                  <div 
-                    key={idx} 
-                    className={`relative group overflow-hidden rounded-3xl border border-white/10 bg-[#1a1a1a] ${member.span} ${member.span && member.span.includes('row-span-2') ? 'aspect-square' : 'aspect-square'}`}
-                  >
-                     <img 
-                        src={member.image} 
-                        alt={member.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0 opacity-90 group-hover:opacity-100" 
-                     />
-                     
-                     {/* Overlay Gradient (Subtle) for readability of text always present */}
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+                    <Linkedin className="w-4 h-4 text-[#0A66C2]" />
+                  </a>
+                )}
+              </div>
+            ))}
 
-                     {/* Bottom Blur Overlay (On Hover) */}
-                     <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent backdrop-blur-[4px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
-                     
-                     {/* LinkedIn Overlay - Bottom Right */}
-                     {member.linkedin && (
-                       <a 
-                         href={member.linkedin}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="absolute bottom-3 right-3 md:bottom-4 md:right-4 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center shadow-xl translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-30 hover:bg-gray-200 hover:scale-110"
-                       >
-                          <Linkedin className="w-3.5 h-3.5 md:w-4 md:h-4 text-black" />
-                       </a>
-                     )}
-
-                     {/* Pill Label */}
-                     <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 px-3 py-1.5 md:px-4 md:py-2 bg-[#1a1a1a] rounded-full flex items-center gap-2.5 shadow-lg border border-white/5 transition-transform duration-300 group-hover:translate-y-[-2px] z-30">
-                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
-                        <span className="text-[10px] md:text-xs font-bold text-white tracking-wide">{member.name}</span>
-                     </div>
-                  </div>
-                )
-             ))}
+            {/* Hiring Card */}
+            <Link 
+              to="/careers"
+              className="relative group overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-[#111] aspect-[3/4] flex flex-col items-center justify-center hover:bg-[#161616] hover:border-white/20 transition-all cursor-pointer"
+            >
+              <div className="w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-brand-orange transition-all duration-300">
+                <Plus className="w-6 h-6 text-gray-400 group-hover:text-brand-orange transition-colors" />
+              </div>
+              <span className="text-white font-bold text-base mb-1">Join Us</span>
+              <span className="text-gray-500 text-xs">We're hiring</span>
+              <div className="absolute bottom-4 left-4 right-4 flex justify-center">
+                <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-[10px] font-medium">Open Positions</span>
+              </div>
+            </Link>
           </div>
-       </div>
-    </div>
+        </div>
+
+      </div>
+    </section>
     
     {/* Impact Statement Section */}
     <section className="bg-black py-20 md:py-32 px-6">
@@ -171,6 +168,48 @@ export const AboutPage: React.FC = () => {
 
     {/* Vertical Testimonials Section */}
     <VerticalTestimonials />
+
+    {/* Organization & Person Schema for SEO */}
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "INFOBYTES",
+          "url": "https://infobytes.io",
+          "logo": "https://infobytes.io/logo.png",
+          "description": "A boutique retention marketing agency specializing in eCommerce email, SMS, and lifecycle strategy.",
+          "sameAs": [
+            "https://linkedin.com/company/infobytes",
+            "https://instagram.com/infobytes.io",
+            "https://twitter.com/infobytes"
+          ],
+          "employee": [
+            {
+              "@type": "Person",
+              "name": "Ben",
+              "jobTitle": "Head of Retention Strategy"
+            },
+            {
+              "@type": "Person",
+              "name": "Ali-Dah",
+              "jobTitle": "Lead Lifecycle Designer"
+            },
+            {
+              "@type": "Person",
+              "name": "Schuith",
+              "jobTitle": "Technical Solutions Architect"
+            },
+            {
+              "@type": "Person",
+              "name": "Ollie",
+              "jobTitle": "Creative Director"
+            }
+          ]
+        })
+      }}
+    />
     </>
   );
 };

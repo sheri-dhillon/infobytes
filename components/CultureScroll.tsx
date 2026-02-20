@@ -6,24 +6,29 @@ interface CultureScrollProps {
     images?: string[];
 }
 
-const DEFAULT_IMAGES = [
-  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+// Row 1: 6 unique images - D2C products and lifestyle
+const ROW1_IMAGES = [
+  "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80", // Luxury cosmetics flatlay
+  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80", // Premium product watch
+  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", // Nike shoe product
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80", // Headphones product
+  "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80", // Polaroid camera product
+  "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80", // Sunglasses product
+];
+
+// Row 2: 5 unique images - Data, strategy, team
+const ROW2_IMAGES = [
+  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", // Data analytics dashboard
+  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80", // Marketing metrics screen
+  "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80", // Team collaboration office
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80", // Strategy whiteboard session
+  "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=800&q=80", // Woman analyzing data laptop
 ];
 
 export const CultureScroll: React.FC<CultureScrollProps> = ({ images = [] }) => {
-  // Ensure we have enough images to loop nicely, fallback to defaults
-  const displayImages = images.length > 0 ? images : DEFAULT_IMAGES;
-  
-  // Split images for row 1 and row 2 visual variance
-  const row1Images = displayImages.slice(0, Math.ceil(displayImages.length / 2));
-  const row2Images = displayImages.slice(Math.ceil(displayImages.length / 2));
-
-  // If too few images, repeat them to fill marquee
-  const finalRow1 = row1Images.length < 4 ? [...row1Images, ...row1Images, ...row1Images] : row1Images;
-  const finalRow2 = row2Images.length < 3 ? [...row2Images, ...row2Images, ...row2Images] : row2Images;
+  // Use dedicated row images
+  const finalRow1 = ROW1_IMAGES;
+  const finalRow2 = ROW2_IMAGES;
 
   return (
     <section className="py-20 bg-black overflow-hidden flex flex-col gap-6 md:gap-8">
@@ -55,13 +60,13 @@ export const CultureScroll: React.FC<CultureScrollProps> = ({ images = [] }) => 
                         <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6">
                             <Activity className="text-white w-6 h-6" />
                         </div>
-                        <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-                            We are a collective of thinkers, builders, and storytellers obsessed.
+                        <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                            A collective of retention architects, data engineers, and direct-response creatives obsessed with ROI.
                         </h3>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400 text-sm font-mono uppercase tracking-widest">
                           <span className="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></span>
-                          Global Team
+                          eCommerce Specialists
                       </div>
                   </div>
 
@@ -71,12 +76,12 @@ export const CultureScroll: React.FC<CultureScrollProps> = ({ images = [] }) => 
                           <div>
                               <div className="flex items-center gap-2 mb-2 opacity-90">
                                   <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-                                  <span className="text-xs font-bold uppercase tracking-wider">Performance</span>
+                                  <span className="text-xs font-bold uppercase tracking-wider">Lifecycle Performance</span>
                               </div>
-                              <h3 className="text-5xl md:text-6xl font-bold tracking-tighter mb-1">4.1M+</h3>
-                              <p className="font-medium text-lg opacity-90">Ad Impressions</p>
+                              <h3 className="text-5xl md:text-6xl font-bold tracking-tighter mb-1">$12.4M+</h3>
+                              <p className="font-medium text-lg opacity-90">Revenue Attributed</p>
                           </div>
-                          <Link to="/contact" className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg cursor-pointer">
+                          <Link to="/work" className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg cursor-pointer">
                               <ArrowUpRight className="w-5 h-5 text-black" />
                           </Link>
                       </div>
@@ -85,29 +90,29 @@ export const CultureScroll: React.FC<CultureScrollProps> = ({ images = [] }) => 
                       <div className="grid grid-cols-2 gap-4 mt-6">
                           <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors">
                              <div className="flex items-center gap-2 mb-2">
-                                <MousePointer2 className="w-4 h-4 opacity-80" />
-                                <span className="text-xs font-bold uppercase opacity-80">CTR</span>
-                             </div>
-                             <div className="text-2xl font-bold">+45%</div>
-                          </div>
-                          <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors">
-                             <div className="flex items-center gap-2 mb-2">
-                                <DollarSign className="w-4 h-4 opacity-80" />
-                                <span className="text-xs font-bold uppercase opacity-80">Revenue</span>
-                             </div>
-                             <div className="text-2xl font-bold">$2.4M</div>
-                          </div>
-                          <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors">
-                             <div className="flex items-center gap-2 mb-2">
                                 <TrendingUp className="w-4 h-4 opacity-80" />
-                                <span className="text-xs font-bold uppercase opacity-80">Conv. Rate</span>
+                                <span className="text-xs font-bold uppercase opacity-80">Avg. LTV Lift</span>
                              </div>
-                             <div className="text-2xl font-bold">+12%</div>
+                             <div className="text-2xl font-bold">+38%</div>
                           </div>
-                          <div className="bg-black text-white rounded-2xl p-4 flex items-center justify-between cursor-pointer group/btn hover:bg-gray-900 transition-colors shadow-lg">
-                              <span className="font-bold text-sm">Let's Talk</span>
+                          <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors">
+                             <div className="flex items-center gap-2 mb-2">
+                                <Percent className="w-4 h-4 opacity-80" />
+                                <span className="text-xs font-bold uppercase opacity-80">Email Revenue</span>
+                             </div>
+                             <div className="text-2xl font-bold">42%</div>
+                          </div>
+                          <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 hover:bg-white/20 transition-colors">
+                             <div className="flex items-center gap-2 mb-2">
+                                <Activity className="w-4 h-4 opacity-80" />
+                                <span className="text-xs font-bold uppercase opacity-80">Churn Reduction</span>
+                             </div>
+                             <div className="text-2xl font-bold">-15%</div>
+                          </div>
+                          <Link to="/work" className="bg-black text-white rounded-2xl p-4 flex items-center justify-between cursor-pointer group/btn hover:bg-gray-900 transition-colors shadow-lg">
+                              <span className="font-bold text-sm">View Case Studies</span>
                               <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                          </div>
+                          </Link>
                       </div>
                   </div>
 
