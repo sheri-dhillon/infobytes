@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2 } from 'lucide-react';
+import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2, DollarSign, Globe, Award } from 'lucide-react';
 import { HeroHeading } from '../components/ui/HeroHeading';
 import { Link } from 'react-router-dom';
 
@@ -12,6 +12,9 @@ interface JobOpening {
   department: string;
   description: string;
   status: 'active' | 'inactive';
+  salary_range: string;
+  timezone: string;
+  experience: string;
 }
 
 // Airtable Configuration
@@ -51,6 +54,9 @@ const fetchJobs = async (): Promise<JobOpening[]> => {
       department: record.fields.department || '',
       description: record.fields.description || '',
       status: (record.fields.status || 'inactive').toLowerCase() as 'active' | 'inactive',
+      salary_range: record.fields.salary_range || '',
+      timezone: record.fields.timezone || '',
+      experience: record.fields.experience || '',
     })).filter((job: JobOpening) => job.title);
     
     console.log('Parsed jobs:', jobs);
@@ -222,7 +228,7 @@ export const CareersPage: React.FC = () => {
                         <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">Hiring</span>
                       </div>
                       <p className="text-gray-400 text-sm mb-3">{job.description}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500">
                         <span className="flex items-center gap-1.5">
                           <Briefcase className="w-4 h-4" />
                           {job.type}
@@ -231,6 +237,24 @@ export const CareersPage: React.FC = () => {
                           <MapPin className="w-4 h-4" />
                           {job.location}
                         </span>
+                        {job.salary_range && (
+                          <span className="flex items-center gap-1.5">
+                            <DollarSign className="w-4 h-4" />
+                            {job.salary_range}
+                          </span>
+                        )}
+                        {job.timezone && (
+                          <span className="flex items-center gap-1.5">
+                            <Globe className="w-4 h-4" />
+                            {job.timezone}
+                          </span>
+                        )}
+                        {job.experience && (
+                          <span className="flex items-center gap-1.5">
+                            <Award className="w-4 h-4" />
+                            {job.experience}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-brand-orange group-hover:border-brand-orange transition-all flex-shrink-0">
@@ -251,7 +275,7 @@ export const CareersPage: React.FC = () => {
                         <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-400/70 text-xs font-medium">Closed</span>
                       </div>
                       <p className="text-gray-600 text-sm mb-3">{job.description}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600">
                         <span className="flex items-center gap-1.5">
                           <Briefcase className="w-4 h-4" />
                           {job.type}
@@ -260,6 +284,24 @@ export const CareersPage: React.FC = () => {
                           <MapPin className="w-4 h-4" />
                           {job.location}
                         </span>
+                        {job.salary_range && (
+                          <span className="flex items-center gap-1.5">
+                            <DollarSign className="w-4 h-4" />
+                            {job.salary_range}
+                          </span>
+                        )}
+                        {job.timezone && (
+                          <span className="flex items-center gap-1.5">
+                            <Globe className="w-4 h-4" />
+                            {job.timezone}
+                          </span>
+                        )}
+                        {job.experience && (
+                          <span className="flex items-center gap-1.5">
+                            <Award className="w-4 h-4" />
+                            {job.experience}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center flex-shrink-0">
