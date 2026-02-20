@@ -17,27 +17,38 @@ interface JobOpening {
   experience: string;
 }
 
+// Airtable Configuration
+const AIRTABLE_BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID;
+const AIRTABLE_API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN;
+
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + '...';
 };
 
-// Function to fetch jobs from server API (proxied to Airtable)
+// Function to fetch jobs from Airtable
 const fetchJobs = async (): Promise<JobOpening[]> => {
-  console.log('Fetching jobs from server API...');
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Careers`;
+  
+  console.log('Fetching jobs from Airtable...');
   
   try {
-    const response = await fetch('/api/careers');
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${AIRTABLE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API error:', response.status, errorText);
-      throw new Error(`API error: ${response.status}`);
+      console.error('Airtable API error:', response.status, errorText);
+      throw new Error(`Airtable API error: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('API response:', data);
+    console.log('Airtable response:', data);
     
     // Map Airtable records to JobOpening format
     const jobs = (data.records || []).map((record: any, index: number) => ({

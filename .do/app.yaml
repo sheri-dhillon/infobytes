@@ -1,0 +1,15 @@
+name: infobytes
+static_sites:
+  - name: web
+    github:
+      branch: main
+      deploy_on_push: true
+    build_command: npm run build
+    output_dir: dist
+    catchall_document: index.html
+    environment_slug: node-js
+    envs:
+      - key: VITE_AIRTABLE_BASE_ID
+        value: app4HU1eGrqtRzFen
+      - key: VITE_AIRTABLE_API_TOKEN
+        value: "${VITE_AIRTABLE_API_TOKEN}"
