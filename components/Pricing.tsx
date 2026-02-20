@@ -1,25 +1,20 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
-import pricingData from '../pricing.json';
+import { Check, Loader2 } from 'lucide-react';
+import { usePricing, PricingPlan } from '../hooks/usePricing';
 
-interface Plan {
-    id: string;
-    name: string;
-    tagline: string;
-    description: string;
-    price: string;
-    frequency: string;
-    isCustom: boolean;
-    customStartingAt?: string;
-    features: string[];
-    highlight: boolean;
-}
-
-const STATIC_PLANS: Plan[] = pricingData.plans as Plan[];
-const PRICING_SECTION = pricingData.section;
+// Static section content (can be moved to Airtable later if needed)
+const PRICING_SECTION = {
+  tagline: "Transparent Pricing",
+  headlinePrefix: "Invest in",
+  headlineAccent: "Revenue Growth.",
+  subheadline: "Clear, value-focused retainer packages designed to maximize your ROI. No hidden fees, just predictable growth.",
+  ctaLabel: "Get Started"
+};
 
 export const Pricing: React.FC = () => {
+  const { plans, loading, error } = usePricing();
+
   return (
     <section className="py-24 md:py-32 bg-[#050505] relative overflow-hidden" id="pricing">
       {/* Background Mesh Gradient */}
@@ -38,32 +33,57 @@ export const Pricing: React.FC = () => {
           </p>
         </div>
 
-        <div className={`grid gap-8 items-stretch ${STATIC_PLANS.length === 1 ? 'max-w-md mx-auto' : STATIC_PLANS.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-           {STATIC_PLANS.map((plan, idx) => (
-             <div key={idx} className="h-full">
-               {plan.highlight ? (
-                 // Highlighted Card with Gradient Border Wrapper
-                 <div className="h-full relative p-[1px] rounded-[2rem] bg-gradient-to-b from-brand-orange to-brand-purple shadow-[0_0_40px_rgba(185,109,243,0.15)] transition-transform duration-300 hover:scale-[1.01]">
-                    <div className="h-full flex flex-col p-8 md:p-10 rounded-[2rem] bg-[#080808]/90 backdrop-blur-xl relative overflow-hidden">
-                       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-brand-orange animate-spin mb-4" />
+            <p className="text-gray-400">Loading pricing plans...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-20">
+            <p className="text-gray-400">{error}</p>
+          </div>
+        )}
+
+        {/* Plans Grid */}
+        {!loading && !error && plans.length > 0 && (
+          <div className={`grid gap-8 items-stretch ${plans.length === 1 ? 'max-w-md mx-auto' : plans.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+             {plans.map((plan, idx) => (
+               <div key={plan.id || idx} className="h-full">
+                 {plan.highlight ? (
+                   // Highlighted Card with Gradient Border Wrapper
+                   <div className="h-full relative p-[1px] rounded-[2rem] bg-gradient-to-b from-brand-orange to-brand-purple shadow-[0_0_40px_rgba(185,109,243,0.15)] transition-transform duration-300 hover:scale-[1.01]">
+                      <div className="h-full flex flex-col p-8 md:p-10 rounded-[2rem] bg-[#080808]/90 backdrop-blur-xl relative overflow-hidden">
+                         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                          <CardContent plan={plan} ctaLabel={PRICING_SECTION.ctaLabel} />
+                      </div>
+                   </div>
+                 ) : (
+                   // Standard Glass Card
+                   <div className="h-full flex flex-col p-8 md:p-10 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-300 backdrop-blur-md">
                         <CardContent plan={plan} ctaLabel={PRICING_SECTION.ctaLabel} />
-                    </div>
-                 </div>
-               ) : (
-                 // Standard Glass Card
-                 <div className="h-full flex flex-col p-8 md:p-10 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-300 backdrop-blur-md">
-                      <CardContent plan={plan} ctaLabel={PRICING_SECTION.ctaLabel} />
-                 </div>
-               )}
-             </div>
-           ))}
-        </div>
+                   </div>
+                 )}
+               </div>
+             ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && plans.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-gray-400">No pricing plans available at the moment.</p>
+          </div>
+        )}
       </div>
     </section>
   );
 };
 
-const CardContent: React.FC<{ plan: Plan; ctaLabel: string }> = ({ plan, ctaLabel }) => (
+const CardContent: React.FC<{ plan: PricingPlan; ctaLabel: string }> = ({ plan, ctaLabel }) => (
   <>
     <div className="mb-8">
         <div className={`text-xs font-bold tracking-wider uppercase mb-3 ${plan.highlight ? 'text-brand-orange' : 'text-gray-500'}`}>

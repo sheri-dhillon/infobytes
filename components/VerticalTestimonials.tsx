@@ -1,27 +1,13 @@
 
 import React from 'react';
-import { Star, Quote, ArrowRight } from 'lucide-react';
+import { Star, Quote, ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTestimonials, Testimonial } from '../hooks/useTestimonials';
 import reviewsData from '../reviews.json';
 
-interface TestimonialItem {
-    id: number;
-    name: string;
-    business_name: string;
-    review: string;
-    stars: number;
-}
-
-const STATIC_DATA: TestimonialItem[] = reviewsData.testimonials.map((item) => ({
-    id: item.id,
-    name: item.name,
-    business_name: item.business_name,
-    review: item.review,
-    stars: item.stars,
-}));
 const VERTICAL_SECTION = reviewsData.sections.vertical;
 
-const TestimonialCard: React.FC<{ data: TestimonialItem }> = ({ data }) => (
+const TestimonialCard: React.FC<{ data: Testimonial }> = ({ data }) => (
   <div className="bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-brand-purple/30 transition-all duration-300 group hover:shadow-[0_0_30px_rgba(185,109,243,0.1)] relative overflow-hidden">
      <Quote className="absolute top-4 right-4 w-12 h-12 text-white/[0.03] group-hover:text-brand-purple/10 transition-colors rotate-180" />
      
@@ -45,9 +31,11 @@ const TestimonialCard: React.FC<{ data: TestimonialItem }> = ({ data }) => (
 );
 
 export const VerticalTestimonials: React.FC = () => {
-  const half = Math.ceil(STATIC_DATA.length / 2);
-  const column1 = STATIC_DATA.slice(0, half);
-  const column2 = STATIC_DATA.slice(half);
+  const { testimonials, loading } = useTestimonials();
+  
+  const half = Math.ceil(testimonials.length / 2);
+  const column1 = testimonials.slice(0, half);
+  const column2 = testimonials.slice(half);
 
   return (
     <section className="py-24 bg-black relative border-t border-white/5 overflow-hidden">
@@ -97,21 +85,27 @@ export const VerticalTestimonials: React.FC = () => {
             <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
             <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                {/* Column 1: Scrolls Up */}
-                <div className="flex flex-col gap-6 animate-scroll-up">
-                    {[...column1, ...column1, ...column1].map((item, idx) => (
-                        <TestimonialCard key={`c1-${idx}`} data={item} />
-                    ))}
-                </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-8 h-8 text-brand-orange animate-spin" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                  {/* Column 1: Scrolls Up */}
+                  <div className="flex flex-col gap-6 animate-scroll-up">
+                      {[...column1, ...column1, ...column1].map((item, idx) => (
+                          <TestimonialCard key={`c1-${idx}`} data={item} />
+                      ))}
+                  </div>
 
-                {/* Column 2: Scrolls Down */}
-                <div className="hidden md:flex flex-col gap-6 animate-scroll-down">
-                    {[...column2, ...column2, ...column2].map((item, idx) => (
-                        <TestimonialCard key={`c2-${idx}`} data={item} />
-                    ))}
-                </div>
-            </div>
+                  {/* Column 2: Scrolls Down */}
+                  <div className="hidden md:flex flex-col gap-6 animate-scroll-down">
+                      {[...column2, ...column2, ...column2].map((item, idx) => (
+                          <TestimonialCard key={`c2-${idx}`} data={item} />
+                      ))}
+                  </div>
+              </div>
+            )}
         </div>
 
       </div>

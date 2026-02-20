@@ -1,21 +1,13 @@
 
 import React, { useRef } from 'react';
-import { Star, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Star, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { useTestimonials, Testimonial } from '../hooks/useTestimonials';
 import reviewsData from '../reviews.json';
 
-interface TestimonialItem {
-    id: number;
-    name: string;
-    business_name: string;
-    service_name: string;
-    review: string;
-    stars: number;
-}
-
-const STATIC_TESTIMONIALS: TestimonialItem[] = reviewsData.testimonials as TestimonialItem[];
 const HOME_SECTION = reviewsData.sections.home;
 
 export const Testimonials: React.FC = () => {
+  const { testimonials, loading } = useTestimonials();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -94,7 +86,11 @@ export const Testimonials: React.FC = () => {
                 className="flex gap-6 overflow-x-auto pb-4 snap-x [&::-webkit-scrollbar]:hidden"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {STATIC_TESTIMONIALS.map((t, i) => (
+                {loading ? (
+                  <div className="flex items-center justify-center w-full py-16">
+                    <Loader2 className="w-8 h-8 text-brand-orange animate-spin" />
+                  </div>
+                ) : testimonials.map((t, i) => (
                   <div 
                     key={t.id || i} 
                     className="min-w-[300px] md:min-w-[380px] lg:min-w-[420px] bg-[#0a0a0a] border border-white/10 p-6 md:p-8 rounded-3xl snap-center group hover:border-white/20 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[360px]"

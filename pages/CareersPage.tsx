@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2, DollarSign, Globe, Award } from 'lucide-react';
+import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2, DollarSign, Globe, Award, X } from 'lucide-react';
 import { HeroHeading } from '../components/ui/HeroHeading';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface JobOpening {
   id: number;
@@ -21,6 +21,12 @@ interface JobOpening {
 const AIRTABLE_BASE_ID = 'app4HU1eGrqtRzFen';
 const AIRTABLE_TABLE_NAME = 'Careers';
 const AIRTABLE_API_TOKEN = 'patUqPTLJ623v59RU.9e2484e36da59837d5b729a33232952183439ec1bfbd9f19afcc1e362fc7e895';
+
+// Helper function to truncate text
+const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trim() + '...';
+};
 
 // Function to fetch jobs from Airtable
 const fetchJobs = async (): Promise<JobOpening[]> => {
@@ -95,6 +101,26 @@ const STATIC_CONFIG = {
 export const CareersPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobOpening[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const openModal = (job: JobOpening) => {
+    setSelectedJob(job);
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    document.body.style.overflow = 'unset';
+    setTimeout(() => setSelectedJob(null), 300);
+  };
+
+  const handleApply = () => {
+    closeModal();
+    navigate('/contact');
+  };
 
   useEffect(() => {
     const loadJobs = async () => {
@@ -215,10 +241,10 @@ export const CareersPage: React.FC = () => {
               const isActive = job.status === 'active';
               
               return isActive ? (
-                <a
+                <button
                   key={job.id}
-                  href={`mailto:careers@infobytes.io?subject=Application for ${job.title}`}
-                  className="group p-6 md:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 transition-all"
+                  onClick={() => openModal(job)}
+                  className="group p-6 md:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 transition-all text-left w-full"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
@@ -227,7 +253,7 @@ export const CareersPage: React.FC = () => {
                         <span className="px-3 py-1 rounded-full bg-brand-purple/20 text-brand-purple text-xs font-medium">{job.department}</span>
                         <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">Hiring</span>
                       </div>
-                      <p className="text-gray-400 text-sm mb-3">{job.description}</p>
+                      <p className="text-gray-400 text-sm mb-3">{truncateText(job.description, 250)}</p>
                       <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500">
                         <span className="flex items-center gap-1.5">
                           <Briefcase className="w-4 h-4" />
@@ -237,18 +263,6 @@ export const CareersPage: React.FC = () => {
                           <MapPin className="w-4 h-4" />
                           {job.location}
                         </span>
-                        {job.salary_range && (
-                          <span className="flex items-center gap-1.5">
-                            <DollarSign className="w-4 h-4" />
-                            {job.salary_range}
-                          </span>
-                        )}
-                        {job.timezone && (
-                          <span className="flex items-center gap-1.5">
-                            <Globe className="w-4 h-4" />
-                            {job.timezone}
-                          </span>
-                        )}
                         {job.experience && (
                           <span className="flex items-center gap-1.5">
                             <Award className="w-4 h-4" />
@@ -261,7 +275,7 @@ export const CareersPage: React.FC = () => {
                       <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                     </div>
                   </div>
-                </a>
+                </button>
               ) : (
                 <div
                   key={job.id}
@@ -274,7 +288,7 @@ export const CareersPage: React.FC = () => {
                         <span className="px-3 py-1 rounded-full bg-gray-800 text-gray-500 text-xs font-medium">{job.department}</span>
                         <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-400/70 text-xs font-medium">Closed</span>
                       </div>
-                      <p className="text-gray-600 text-sm mb-3">{job.description}</p>
+                      <p className="text-gray-600 text-sm mb-3">{truncateText(job.description, 250)}</p>
                       <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600">
                         <span className="flex items-center gap-1.5">
                           <Briefcase className="w-4 h-4" />
@@ -284,18 +298,6 @@ export const CareersPage: React.FC = () => {
                           <MapPin className="w-4 h-4" />
                           {job.location}
                         </span>
-                        {job.salary_range && (
-                          <span className="flex items-center gap-1.5">
-                            <DollarSign className="w-4 h-4" />
-                            {job.salary_range}
-                          </span>
-                        )}
-                        {job.timezone && (
-                          <span className="flex items-center gap-1.5">
-                            <Globe className="w-4 h-4" />
-                            {job.timezone}
-                          </span>
-                        )}
                         {job.experience && (
                           <span className="flex items-center gap-1.5">
                             <Award className="w-4 h-4" />
@@ -328,6 +330,117 @@ export const CareersPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Job Details Modal */}
+      <div 
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+          isModalOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        }`}
+      >
+        {/* Backdrop */}
+        <div 
+          className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${
+            isModalOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={closeModal}
+        />
+        
+        {/* Modal Content */}
+        <div 
+          className={`relative w-full max-w-2xl max-h-[90vh] bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden flex flex-col transform transition-all duration-300 ${
+            isModalOpen ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-8 opacity-0'
+          }`}
+        >
+          {selectedJob && (
+            <>
+              {/* Modal Header */}
+              <div className="p-6 md:p-8 border-b border-white/10">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <span className="px-3 py-1 rounded-full bg-brand-purple/20 text-brand-purple text-xs font-medium">{selectedJob.department}</span>
+                      <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">Hiring</span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white">{selectedJob.title}</h2>
+                  </div>
+                  <button 
+                    onClick={closeModal}
+                    className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors flex-shrink-0"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                <div className="prose prose-invert max-w-none">
+                  <h3 className="text-lg font-semibold text-white mb-3">About This Role</h3>
+                  <p className="text-gray-400 leading-relaxed whitespace-pre-line">{selectedJob.description}</p>
+                </div>
+
+                {/* Apply Button */}
+                <div className="mt-8">
+                  <button
+                    onClick={handleApply}
+                    className="w-full group relative px-6 py-4 bg-gradient-to-r from-brand-orange to-brand-purple text-white rounded-xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02] shadow-[0_0_30px_rgba(255,107,74,0.3)] hover:shadow-[0_0_40px_rgba(185,109,243,0.4)]"
+                  >
+                    <span className="font-bold text-base">Apply for This Role</span>
+                    <ArrowUpRight className="w-5 h-5 transition-transform group-hover:rotate-45" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 md:p-8 border-t border-white/10 bg-white/[0.02]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">Job Type</span>
+                    <span className="text-white font-medium flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-brand-orange" />
+                      {selectedJob.type}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">Location</span>
+                    <span className="text-white font-medium flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-brand-orange" />
+                      {selectedJob.location}
+                    </span>
+                  </div>
+                  {selectedJob.salary_range && (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500 uppercase tracking-wider">Salary (PKR)</span>
+                      <span className="text-white font-medium flex items-center gap-2">
+                        <span className="w-4 h-4 text-brand-orange text-xs font-bold flex items-center justify-center">₨</span>
+                        {selectedJob.salary_range}
+                      </span>
+                    </div>
+                  )}
+                  {selectedJob.timezone && (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500 uppercase tracking-wider">Timezone</span>
+                      <span className="text-white font-medium flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-brand-orange" />
+                        {selectedJob.timezone}
+                      </span>
+                    </div>
+                  )}
+                  {selectedJob.experience && (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-500 uppercase tracking-wider">Experience</span>
+                      <span className="text-white font-medium flex items-center gap-2">
+                        <Award className="w-4 h-4 text-brand-orange" />
+                        {selectedJob.experience}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </>
   );
 };
