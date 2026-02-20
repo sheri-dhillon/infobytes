@@ -17,42 +17,30 @@ interface JobOpening {
   experience: string;
 }
 
-// Airtable Configuration (using environment variables)
-const AIRTABLE_BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID;
-const AIRTABLE_TABLE_NAME = 'Careers';
-const AIRTABLE_API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN;
-
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + '...';
 };
 
-// Function to fetch jobs from Airtable
+// Function to fetch jobs from server API (proxied to Airtable)
 const fetchJobs = async (): Promise<JobOpening[]> => {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME)}`;
-  
-  console.log('Fetching jobs from Airtable...', url);
+  console.log('Fetching jobs from server API...');
   
   try {
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${AIRTABLE_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch('/api/careers');
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Airtable API error:', response.status, errorText);
-      throw new Error(`Airtable API error: ${response.status}`);
+      console.error('API error:', response.status, errorText);
+      throw new Error(`API error: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('Airtable response:', data);
+    console.log('API response:', data);
     
     // Map Airtable records to JobOpening format
-    const jobs = data.records.map((record: any, index: number) => ({
+    const jobs = (data.records || []).map((record: any, index: number) => ({
       id: record.fields.id || index + 1,
       title: record.fields.title || '',
       type: record.fields.type || '',
@@ -69,7 +57,7 @@ const fetchJobs = async (): Promise<JobOpening[]> => {
     return jobs;
     
   } catch (error) {
-    console.error('Error fetching jobs from Airtable:', error);
+    console.error('Error fetching jobs:', error);
     return [];
   }
 };

@@ -9,6 +9,8 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'shehryar@infobytes.io';
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_API_TOKEN = process.env.AIRTABLE_API_TOKEN;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -160,6 +162,48 @@ app.post('/api/contact', async (req, res) => {
     return res.status(500).json({
       ok: false,
       message: error instanceof Error ? error.message : 'Unexpected server error.'
+    });
+  }
+});
+
+// Airtable API proxy for careers/jobs
+app.get('/api/careers', async (req, res) => {
+  try {
+    if (!AIRTABLE_BASE_ID || !AIRTABLE_API_TOKEN) {
+      return res.status(500).json({
+        ok: false,
+        message: 'Airtable configuration is missing.',
+        records: []
+      });
+    }
+
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Careers`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${AIRTABLE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Airtable API error:', response.status, errorText);
+      return res.status(response.status).json({
+        ok: false,
+        message: `Airtable API error: ${response.status}`,
+        records: []
+      });
+    }
+
+    const data = await response.json();
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error('Error fetching from Airtable:', error);
+    return res.status(500).json({
+      ok: false,
+      message: error instanceof Error ? error.message : 'Unexpected server error.',
+      records: []
     });
   }
 });
