@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2, DollarSign, Globe, Award, X } from 'lucide-react';
 import { HeroHeading } from '../components/ui/HeroHeading';
