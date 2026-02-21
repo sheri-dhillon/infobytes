@@ -17,6 +17,103 @@ import { useJob, createJobSlug } from '../hooks/useJobs';
 // Redirect URL after form submission (will be updated later)
 const INTERVIEW_REDIRECT_URL = 'https://form.jotform.com/260511821030036';
 
+// Helper function to convert markdown-style text to HTML
+const parseMarkdownToHtml = (text: string): string => {
+  if (!text) return '';
+  
+  let html = text;
+  
+  // Convert **bold** to <strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Convert *italic* to <em> (but not inside strong tags)
+  html = html.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+  
+  // Check if text contains numbered list pattern (1. followed by 2. etc)
+  const hasNumberedList = /\d+\.\s+.+\d+\.\s+/.test(html);
+  
+  if (hasNumberedList) {
+    // Use regex to find all numbered items and split the text
+    // Match pattern: number followed by period and space, then content until next number or end
+    const numberedItemRegex = /(\d+)\.\s+([^]*?)(?=\s*\d+\.\s+|$)/g;
+    const introMatch = html.match(/^(.*?)(?=\s*1\.\s+)/s);
+    const introText = introMatch ? introMatch[1].trim() : '';
+    
+    const items: string[] = [];
+    let match;
+    
+    while ((match = numberedItemRegex.exec(html)) !== null) {
+      const content = match[2].trim();
+      if (content) {
+        items.push(`<li>${content}</li>`);
+      }
+    }
+    
+    let result = '';
+    
+    // Add intro paragraph if exists
+    if (introText) {
+      result += `<p>${introText}</p>`;
+    }
+    
+    // Add numbered list
+    if (items.length > 0) {
+      result += `<ol>${items.join('')}</ol>`;
+    }
+    
+    return result;
+  }
+  
+  // Handle text with line breaks (fallback for non-inline lists)
+  const lines = html.split('\n');
+  const processedLines: string[] = [];
+  let inList = false;
+  let listItems: string[] = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Check for numbered list items (e.g., "1. Item" or "1) Item")
+    const numberedMatch = line.match(/^(\d+)[\.\)]\s+(.+)$/);
+    
+    // Check for bullet points (e.g., "- Item" or "• Item")
+    const bulletMatch = line.match(/^[-•]\s+(.+)$/);
+    
+    if (numberedMatch) {
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      listItems.push(`<li>${numberedMatch[2]}</li>`);
+    } else if (bulletMatch) {
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      listItems.push(`<li>${bulletMatch[1]}</li>`);
+    } else {
+      // End of list
+      if (inList && listItems.length > 0) {
+        processedLines.push(`<ol>${listItems.join('')}</ol>`);
+        inList = false;
+        listItems = [];
+      }
+      
+      // Regular paragraph
+      if (line) {
+        processedLines.push(`<p>${line}</p>`);
+      }
+    }
+  }
+  
+  // Handle any remaining list items
+  if (inList && listItems.length > 0) {
+    processedLines.push(`<ol>${listItems.join('')}</ol>`);
+  }
+  
+  return processedLines.join('');
+};
+
 interface FormData {
   fullName: string;
   email: string;
@@ -208,7 +305,54 @@ export const JobApplicationPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-brand-dark pt-40 md:pt-48 pb-20">
+    <>
+      {/* Styles for rich text job description */}
+      <style>{`
+        .job-description-content ul,
+        .job-description-content ol {
+          margin: 1rem 0;
+          padding-left: 1.5rem;
+        }
+        .job-description-content ul {
+          list-style-type: disc;
+        }
+        .job-description-content ol {
+          list-style-type: decimal;
+        }
+        .job-description-content li {
+          margin-bottom: 0.5rem;
+          color: #9ca3af;
+        }
+        .job-description-content p {
+          margin-bottom: 1rem;
+        }
+        .job-description-content h1,
+        .job-description-content h2,
+        .job-description-content h3,
+        .job-description-content h4 {
+          color: white;
+          font-weight: 600;
+          margin-top: 1.5rem;
+          margin-bottom: 0.75rem;
+        }
+        .job-description-content h1 { font-size: 1.5rem; }
+        .job-description-content h2 { font-size: 1.25rem; }
+        .job-description-content h3 { font-size: 1.125rem; }
+        .job-description-content strong,
+        .job-description-content b {
+          color: white;
+          font-weight: 600;
+        }
+        .job-description-content a {
+          color: #f97316;
+          text-decoration: underline;
+        }
+        .job-description-content a:hover {
+          color: #fb923c;
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-brand-dark pt-40 md:pt-48 pb-20">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Back Button */}
@@ -220,7 +364,7 @@ export const JobApplicationPage: React.FC = () => {
           Back to Careers
         </Link>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
           
           {/* Left Column - Job Details */}
           <div className="order-2 lg:order-1">
@@ -286,16 +430,17 @@ export const JobApplicationPage: React.FC = () => {
               {/* Job Description */}
               <div>
                 <h2 className="text-lg font-semibold text-white mb-4">About This Role</h2>
-                <div className="text-gray-400 leading-relaxed whitespace-pre-line">
-                  {job.description}
-                </div>
+                <div 
+                  className="text-gray-400 leading-relaxed job-description-content"
+                  dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(job.description) }}
+                />
               </div>
             </div>
           </div>
 
           {/* Right Column - Application Form */}
-          <div className="order-1 lg:order-2">
-            <div className="sticky top-32 p-8 rounded-3xl bg-[#0a0a0a] border border-white/10">
+          <div className="order-1 lg:order-2 lg:sticky lg:top-32 self-start">
+            <div className="p-8 rounded-3xl bg-[#0a0a0a] border border-white/10">
               <h2 className="text-2xl font-bold text-white mb-2">Apply for This Role</h2>
               <p className="text-gray-400 text-sm mb-8">Fill out the form below to submit your application.</p>
               
@@ -504,5 +649,6 @@ export const JobApplicationPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };

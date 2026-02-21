@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2, DollarSign, Globe, Award, X } from 'lucide-react';
+import { ArrowUpRight, Mail, MapPin, Clock, Briefcase, Loader2, DollarSign, Globe, Award, X, Maximize2 } from 'lucide-react';
 import { HeroHeading } from '../components/ui/HeroHeading';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -20,10 +20,113 @@ interface JobOpening {
 const AIRTABLE_BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID;
 const AIRTABLE_API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN;
 
-// Helper function to truncate text
+// Helper function to truncate text (strips HTML/markdown for preview)
 const truncateText = (text: string, maxLength: number): string => {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + '...';
+  // Remove markdown formatting for plain text preview
+  const plainText = text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (plainText.length <= maxLength) return plainText;
+  return plainText.slice(0, maxLength).trim() + '...';
+};
+
+// Helper function to convert markdown-style text to HTML
+const parseMarkdownToHtml = (text: string): string => {
+  if (!text) return '';
+  
+  let html = text;
+  
+  // Convert **bold** to <strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Convert *italic* to <em> (but not inside strong tags)
+  html = html.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+  
+  // Check if text contains numbered list pattern (1. followed by 2. etc)
+  const hasNumberedList = /\d+\.\s+.+\d+\.\s+/.test(html);
+  
+  if (hasNumberedList) {
+    // Use regex to find all numbered items and split the text
+    // Match pattern: number followed by period and space, then content until next number or end
+    const numberedItemRegex = /(\d+)\.\s+([^]*?)(?=\s*\d+\.\s+|$)/g;
+    const introMatch = html.match(/^(.*?)(?=\s*1\.\s+)/s);
+    const introText = introMatch ? introMatch[1].trim() : '';
+    
+    const items: string[] = [];
+    let match;
+    
+    while ((match = numberedItemRegex.exec(html)) !== null) {
+      const content = match[2].trim();
+      if (content) {
+        items.push(`<li>${content}</li>`);
+      }
+    }
+    
+    let result = '';
+    
+    // Add intro paragraph if exists
+    if (introText) {
+      result += `<p>${introText}</p>`;
+    }
+    
+    // Add numbered list
+    if (items.length > 0) {
+      result += `<ol>${items.join('')}</ol>`;
+    }
+    
+    return result;
+  }
+  
+  // Handle text with line breaks (fallback for non-inline lists)
+  const lines = html.split('\n');
+  const processedLines: string[] = [];
+  let inList = false;
+  let listItems: string[] = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Check for numbered list items (e.g., "1. Item" or "1) Item")
+    const numberedMatch = line.match(/^(\d+)[\.\)]\s+(.+)$/);
+    
+    // Check for bullet points (e.g., "- Item" or "• Item")
+    const bulletMatch = line.match(/^[-•]\s+(.+)$/);
+    
+    if (numberedMatch) {
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      listItems.push(`<li>${numberedMatch[2]}</li>`);
+    } else if (bulletMatch) {
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      listItems.push(`<li>${bulletMatch[1]}</li>`);
+    } else {
+      // End of list
+      if (inList && listItems.length > 0) {
+        processedLines.push(`<ol>${listItems.join('')}</ol>`);
+        inList = false;
+        listItems = [];
+      }
+      
+      // Regular paragraph
+      if (line) {
+        processedLines.push(`<p>${line}</p>`);
+      }
+    }
+  }
+  
+  // Handle any remaining list items
+  if (inList && listItems.length > 0) {
+    processedLines.push(`<ol>${listItems.join('')}</ol>`);
+  }
+  
+  return processedLines.join('');
 };
 
 // Function to fetch jobs from Airtable
@@ -140,6 +243,52 @@ export const CareersPage: React.FC = () => {
 
   return (
     <>
+      {/* Styles for rich text job description */}
+      <style>{`
+        .job-description-content ul,
+        .job-description-content ol {
+          margin: 1rem 0;
+          padding-left: 1.5rem;
+        }
+        .job-description-content ul {
+          list-style-type: disc;
+        }
+        .job-description-content ol {
+          list-style-type: decimal;
+        }
+        .job-description-content li {
+          margin-bottom: 0.5rem;
+          color: #9ca3af;
+        }
+        .job-description-content p {
+          margin-bottom: 1rem;
+        }
+        .job-description-content h1,
+        .job-description-content h2,
+        .job-description-content h3,
+        .job-description-content h4 {
+          color: white;
+          font-weight: 600;
+          margin-top: 1.5rem;
+          margin-bottom: 0.75rem;
+        }
+        .job-description-content h1 { font-size: 1.5rem; }
+        .job-description-content h2 { font-size: 1.25rem; }
+        .job-description-content h3 { font-size: 1.125rem; }
+        .job-description-content strong,
+        .job-description-content b {
+          color: white;
+          font-weight: 600;
+        }
+        .job-description-content a {
+          color: #f97316;
+          text-decoration: underline;
+        }
+        .job-description-content a:hover {
+          color: #fb923c;
+        }
+      `}</style>
+
       {/* Hero Section */}
       <section className="relative min-h-[70vh] w-full flex flex-col bg-brand-dark overflow-hidden">
         
@@ -277,7 +426,7 @@ export const CareersPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-brand-orange group-hover:border-brand-orange transition-all flex-shrink-0">
-                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                      <Maximize2 className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                     </div>
                   </div>
                 </button>
@@ -312,7 +461,7 @@ export const CareersPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center flex-shrink-0">
-                      <ArrowUpRight className="w-5 h-5 text-gray-600" />
+                      <Maximize2 className="w-5 h-5 text-gray-600" />
                     </div>
                   </div>
                 </div>
@@ -380,7 +529,10 @@ export const CareersPage: React.FC = () => {
               <div className="flex-1 overflow-y-auto p-6 md:p-8">
                 <div className="prose prose-invert max-w-none">
                   <h3 className="text-lg font-semibold text-white mb-3">About This Role</h3>
-                  <p className="text-gray-400 leading-relaxed whitespace-pre-line">{selectedJob.description}</p>
+                  <div 
+                    className="text-gray-400 leading-relaxed job-description-content"
+                    dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(selectedJob.description) }}
+                  />
                 </div>
 
                 {/* Apply Button */}
