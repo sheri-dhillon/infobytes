@@ -15,7 +15,7 @@ import {
 import { useJob, createJobSlug } from '../hooks/useJobs';
 
 // Redirect URL after form submission (will be updated later)
-const INTERVIEW_REDIRECT_URL = 'https://example.com/interview';
+const INTERVIEW_REDIRECT_URL = 'https://form.jotform.com/260511821030036';
 
 interface FormData {
   fullName: string;
