@@ -38,7 +38,14 @@ const FIELD_LABELS = {
   project_details: 'Project Details'
 };
 
+// Middleware
 app.use(express.json({ limit: '1mb' }));
+
+// Ensure API routes always return JSON, never HTML
+app.use('/api', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
 
 async function verifyTurnstile(token) {
   const params = new URLSearchParams();
@@ -134,58 +141,57 @@ function normalizePayload(body) {
 }
 
 app.post('/api/contact', async (req, res) => {
-  console.log('POST /api/contact received');
+  console.log('POST /api/contact received, body keys:', Object.keys(req.body || {}));
   
   try {
-    if (!RESEND_API_KEY || !TURNSTILE_SECRET_KEY) {
-      console.error('Missing env vars - RESEND_API_KEY:', !!RESEND_API_KEY, 'TURNSTILE_SECRET_KEY:', !!TURNSTILE_SECRET_KEY);
-      return res.status(500).json({
-        ok: false,
-        message: 'Server is missing required environment variables.'
-      });
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set');
+      return res.status(500).json({ ok: false, message: 'Server configuration error: email service not configured.' });
+    }
+    if (!TURNSTILE_SECRET_KEY) {
+      console.error('TURNSTILE_SECRET_KEY is not set');
+      return res.status(500).json({ ok: false, message: 'Server configuration error: security service not configured.' });
     }
 
     const { turnstileToken } = req.body || {};
     const form = normalizePayload(req.body || {});
-    
-    console.log('Form data received:', Object.keys(form));
 
+    // Validate required fields
     const missingField = REQUIRED_FIELDS.find((field) => !form[field]);
     if (missingField) {
-      console.log('Missing field:', missingField);
-      return res.status(400).json({
-        ok: false,
-        message: `Missing required field: ${FIELD_LABELS[missingField]}`
-      });
+      return res.status(400).json({ ok: false, message: `Missing required field: ${FIELD_LABELS[missingField]}` });
     }
 
+    // Validate turnstile
     if (!turnstileToken || typeof turnstileToken !== 'string') {
-      console.log('Missing turnstile token');
-      return res.status(400).json({
-        ok: false,
-        message: 'Turnstile verification is required.'
-      });
+      return res.status(400).json({ ok: false, message: 'Turnstile verification is required.' });
     }
 
-    console.log('Verifying turnstile...');
-    const turnstileResult = await verifyTurnstile(turnstileToken);
+    let turnstileResult;
+    try {
+      turnstileResult = await verifyTurnstile(turnstileToken);
+    } catch (err) {
+      console.error('Turnstile verification network error:', err);
+      return res.status(500).json({ ok: false, message: 'Could not verify security token. Please try again.' });
+    }
+
     if (!turnstileResult?.success) {
       const errorCodes = Array.isArray(turnstileResult?.['error-codes'])
         ? turnstileResult['error-codes'].join(', ')
         : 'unknown';
-      
       console.log('Turnstile failed:', errorCodes);
-      return res.status(400).json({
-        ok: false,
-        message: `Bot verification failed. (${errorCodes})`
-      });
+      return res.status(400).json({ ok: false, message: `Bot verification failed. (${errorCodes})` });
     }
-    
-    console.log('Turnstile verified, saving to Airtable...');
 
-    // Save to Airtable (non-blocking - doesn't fail the request if it errors)
-    await saveContactToAirtable(form);
-    console.log('Airtable saved (or skipped)');
+    console.log('Turnstile verified');
+
+    // Save to Airtable (best-effort, don't block on failure)
+    try {
+      await saveContactToAirtable(form);
+      console.log('Saved to Airtable');
+    } catch (err) {
+      console.error('Airtable save failed (continuing):', err);
+    }
 
     const formRowsText = Object.entries(FIELD_LABELS)
       .map(([key, label]) => `${label}: ${form[key] || 'N/A'}`)
@@ -195,51 +201,57 @@ app.post('/api/contact', async (req, res) => {
       .map(([key, label]) => `<li><strong>${label}:</strong> ${form[key] || 'N/A'}</li>`)
       .join('');
 
-    console.log('Sending notification email to team...');
-    await sendResendEmail({
-      from: RESEND_FROM_EMAIL,
-      to: [CONTACT_TO_EMAIL],
-      subject: 'New Brand Inquiry Received',
-      reply_to: [form.email],
-      text: `A new inquiry was submitted:\n\n${formRowsText}`,
-      html: `<p>A new inquiry was submitted:</p><ul>${formRowsHtml}</ul>`
-    });
-    console.log('Team email sent');
+    // Send notification email to team
+    try {
+      await sendResendEmail({
+        from: RESEND_FROM_EMAIL,
+        to: [CONTACT_TO_EMAIL],
+        subject: 'New Brand Inquiry Received',
+        reply_to: [form.email],
+        text: `A new inquiry was submitted:\n\n${formRowsText}`,
+        html: `<p>A new inquiry was submitted:</p><ul>${formRowsHtml}</ul>`
+      });
+      console.log('Team notification email sent');
+    } catch (err) {
+      console.error('Failed to send team notification email:', err);
+      // Continue - still try to send thank-you email
+    }
 
-    console.log('Sending thank you email to:', form.email);
-    await sendResendEmail({
-      from: RESEND_FROM_EMAIL,
-      to: [form.email],
-      subject: 'Thank You for Reaching Out to InfoBytes!',
-      text: `Hi ${form.first_name},\n\nThank you for contacting InfoBytes! We've received your inquiry and our team is reviewing your project details.\n\nHere's a summary of what you submitted:\n- Project Goal: ${form.project_goal}\n- Monthly Store Revenue: ${form.monthly_store_revenue}\n- Current Platform: ${form.current_platform}\n\nWe typically respond within 24-48 business hours. In the meantime, feel free to book a call directly: https://calendly.com/shehryar-infobytes/30min\n\nBest regards,\nThe InfoBytes Team`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Hi ${form.first_name},</h2>
-          <p>Thank you for contacting <strong>InfoBytes</strong>! We've received your inquiry and our team is reviewing your project details.</p>
-          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #555;">Your Submission Summary:</h3>
-            <ul style="list-style: none; padding: 0;">
-              <li style="padding: 8px 0; border-bottom: 1px solid #ddd;"><strong>Project Goal:</strong> ${form.project_goal}</li>
-              <li style="padding: 8px 0; border-bottom: 1px solid #ddd;"><strong>Monthly Revenue:</strong> ${form.monthly_store_revenue}</li>
-              <li style="padding: 8px 0;"><strong>Current Platform:</strong> ${form.current_platform}</li>
-            </ul>
+    // Send thank you email to customer
+    try {
+      await sendResendEmail({
+        from: RESEND_FROM_EMAIL,
+        to: [form.email],
+        subject: 'Thank You for Reaching Out to InfoBytes!',
+        text: `Hi ${form.first_name},\n\nThank you for contacting InfoBytes! We've received your inquiry and our team is reviewing your project details.\n\nHere's a summary of what you submitted:\n- Project Goal: ${form.project_goal}\n- Monthly Store Revenue: ${form.monthly_store_revenue}\n- Current Platform: ${form.current_platform}\n\nWe typically respond within 24-48 business hours. In the meantime, feel free to book a call directly: https://calendly.com/shehryar-infobytes/30min\n\nBest regards,\nThe InfoBytes Team`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Hi ${form.first_name},</h2>
+            <p>Thank you for contacting <strong>InfoBytes</strong>! We've received your inquiry and our team is reviewing your project details.</p>
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #555;">Your Submission Summary:</h3>
+              <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0; border-bottom: 1px solid #ddd;"><strong>Project Goal:</strong> ${form.project_goal}</li>
+                <li style="padding: 8px 0; border-bottom: 1px solid #ddd;"><strong>Monthly Revenue:</strong> ${form.monthly_store_revenue}</li>
+                <li style="padding: 8px 0;"><strong>Current Platform:</strong> ${form.current_platform}</li>
+              </ul>
+            </div>
+            <p>We typically respond within <strong>24-48 business hours</strong>.</p>
+            <p>Want to speed things up? <a href="https://calendly.com/shehryar-infobytes/30min" style="color: #f97316;">Book a call directly →</a></p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="color: #888; font-size: 14px;">Best regards,<br><strong>The InfoBytes Team</strong></p>
           </div>
-          <p>We typically respond within <strong>24-48 business hours</strong>.</p>
-          <p>Want to speed things up? <a href="https://calendly.com/shehryar-infobytes/30min" style="color: #f97316;">Book a call directly →</a></p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-          <p style="color: #888; font-size: 14px;">Best regards,<br><strong>The InfoBytes Team</strong></p>
-        </div>
-      `
-    });
-    console.log('Thank you email sent');
+        `
+      });
+      console.log('Thank you email sent to:', form.email);
+    } catch (err) {
+      console.error('Failed to send thank-you email:', err);
+    }
 
-    console.log('Contact form submission successful');
-    return res.status(200).json({
-      ok: true,
-      message: 'Your message has been sent successfully.'
-    });
+    console.log('Contact form processed successfully');
+    return res.status(200).json({ ok: true, message: 'Your message has been sent successfully.' });
   } catch (error) {
-    console.error('Contact form error:', error);
+    console.error('Contact form unexpected error:', error);
     return res.status(500).json({
       ok: false,
       message: error instanceof Error ? error.message : 'Unexpected server error.'

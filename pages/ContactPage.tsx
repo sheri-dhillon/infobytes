@@ -270,13 +270,26 @@ export const ContactPage: React.FC = () => {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           ...payload,
           turnstileToken
         })
       });
+
+      // Handle non-JSON responses (e.g. Cloudflare challenge pages)
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', response.status, text.substring(0, 200));
+        throw new Error(
+          response.status === 403
+            ? 'Request blocked by security. Please disable ad-blockers and try again.'
+            : `Server error (${response.status}). Please try again later.`
+        );
+      }
 
       const result = await response.json();
 
@@ -294,6 +307,7 @@ export const ContactPage: React.FC = () => {
       console.error('Contact form submit failed:', error);
       setSubmitStatus('error');
       setSubmitMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+      window.turnstile?.reset(turnstileWidgetIdRef.current || undefined);
     } finally {
       setIsSubmitting(false);
     }
