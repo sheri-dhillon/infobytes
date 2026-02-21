@@ -116,8 +116,15 @@ export const CareersPage: React.FC = () => {
   };
 
   const handleApply = () => {
-    closeModal();
-    navigate('/contact');
+    if (selectedJob) {
+      closeModal();
+      // Create URL-friendly slug from job title
+      const slug = selectedJob.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      navigate(`/careers/apply/${slug}`);
+    }
   };
 
   useEffect(() => {
