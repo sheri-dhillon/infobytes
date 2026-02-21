@@ -340,7 +340,6 @@ export const CareersPage: React.FC = () => {
           className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${
             isModalOpen ? 'opacity-100' : 'opacity-0'
           }`}
-          onClick={closeModal}
         />
         
         {/* Modal Content */}
