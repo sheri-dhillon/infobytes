@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -16,6 +16,20 @@ import { useJob, createJobSlug } from '../hooks/useJobs';
 
 // Redirect URL after form submission (will be updated later)
 const INTERVIEW_REDIRECT_URL = 'https://form.jotform.com/260511821030036';
+
+// Cloudflare Turnstile site key
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACd9k8squSr31WmB';
+
+// Turnstile type declaration
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 
 // Helper function to convert markdown-style text to HTML
 const parseMarkdownToHtml = (text: string): string => {
@@ -142,6 +156,8 @@ export const JobApplicationPage: React.FC = () => {
   const navigate = useNavigate();
   const { job, loading, error } = useJob(slug);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
   
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
@@ -158,9 +174,67 @@ export const JobApplicationPage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
+
+  // Load Turnstile script
+  useEffect(() => {
+    if (document.querySelector('script[data-turnstile-script="true"]')) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.setAttribute('data-turnstile-script', 'true');
+    document.head.appendChild(script);
+  }, []);
+
+  // Render Turnstile widget when job is loaded
+  useEffect(() => {
+    if (!job) return;
+
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    const intervalId = window.setInterval(() => {
+      const turnstileApi = window.turnstile;
+      const container = turnstileContainerRef.current;
+
+      if (!turnstileApi?.render || !container || turnstileWidgetIdRef.current) {
+        attempts += 1;
+        if (attempts >= maxAttempts) {
+          window.clearInterval(intervalId);
+        }
+        return;
+      }
+
+      container.innerHTML = '';
+      turnstileWidgetIdRef.current = turnstileApi.render(container, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'dark'
+      });
+      window.clearInterval(intervalId);
+    }, 150);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [job]);
+
+  // Cleanup Turnstile widget on unmount
+  useEffect(() => {
+    return () => {
+      const widgetId = turnstileWidgetIdRef.current;
+      if (widgetId && window.turnstile?.remove) {
+        window.turnstile.remove(widgetId);
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, []);
 
   // Update applyingForRole when job loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (job) {
       setFormData(prev => ({ ...prev, applyingForRole: job.title }));
     }
@@ -237,6 +311,17 @@ export const JobApplicationPage: React.FC = () => {
     
     if (!validateForm()) return;
     
+    // Get Turnstile token
+    const formElement = e.currentTarget as HTMLFormElement;
+    const formPayload = new window.FormData(formElement);
+    const turnstileToken = String(formPayload.get('cf-turnstile-response') || '');
+    
+    if (!turnstileToken) {
+      setTurnstileError('Please complete the security verification.');
+      return;
+    }
+    
+    setTurnstileError(null);
     setIsSubmitting(true);
     
     // Simulate form submission (replace with actual API call)
@@ -622,6 +707,17 @@ export const JobApplicationPage: React.FC = () => {
                   </div>
                   {errors.timezoneComfort && <p className="mt-1 text-sm text-red-500">{errors.timezoneComfort}</p>}
                 </div>
+
+                {/* Turnstile Container */}
+                <div
+                  ref={turnstileContainerRef}
+                  className="min-h-[65px]"
+                ></div>
+
+                {/* Turnstile Error */}
+                {turnstileError && (
+                  <p className="text-sm text-red-500 text-center">{turnstileError}</p>
+                )}
 
                 {/* Submit Button */}
                 <button
