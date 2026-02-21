@@ -267,15 +267,25 @@ export const ContactPage: React.FC = () => {
     setSubmitMessage('');
 
     try {
-      const formRowsText = STATIC_CONTACT_CONFIG.form_fields
-        .map((field: any) => `${field.label}: ${payload[field.key] || 'N/A'}`)
-        .join('\n');
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...payload,
+          turnstileToken
+        })
+      });
 
-      const mailtoUrl = `mailto:shehryar@infobytes.io?subject=${encodeURIComponent('New Brand Inquiry Received')}&body=${encodeURIComponent(formRowsText)}`;
-      window.location.href = mailtoUrl;
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message || 'Failed to submit form');
+      }
 
       setSubmitStatus('success');
-      setSubmitMessage('Your email client was opened with your inquiry details. Please send the email to complete submission.');
+      setSubmitMessage(result.message || 'Your message has been sent successfully!');
       setFormData({});
       setStepMessage('');
       setCurrentStep(1);
