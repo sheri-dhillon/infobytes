@@ -14,8 +14,8 @@ const STATIC_CONTACT_CONFIG = {
         heading: "LET'S CHAT",
         subheading: "Let's bring your vision to life.",
         email: "hello@infobytes.io",
-        phone: "+1 (555) 000-0000",
-        address: "123 Design Street, Creative City, NY 10012",
+        phone: "+92 303 734 8566",
+        address: "Office 201, 2nd Floor The Mall of Faisalabad, Faisalabad, Pakistan",
         booking_link: "https://calendly.com/shehryar-infobytes/30min"
     },
     form_fields: [

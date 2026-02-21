@@ -79,6 +79,49 @@ async function sendResendEmail(payload) {
   return data;
 }
 
+async function saveContactToAirtable(form) {
+  if (!AIRTABLE_BASE_ID || !AIRTABLE_API_TOKEN) {
+    console.warn('Airtable not configured, skipping contact save');
+    return null;
+  }
+
+  const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Contacts`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_API_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      records: [
+        {
+          fields: {
+            'First Name': form.first_name,
+            'Last Name': form.last_name,
+            'Email': form.email,
+            'Company Name': form.company_name || '',
+            'Mobile Number': form.mobile_number || '',
+            'Project Goal': form.project_goal,
+            'Monthly Store Revenue': form.monthly_store_revenue,
+            'Current Platform': form.current_platform,
+            'Project Details': form.project_details,
+            'Submitted At': new Date().toISOString()
+          }
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error('Airtable save error:', data);
+    // Don't throw - we still want to send emails even if Airtable fails
+    return null;
+  }
+
+  return data;
+}
+
 function normalizePayload(body) {
   const normalized = {};
 
@@ -129,6 +172,9 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
+    // Save to Airtable (non-blocking - doesn't fail the request if it errors)
+    await saveContactToAirtable(form);
+
     const formRowsText = Object.entries(FIELD_LABELS)
       .map(([key, label]) => `${label}: ${form[key] || 'N/A'}`)
       .join('\n');
@@ -149,9 +195,26 @@ app.post('/api/contact', async (req, res) => {
     await sendResendEmail({
       from: RESEND_FROM_EMAIL,
       to: [form.email],
-      subject: 'Thanks for Contacting InfoBytes',
-      text: "We've revieved your query and soon you'll receive a response from us.",
-      html: "<p>We've revieved your query and soon you'll receive a response from us.</p>"
+      subject: 'Thank You for Reaching Out to InfoBytes!',
+      text: `Hi ${form.first_name},\n\nThank you for contacting InfoBytes! We've received your inquiry and our team is reviewing your project details.\n\nHere's a summary of what you submitted:\n- Project Goal: ${form.project_goal}\n- Monthly Store Revenue: ${form.monthly_store_revenue}\n- Current Platform: ${form.current_platform}\n\nWe typically respond within 24-48 business hours. In the meantime, feel free to book a call directly: https://calendly.com/shehryar-infobytes/30min\n\nBest regards,\nThe InfoBytes Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Hi ${form.first_name},</h2>
+          <p>Thank you for contacting <strong>InfoBytes</strong>! We've received your inquiry and our team is reviewing your project details.</p>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #555;">Your Submission Summary:</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 8px 0; border-bottom: 1px solid #ddd;"><strong>Project Goal:</strong> ${form.project_goal}</li>
+              <li style="padding: 8px 0; border-bottom: 1px solid #ddd;"><strong>Monthly Revenue:</strong> ${form.monthly_store_revenue}</li>
+              <li style="padding: 8px 0;"><strong>Current Platform:</strong> ${form.current_platform}</li>
+            </ul>
+          </div>
+          <p>We typically respond within <strong>24-48 business hours</strong>.</p>
+          <p>Want to speed things up? <a href="https://calendly.com/shehryar-infobytes/30min" style="color: #f97316;">Book a call directly →</a></p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #888; font-size: 14px;">Best regards,<br><strong>The InfoBytes Team</strong></p>
+        </div>
+      `
     });
 
     return res.status(200).json({
