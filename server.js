@@ -134,8 +134,11 @@ function normalizePayload(body) {
 }
 
 app.post('/api/contact', async (req, res) => {
+  console.log('POST /api/contact received');
+  
   try {
     if (!RESEND_API_KEY || !TURNSTILE_SECRET_KEY) {
+      console.error('Missing env vars - RESEND_API_KEY:', !!RESEND_API_KEY, 'TURNSTILE_SECRET_KEY:', !!TURNSTILE_SECRET_KEY);
       return res.status(500).json({
         ok: false,
         message: 'Server is missing required environment variables.'
@@ -144,9 +147,12 @@ app.post('/api/contact', async (req, res) => {
 
     const { turnstileToken } = req.body || {};
     const form = normalizePayload(req.body || {});
+    
+    console.log('Form data received:', Object.keys(form));
 
     const missingField = REQUIRED_FIELDS.find((field) => !form[field]);
     if (missingField) {
+      console.log('Missing field:', missingField);
       return res.status(400).json({
         ok: false,
         message: `Missing required field: ${FIELD_LABELS[missingField]}`
@@ -154,26 +160,32 @@ app.post('/api/contact', async (req, res) => {
     }
 
     if (!turnstileToken || typeof turnstileToken !== 'string') {
+      console.log('Missing turnstile token');
       return res.status(400).json({
         ok: false,
         message: 'Turnstile verification is required.'
       });
     }
 
+    console.log('Verifying turnstile...');
     const turnstileResult = await verifyTurnstile(turnstileToken);
     if (!turnstileResult?.success) {
       const errorCodes = Array.isArray(turnstileResult?.['error-codes'])
         ? turnstileResult['error-codes'].join(', ')
         : 'unknown';
-
+      
+      console.log('Turnstile failed:', errorCodes);
       return res.status(400).json({
         ok: false,
         message: `Bot verification failed. (${errorCodes})`
       });
     }
+    
+    console.log('Turnstile verified, saving to Airtable...');
 
     // Save to Airtable (non-blocking - doesn't fail the request if it errors)
     await saveContactToAirtable(form);
+    console.log('Airtable saved (or skipped)');
 
     const formRowsText = Object.entries(FIELD_LABELS)
       .map(([key, label]) => `${label}: ${form[key] || 'N/A'}`)
@@ -183,6 +195,7 @@ app.post('/api/contact', async (req, res) => {
       .map(([key, label]) => `<li><strong>${label}:</strong> ${form[key] || 'N/A'}</li>`)
       .join('');
 
+    console.log('Sending notification email to team...');
     await sendResendEmail({
       from: RESEND_FROM_EMAIL,
       to: [CONTACT_TO_EMAIL],
@@ -191,7 +204,9 @@ app.post('/api/contact', async (req, res) => {
       text: `A new inquiry was submitted:\n\n${formRowsText}`,
       html: `<p>A new inquiry was submitted:</p><ul>${formRowsHtml}</ul>`
     });
+    console.log('Team email sent');
 
+    console.log('Sending thank you email to:', form.email);
     await sendResendEmail({
       from: RESEND_FROM_EMAIL,
       to: [form.email],
@@ -216,12 +231,15 @@ app.post('/api/contact', async (req, res) => {
         </div>
       `
     });
+    console.log('Thank you email sent');
 
+    console.log('Contact form submission successful');
     return res.status(200).json({
       ok: true,
       message: 'Your message has been sent successfully.'
     });
   } catch (error) {
+    console.error('Contact form error:', error);
     return res.status(500).json({
       ok: false,
       message: error instanceof Error ? error.message : 'Unexpected server error.'
