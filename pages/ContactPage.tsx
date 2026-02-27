@@ -282,12 +282,12 @@ export const ContactPage: React.FC = () => {
 
       const result = await response.json();
 
-      if (!response.ok || !result.ok) {
+      if (!response.ok) {
         throw new Error(result.message || 'Failed to submit form');
       }
 
       setSubmitStatus('success');
-      setSubmitMessage(result.message || 'Your message has been sent successfully!');
+      setSubmitMessage('Your message has been sent successfully!');
 
       // Clear form and reset to step 1 automatically
       setFormData({});

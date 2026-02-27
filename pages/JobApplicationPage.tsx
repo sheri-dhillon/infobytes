@@ -340,24 +340,21 @@ export const JobApplicationPage: React.FC = () => {
         submitData.append('resume', formData.resume);
       }
 
-      const response = await fetch('/api/apply', {
+      // Add Turnstile token to the multipart/form-data payload
+      submitData.append('cf-turnstile-response', turnstileToken);
+
+      const response = await fetch('https://usebasin.com/f/f28eda177933', {
         method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
         body: submitData
       });
-
-      // Handle non-JSON responses
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        const text = await response.text();
-        const snippet = text.substring(0, 200);
-        console.error('Non-JSON response:', response.status, snippet);
-        throw new Error(`Server error (${response.status}). Details: ${snippet.replace(/<[^>]*>?/gm, '').substring(0, 100)}...`);
-      }
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong while submitting.');
+        throw new Error(data.error || 'Something went wrong while submitting.');
       }
 
       setSubmitSuccess(true);
