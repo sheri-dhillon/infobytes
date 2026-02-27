@@ -96,7 +96,7 @@ declare global {
 }
 
 export const ContactPage: React.FC = () => {
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACd9k8squSr31WmB';
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACjfmGW_Yt9s_jaf';
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -284,11 +284,12 @@ export const ContactPage: React.FC = () => {
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
         const text = await response.text();
-        console.error('Non-JSON response:', response.status, text.substring(0, 200));
+        const snippet = text.substring(0, 200);
+        console.error('Non-JSON response:', response.status, snippet);
         throw new Error(
           response.status === 403
             ? 'Request blocked by security. Please disable ad-blockers and try again.'
-            : `Server error (${response.status}). Please try again later.`
+            : `Server error (${response.status}). Details: ${snippet.replace(/<[^>]*>?/gm, '').substring(0, 100)}...`
         );
       }
 

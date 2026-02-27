@@ -1,4 +1,4 @@
-import 'dotenv/config.js';
+try { await import('dotenv/config.js'); } catch (e) { /* dotenv not available in production */ }
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -205,20 +205,15 @@ app.post('/api/contact', async (req, res) => {
       .join('');
 
     // Send notification email to team
-    try {
-      await transporter.sendMail({
-        from: `"${form.first_name} ${form.last_name}" <${process.env.SMTP_USER}>`,
-        to: CONTACT_TO_EMAIL,
-        replyTo: form.email,
-        subject: 'New Brand Inquiry Received',
-        text: `A new inquiry was submitted:\n\n${formRowsText}`,
-        html: `<p>A new inquiry was submitted:</p><ul>${formRowsHtml}</ul>`
-      });
-      console.log('Team notification email sent');
-    } catch (err) {
-      console.error('Failed to send team notification email:', err);
-      // Continue - still try to send thank-you email
-    }
+    await transporter.sendMail({
+      from: `"${form.first_name} ${form.last_name}" <${process.env.SMTP_USER}>`,
+      to: CONTACT_TO_EMAIL,
+      replyTo: form.email,
+      subject: 'New Brand Inquiry Received',
+      text: `A new inquiry was submitted:\n\n${formRowsText}`,
+      html: `<p>A new inquiry was submitted:</p><ul>${formRowsHtml}</ul>`
+    });
+    console.log('Team notification email sent');
 
     // Send thank you email to customer
     try {
@@ -426,6 +421,18 @@ app.get('*', (req, res, next) => {
   }
 
   return res.sendFile(path.join(distDir, 'index.html'));
+});
+
+// Global error handler - ensures ALL errors return JSON for API routes
+app.use((err, req, res, _next) => {
+  console.error('Global error handler:', err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    ok: false,
+    message: err.type === 'entity.parse.failed'
+      ? 'Invalid request body. Please try again.'
+      : (err.message || 'Unexpected server error.')
+  });
 });
 
 app.listen(PORT, () => {

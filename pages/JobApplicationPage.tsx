@@ -18,7 +18,7 @@ import { useJob, createJobSlug } from '../hooks/useJobs';
 const INTERVIEW_REDIRECT_URL = '#!';
 
 // Cloudflare Turnstile site key
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACd9k8squSr31WmB';
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACjfmGW_Yt9s_jaf';
 
 // Turnstile type declaration
 declare global {
@@ -345,7 +345,16 @@ export const JobApplicationPage: React.FC = () => {
         body: submitData
       });
 
-      const data = await response.json().catch(() => ({ message: 'Invalid server response' }));
+      // Handle non-JSON responses
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        const snippet = text.substring(0, 200);
+        console.error('Non-JSON response:', response.status, snippet);
+        throw new Error(`Server error (${response.status}). Details: ${snippet.replace(/<[^>]*>?/gm, '').substring(0, 100)}...`);
+      }
+
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || 'Something went wrong while submitting.');
