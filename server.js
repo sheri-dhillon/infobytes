@@ -1,6 +1,8 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import multer from 'multer';
+import nodemailer from 'nodemailer';
 
 const app = express();
 
@@ -46,6 +48,27 @@ app.use('/api', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   next();
 });
+
+// Configure Multer for in-memory uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
+
+// Configure Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || '',
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: process.env.SMTP_SECURE !== 'false', // true by default typically for 465
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || ''
+  }
+});
+
+const JOB_APPLICATIONS_TO_EMAIL = process.env.JOB_APPLICATIONS_TO_EMAIL || 'careers@infobytes.io';
 
 async function verifyTurnstile(token) {
   const params = new URLSearchParams();
@@ -142,7 +165,7 @@ function normalizePayload(body) {
 
 app.post('/api/contact', async (req, res) => {
   console.log('POST /api/contact received, body keys:', Object.keys(req.body || {}));
-  
+
   try {
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not set');
@@ -259,6 +282,120 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+app.post('/api/apply', upload.single('resume'), async (req, res) => {
+  console.log('POST /api/apply received, body keys:', Object.keys(req.body || {}), 'file:', !!req.file);
+
+  try {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error('SMTP credentials are not set');
+      return res.status(500).json({ ok: false, message: 'Server configuration error: email service not configured.' });
+    }
+    if (!TURNSTILE_SECRET_KEY) {
+      console.error('TURNSTILE_SECRET_KEY is not set');
+      return res.status(500).json({ ok: false, message: 'Server configuration error: security service not configured.' });
+    }
+
+    const turnstileToken = req.body['cf-turnstile-response'];
+    const {
+      fullName,
+      email,
+      phone,
+      currentStatus,
+      applyingForRole,
+      currentSalary,
+      expectedSalary,
+      timezoneComfort
+    } = req.body;
+
+    const resumeFile = req.file;
+
+    // Validate required fields
+    if (!fullName || !email || !phone || !currentStatus || !currentSalary || !expectedSalary || !timezoneComfort) {
+      return res.status(400).json({ ok: false, message: 'Missing required fields.' });
+    }
+
+    if (!resumeFile) {
+      return res.status(400).json({ ok: false, message: 'Resume file is required.' });
+    }
+
+    // Validate turnstile
+    if (!turnstileToken || typeof turnstileToken !== 'string') {
+      return res.status(400).json({ ok: false, message: 'Turnstile verification is required.' });
+    }
+
+    let turnstileResult;
+    try {
+      turnstileResult = await verifyTurnstile(turnstileToken);
+    } catch (err) {
+      console.error('Turnstile verification network error:', err);
+      return res.status(500).json({ ok: false, message: 'Could not verify security token. Please try again.' });
+    }
+
+    if (!turnstileResult?.success) {
+      const errorCodes = Array.isArray(turnstileResult?.['error-codes'])
+        ? turnstileResult['error-codes'].join(', ')
+        : 'unknown';
+      console.log('Turnstile failed:', errorCodes);
+      return res.status(400).json({ ok: false, message: `Bot verification failed. (${errorCodes})` });
+    }
+
+    console.log('Turnstile verified for job application');
+
+    // Send email via SMTP
+    const mailOptions = {
+      from: `"${fullName}" <${process.env.SMTP_USER}>`, // many SMTP providers require 'from' to match 'auth.user'
+      to: JOB_APPLICATIONS_TO_EMAIL,
+      replyTo: email,
+      subject: `New Job Application: ${applyingForRole || 'Unknown Role'} - ${fullName}`,
+      text: `
+New Job Application Received
+
+Role: ${applyingForRole || 'Unknown Role'}
+Applicant: ${fullName}
+Email: ${email}
+Phone: ${phone}
+Status: ${currentStatus}
+Current Salary (PKR): ${currentSalary}
+Expected Salary (PKR): ${expectedSalary}
+Comfortable with Timezone: ${timezoneComfort}
+
+Resume is attached.
+        `,
+      html: `
+            <h2>New Job Application Received</h2>
+            <p><strong>Role:</strong> ${applyingForRole || 'Unknown Role'}</p>
+            <p><strong>Applicant:</strong> ${fullName}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Status:</strong> ${currentStatus}</p>
+            <p><strong>Current Salary (PKR):</strong> ${currentSalary}</p>
+            <p><strong>Expected Salary (PKR):</strong> ${expectedSalary}</p>
+            <p><strong>Comfortable with Timezone:</strong> ${timezoneComfort}</p>
+            <p><em>Resume is attached.</em></p>
+        `,
+      attachments: [
+        {
+          filename: resumeFile.originalname,
+          content: resumeFile.buffer,
+          contentType: resumeFile.mimetype
+        }
+      ]
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Job application email sent successfully');
+
+    return res.status(200).json({ ok: true, message: 'Application submitted successfully.' });
+
+  } catch (error) {
+    console.error('Job application unexpected error:', error);
+    return res.status(500).json({
+      ok: false,
+      message: error instanceof Error ? error.message : 'Unexpected server error.'
+    });
+  }
+});
+
 // Airtable API proxy for careers/jobs
 app.get('/api/careers', async (req, res) => {
   try {
@@ -271,7 +408,7 @@ app.get('/api/careers', async (req, res) => {
     }
 
     const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Careers`;
-    
+
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${AIRTABLE_API_TOKEN}`,
