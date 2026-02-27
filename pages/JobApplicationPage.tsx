@@ -15,7 +15,7 @@ import {
 import { useJob, createJobSlug } from '../hooks/useJobs';
 
 // Redirect URL after form submission (will be updated later)
-const INTERVIEW_REDIRECT_URL = 'https://form.jotform.com/260511821030036';
+const INTERVIEW_REDIRECT_URL = '#!';
 
 // Cloudflare Turnstile site key
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACd9k8squSr31WmB';
