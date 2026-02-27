@@ -1,3 +1,4 @@
+import 'dotenv/config.js';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -66,6 +67,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const JOB_APPLICATIONS_TO_EMAIL = process.env.JOB_APPLICATIONS_TO_EMAIL || 'careers@infobytes.io';
+const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'hello@infobytes.io';
 
 async function verifyTurnstile(token) {
   const params = new URLSearchParams();
@@ -206,7 +208,7 @@ app.post('/api/contact', async (req, res) => {
     try {
       await transporter.sendMail({
         from: `"${form.first_name} ${form.last_name}" <${process.env.SMTP_USER}>`,
-        to: JOB_APPLICATIONS_TO_EMAIL, // Using the same inbox for now
+        to: CONTACT_TO_EMAIL,
         replyTo: form.email,
         subject: 'New Brand Inquiry Received',
         text: `A new inquiry was submitted:\n\n${formRowsText}`,
