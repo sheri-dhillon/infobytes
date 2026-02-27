@@ -268,7 +268,7 @@ export const ContactPage: React.FC = () => {
     setSubmitMessage('');
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch('https://submit-form.com/4aNIcWwHZ', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -276,22 +276,9 @@ export const ContactPage: React.FC = () => {
         },
         body: JSON.stringify({
           ...payload,
-          turnstileToken
+          "cf-turnstile-response": turnstileToken
         })
       });
-
-      // Handle non-JSON responses (e.g. Cloudflare challenge pages)
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        const text = await response.text();
-        const snippet = text.substring(0, 200);
-        console.error('Non-JSON response:', response.status, snippet);
-        throw new Error(
-          response.status === 403
-            ? 'Request blocked by security. Please disable ad-blockers and try again.'
-            : `Server error (${response.status}). Details: ${snippet.replace(/<[^>]*>?/gm, '').substring(0, 100)}...`
-        );
-      }
 
       const result = await response.json();
 
