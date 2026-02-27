@@ -353,11 +353,6 @@ export const JobApplicationPage: React.FC = () => {
 
       setSubmitSuccess(true);
 
-      // Redirect to interview page after 2 seconds
-      setTimeout(() => {
-        window.location.href = INTERVIEW_REDIRECT_URL;
-      }, 2000);
-
     } catch (err) {
       console.error('Form submission error:', err);
       setTurnstileError(err instanceof Error ? err.message : 'An error occurred during submission.');
@@ -404,8 +399,14 @@ export const JobApplicationPage: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-white mb-4">Application Submitted!</h1>
           <p className="text-gray-400 mb-4">Thank you for applying for the <span className="text-white font-medium">{job.title}</span> position.</p>
-          <p className="text-gray-500 text-sm">Redirecting you to the initial interview...</p>
-          <Loader2 className="w-6 h-6 text-brand-orange animate-spin mx-auto mt-6" />
+          <p className="text-gray-500 text-sm">We have received your resume and our team will review your application shortly.</p>
+          <Link
+            to="/careers"
+            className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-white/10 text-white rounded-full font-bold hover:bg-white/20 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            View Other Roles
+          </Link>
         </div>
       </div>
     );
