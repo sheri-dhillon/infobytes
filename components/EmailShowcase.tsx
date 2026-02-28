@@ -1,65 +1,65 @@
 
 import React from 'react';
 
-const STATIC_EMAILS = [
-  { url: "https://cdn.dribbble.com/users/2364329/screenshots/15697240/media/790b9f029323382760775d7963d09a47.png", alt: "Fashion Newsletter" },
-  { url: "https://cdn.dribbble.com/users/3532588/screenshots/19222383/media/4c06f3630f9a72b220300df87630733d.png", alt: "Tech Promo" },
-  { url: "https://cdn.dribbble.com/users/6034870/screenshots/16658097/media/e24e2c94970030224676644464096009.png", alt: "E-commerce Sale" },
-  { url: "https://cdn.dribbble.com/users/6234/screenshots/15671753/media/5e876007e003057376c72930263309a4.png", alt: "App Launch" }
+const TEMPLATE_IMAGES = [
+  { url: "/templates/template 1.png", alt: "Modern E-commerce Layout" },
+  { url: "/templates/template 2.png", alt: "Minimalist Brand Newsletter" },
+  { url: "/templates/template 3.png", alt: "High-Conversion Sale Promo" },
+  { url: "/templates/template 4.png", alt: "Product Launch Sequence" },
+  { url: "/templates/template 5.png", alt: "Luxury Brand Showcase" },
+  { url: "/templates/template 6.png", alt: "Editorial Content Design" },
+  { url: "/templates/template 7.png", alt: "Seasonal Campaign Layout" },
+  { url: "/templates/template 8.png", alt: "Direct Response Architecture" },
+  { url: "/templates/template 9.png", alt: "Lifestyle Engagement Series" }
 ];
 
 export const EmailShowcase: React.FC = () => {
   const animationStyle = {
-      animationDuration: '60s',
-      animationDirection: 'normal'
+    animationDuration: '80s',
+    animationDirection: 'normal'
   };
 
   return (
     <section className="py-24 bg-[#0a0a0a] border-t border-white/5 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
         <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase mb-6 text-brand-orange">
-            DESIGN SHOWCASE
+          DESIGN SHOWCASE
         </div>
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
           Designs that do more than look good.
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            A curated showcase of high-yield email layouts built to turn every open into a measurable result. Every pixel is designed to drive revenue and reinforce brand identity across Klaviyo and Omnisend.
+          A curated showcase of high-yield email layouts built to turn every open into a measurable result. Every pixel is designed to drive revenue and reinforce brand identity across Klaviyo and Omnisend.
         </p>
       </div>
-      
-      <div className="flex flex-col gap-6 relative">
-         {/* Fade masks for edges */}
-         <div className="absolute inset-y-0 left-0 w-24 md:w-64 bg-gradient-to-r from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
-         <div className="absolute inset-y-0 right-0 w-24 md:w-64 bg-gradient-to-l from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
 
-         {/* Carousel Row */}
-         <div className="flex overflow-hidden group">
-           <div 
-             className="flex gap-8 md:gap-12 min-w-full shrink-0 items-center animate-scroll-left group-hover:[animation-play-state:paused]"
-             style={animationStyle}
-           >
-             {/* Triple the array to ensure seamless loop */}
-             {[...STATIC_EMAILS, ...STATIC_EMAILS, ...STATIC_EMAILS].map((item, i) => (
-               <div 
-                 key={`email-${i}`} 
-                 className="w-[280px] md:w-[350px] aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-[#111] hover:border-white/30 transition-all duration-300 relative group/item shadow-xl"
-               >
-                 <img 
-                    src={item.url} 
-                    alt={item.alt} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-105" 
-                    loading="lazy"
-                 />
-                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="bg-white text-black px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transform translate-y-4 group-hover/item:translate-y-0 transition-transform">
-                        {item.alt}
-                    </span>
-                 </div>
-               </div>
-             ))}
-           </div>
-         </div>
+      <div className="flex flex-col gap-6 relative">
+        {/* Fade masks for edges */}
+        <div className="absolute inset-y-0 left-0 w-24 md:w-64 bg-gradient-to-r from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-24 md:w-64 bg-gradient-to-l from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
+
+        {/* Carousel Row */}
+        <div className="flex overflow-hidden">
+          <div
+            className="flex gap-4 min-w-full shrink-0 items-center animate-scroll-left"
+            style={animationStyle}
+          >
+            {/* Triple the array to ensure seamless loop with 4 visible items */}
+            {[...TEMPLATE_IMAGES, ...TEMPLATE_IMAGES, ...TEMPLATE_IMAGES].map((item, i) => (
+              <div
+                key={`template-${i}`}
+                className="w-[calc(25vw-1rem)] md:w-[calc(25vw-1.5rem)] aspect-[3/4] flex items-center justify-center"
+              >
+                <img
+                  src={item.url}
+                  alt={item.alt}
+                  className="max-w-full max-h-full object-contain"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
