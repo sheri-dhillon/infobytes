@@ -1,54 +1,57 @@
 
 import React from 'react';
 
-// Default static logos
-const LOGOS = [
-  { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/2560px-Shopify_logo_2018.svg.png", alt: "Shopify" },
-  { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/WooCommerce_logo.svg/1200px-WooCommerce_logo.svg.png", alt: "WooCommerce" },
-  { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png", alt: "React" },
-  { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/1184px-Vue.js_Logo_2.svg.png", alt: "Vue" },
-  { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Nextjs-logo.svg/2560px-Nextjs-logo.svg.png", alt: "Next.js" },
-  { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Laravel.svg/1969px-Laravel.svg.png", alt: "Laravel" }
+// Partner platform logos from public/partners
+const PARTNER_LOGOS = [
+  { url: "/partners/Shopify-partner.png", alt: "Shopify Partner" },
+  { url: "/partners/Klaviyo.png", alt: "Klaviyo" },
+  { url: "/partners/Mailchimp.png", alt: "Mailchimp" },
+  { url: "/partners/WooCommerce.png", alt: "WooCommerce" },
+  { url: "/partners/omnisend.png", alt: "Omnisend" }
 ];
 
 export const TrustedBy: React.FC = () => {
   const animationStyle = {
-      animationDuration: '30s',
-      animationDirection: 'normal'
+    animationDuration: '25s',
+    animationDirection: 'normal'
   };
 
   return (
-    <section className="py-24 bg-black border-t border-white/5 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
-        <h3 className="text-white font-medium text-lg md:text-xl tracking-wide">
-          Our Tech Stack & Partnerships
-        </h3>
-      </div>
-      
-      <div className="flex flex-col gap-6 relative">
-         {/* Fade masks for edges */}
-         <div className="absolute inset-y-0 left-0 w-24 md:w-64 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
-         <div className="absolute inset-y-0 right-0 w-24 md:w-64 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>
+    <section className="py-24 bg-black border-t border-white/5 overflow-hidden relative">
+      {/* Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-         {/* Carousel Row */}
-         <div className="flex overflow-hidden group">
-           <div 
-             className="flex gap-8 md:gap-16 min-w-full shrink-0 items-center animate-scroll-left group-hover:[animation-play-state:paused]"
-             style={animationStyle}
-           >
-             {/* Triple the array to ensure seamless loop */}
-             {[...LOGOS, ...LOGOS, ...LOGOS].map((logo, i) => (
-               <div key={`logo-${i}`} className="flex items-center justify-center min-w-[120px] md:min-w-[160px] opacity-50 hover:opacity-100 transition-opacity duration-300">
-                 <img 
-                    src={logo.url} 
-                    alt={logo.alt} 
-                    className="h-8 md:h-12 w-auto object-contain brightness-0 invert" 
-                    loading="lazy"
-                 />
-               </div>
-             ))}
-           </div>
-         </div>
+      <div className="max-w-7xl mx-auto px-6 mb-16 text-center relative z-10">
+        <h3 className="text-white/60 font-medium text-sm md:text-base tracking-[0.2em] uppercase mb-4">
+          Strategic Partner Platforms
+        </h3>
+        <div className="h-px w-12 bg-blue-500/50 mx-auto" />
+      </div>
+
+      <div className="flex flex-col gap-6 relative">
+        {/* Fade masks for edges */}
+        <div className="absolute inset-y-0 left-0 w-24 md:w-64 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-24 md:w-64 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none"></div>
+
+        {/* Carousel Row */}
+        <div className="flex overflow-hidden group">
+          <div
+            className="flex gap-12 md:gap-24 min-w-full shrink-0 items-center animate-scroll-left group-hover:[animation-play-state:paused]"
+            style={animationStyle}
+          >
+            {/* Repeat the array multiple times for a seamless loop */}
+            {[...PARTNER_LOGOS, ...PARTNER_LOGOS, ...PARTNER_LOGOS, ...PARTNER_LOGOS].map((logo, i) => (
+              <div key={`partner-${i}`} className="flex items-center justify-center min-w-[140px] md:min-w-[200px] group/logo">
+                <img
+                  src={logo.url}
+                  alt={logo.alt}
+                  className="h-7 md:h-10 w-auto object-contain transition-all duration-500 opacity-40 grayscale group-hover/logo:opacity-100 group-hover/logo:grayscale-0 group-hover/logo:scale-110"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
