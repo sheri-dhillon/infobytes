@@ -8,6 +8,7 @@ import { Testimonials } from '../components/Testimonials';
 import { Pricing } from '../components/Pricing';
 import { FAQ, buildFaqPageJsonLd } from '../components/FAQ';
 import { TrustedBy } from '../components/TrustedBy';
+import { VerticalShowcase } from '../components/VerticalShowcase';
 
 export const HomePage: React.FC = () => {
   return (
@@ -87,6 +88,7 @@ export const HomePage: React.FC = () => {
       <Hero />
       <About />
       <Services />
+      <VerticalShowcase />
       <Momentum />
       <TrustedBy />
       <Testimonials />
